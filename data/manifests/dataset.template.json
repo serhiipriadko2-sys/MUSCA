@@ -1,0 +1,16 @@
+{
+  "dataset": {
+    "name": null,
+    "organism": null,
+    "sex": null,
+    "anatomical_scope": null,
+    "release": null,
+    "source": null,
+    "retrieved_at": null,
+    "citation": null,
+    "license": null,
+    "content_hash_or_source_snapshot": null,
+    "local_storage": null,
+    "transformations": []
+  }
+}

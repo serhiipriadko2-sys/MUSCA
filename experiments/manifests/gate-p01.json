@@ -1,0 +1,42 @@
+{
+  "experiment": {
+    "id": "GATE-P01-v0.1",
+    "question": "Does paid chemical observation support understandable and interesting player decisions?",
+    "hypothesis": "Players use chemical evidence in their choice and rate clarity and interest above the preregistered product thresholds.",
+    "falsifier": "Thresholds fail, choices are mostly guesses, or a technical defect prevents the decision.",
+    "code_commit": null,
+    "dataset_manifest": null,
+    "model": "ScriptedBackend and scripted event interpreter; no neural model",
+    "task": "gate-v1: reach the gate, investigate if desired, choose a reagent or leave",
+    "controls": ["light", "light_chemical"],
+    "fixed_conditions": ["safe approach", "16 navigation ticks", "2 cells", "scan costs 1 cell", "same light charges and instructions"],
+    "train_worlds": [],
+    "test_worlds": ["gate-v1/a", "gate-v1/b"],
+    "random_seeds": [],
+    "repetitions": 12,
+    "metrics": ["gate_reached", "scan_used", "choice", "end_reason", "cells_remaining", "choice_basis", "clarity_1_to_5", "interest_1_to_5", "intervention", "missingness"],
+    "compute_budget": "local standard-library Python; 10 minutes per participant; no external service",
+    "analysis_plan": "Show all assignments, condition counts, distributions and missing answers; separate layouts; no population superiority claim.",
+    "success_criterion": "clarity >=4 in 9/12; interest >=4 in 8/12; scan used and chemistry named in >=4/6 chemical-mode sessions",
+    "result_path": "experiments/results/gate-p01/",
+    "status": "draft_not_run",
+    "study_type": "exploratory_game_pilot",
+    "protocol": "docs/PLAYTEST_PROTOCOL.md",
+    "freeze_required": ["code_commit_or_archived_snapshot", "manifest_sha256", "participant_consent_and_retention_terms"],
+    "assignments": [
+      {"slot": 1, "mode": "light", "layout": "a"},
+      {"slot": 2, "mode": "light_chemical", "layout": "b"},
+      {"slot": 3, "mode": "light", "layout": "b"},
+      {"slot": 4, "mode": "light_chemical", "layout": "a"},
+      {"slot": 5, "mode": "light_chemical", "layout": "a"},
+      {"slot": 6, "mode": "light", "layout": "b"},
+      {"slot": 7, "mode": "light_chemical", "layout": "b"},
+      {"slot": 8, "mode": "light", "layout": "a"},
+      {"slot": 9, "mode": "light", "layout": "b"},
+      {"slot": 10, "mode": "light_chemical", "layout": "a"},
+      {"slot": 11, "mode": "light", "layout": "a"},
+      {"slot": 12, "mode": "light_chemical", "layout": "b"}
+    ],
+    "confounds": ["small convenience sample", "fixed assignment order", "perfect chemical observation", "different available information and actions", "single puzzle", "scripted interpretation"]
+  }
+}

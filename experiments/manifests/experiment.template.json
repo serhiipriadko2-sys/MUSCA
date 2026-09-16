@@ -1,0 +1,28 @@
+{
+  "experiment": {
+    "id": null,
+    "question": null,
+    "hypothesis": null,
+    "falsifier": null,
+    "code_commit": null,
+    "dataset_manifest": null,
+    "model": null,
+    "task": null,
+    "controls": [],
+    "fixed_conditions": [],
+    "train_worlds": [],
+    "validation_worlds": [],
+    "test_worlds": [],
+    "random_seeds": [],
+    "repetitions": null,
+    "metrics": [],
+    "compute_budget": null,
+    "analysis_plan": null,
+    "success_criterion": null,
+    "result_path": null,
+    "study_type": null,
+    "trainable_parameters": [],
+    "confounds": [],
+    "status": "draft"
+  }
+}
