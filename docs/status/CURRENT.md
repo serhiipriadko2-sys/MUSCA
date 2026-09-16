@@ -38,8 +38,7 @@ R00 не пройден, R01 не запускался. Каналы и build pi
 
 ## Игровая линия
 
-[FACT] GATE-P01 v0.1 подготовлен до данных: 12 fixed assignments, 0 human sessions.
-Автотесты и developer checks не являются playtest evidence.
+[FACT] GATE-P01 v0.1: 12 fixed assignments; **1 human session completed** on the frozen v2 snapshot. Partial participant-level responses/outcomes remain local and are not published during collection. Autotests and developer checks are not playtest evidence. No aggregate success/failure claim is made before the preregistered analysis.
 
 [FACT] `gate-p01-build-v2.zip` имеет SHA-256
 `f70981ac197203ad21effcf6e9ba3ab4c620a3df72a9b1315ee8abf2ae91ae2a`,
@@ -60,19 +59,17 @@ connectome backend и biological dynamics в игровой runtime не под�
 MUSCA не содержит Unity project markers. Поэтому Unity/3D — будущий implementation
 gate, а не уже существующая часть проекта.
 
-[FACT] CI использует только `contents: read`. В этом hardening diff official GitHub
-Actions переводятся с mutable major tags на full immutable commit SHAs и добавляется
-CI self-test pilot bundle tooling. Этот diff должен получить собственный CI read-back.
+[FACT] CI использует только contents: read. Hardening commit b1f39b35... pins official GitHub Actions to full immutable commit SHAs and adds CI self-test pilot bundle tooling. Fresh GitHub read-back: push CI #24 PASS and PR CI #25 PASS for this exact head.
 
 ## Текущие границы вывода
 
 | Поверхность | Состояние |
 | --- | --- |
-| Python prototype / tests | PASS на verified `c46d814...` |
-| Exact c46 GitHub CI | PASS, push #22 + PR #23 |
+| Python prototype / tests | PASS; frozen pilot payload remains c46-equivalent |
+| Current feature-head GitHub CI | PASS on b1f39b35..., push #24 + PR #25 |
 | Independent PR review | NOT DONE |
 | Pilot build v2 bytes | PASS, 55/55 = c46 payload |
-| Human GATE-P01 | NOT RUN, 0 sessions |
+| Human GATE-P01 | IN PROGRESS, 1/12 completed; no aggregate verdict |
 | Shiu source/data provenance | PASS |
 | Strict Shiu environment | NOT SOLVED |
 | SCI-R00 / SCI-R01 | NOT PASSED / NOT RUN |
@@ -82,8 +79,8 @@ CI self-test pilot bundle tooling. Этот diff должен получить �
 
 ## Следующие gates
 
-1. Получить CI для hardening commit и независимый review draft PR #1.
-2. Провести facilitator-owned GATE-P01 по frozen v2 snapshot; не раздавать source ZIP.
+1. Получить независимый review draft PR #1; CI hardening уже verified.
+2. Продолжить facilitator-owned GATE-P01 по frozen v2 snapshot до preregistered stop; не раздавать source ZIP и не публиковать participant-level partial results.
 3. Отдельно разрешить repository-access premise и выполнить strict R00; failure
    сохранить как результат, а compatibility lineage именовать отдельно.
 4. Только после продуктового или научного discriminating signal принимать ADR о Unity
@@ -92,4 +89,4 @@ CI self-test pilot bundle tooling. Этот diff должен получить �
 ∆ — mutable status отделён от исторических receipts; claim boundaries уточнены.
 D — fresh GitHub/DC read-back, 105 tests, manifest gates, artifact hash comparison.
 Ω — высокая для перечисленных инженерных фактов; science/product value UNKNOWN.
-Λ — пересмотреть при новом HEAD/CI, review, первой human session или R00/R01 result.
+Λ — пересмотреть при новом HEAD/CI, independent review, завершении preregistered human collection или R00/R01 result.
