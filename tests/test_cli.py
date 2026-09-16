@@ -64,6 +64,15 @@ class CliTests(unittest.TestCase):
             self.assertEqual(completed.returncode, 2)
             self.assertEqual(output.read_text(encoding='utf-8'), 'preserve this')
 
+    def test_occupied_receipt_path_rejects_before_player_interaction(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'existing.json'
+            output.write_text('preserve this', encoding='utf-8')
+            completed = invoke('--puzzle', '--mode', 'light_chemical', '--output', str(output), input_text='go\nscan\ncobalt\n')
+            self.assertEqual(completed.returncode, 2)
+            self.assertEqual(completed.stdout, '')
+            self.assertEqual(output.read_text(encoding='utf-8'), 'preserve this')
+
     def test_budget_and_output_options_reject_invalid_values(self):
         for arguments in (('--ticks', '0'), ('--ticks', '257'), ('--ticks', 'nan'), ('--json',), ('--mode', 'omniscient')):
             with self.subTest(arguments=arguments):

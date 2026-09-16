@@ -1,97 +1,99 @@
 # MUSCA — текущий статус
 
-Дата свежей проверки: 2026-09-16. Для изменяемых GitHub/host фактов новый
-connector/read-back имеет приоритет над этим документом.
+Дата: 2026-09-16. GitHub read-back: 15:55 UTC. Этот документ — датированный
+снимок; перед новым решением перечитать репозиторий и нужную внешнюю поверхность.
 
-Последние подтверждённые вехи:
+## Проверенный результат
 
-- [SCI-R00 preregistration](../research/SCI_R00_R01_REPRO_PLAN.md);
-- [R00 read-only preflight](2026-09-16-r00-preflight.md);
-- [operational containment snapshot](2026-09-16-concurrent-ops-drift.md);
-- [R00 solver/source provenance](2026-09-16-r00-source-provenance.md).
+[FACT] Локальные исправления поверх `2bb02d40ddb909051a178f48b6216a42173741c8`
+прошли **105 тестов** на Windows / Python 3.14.6. Повтор через Remote Desktop
+Commander тоже прошёл 105 тестов на той же машине. Полный разбор, команды,
+источники и пределы — в [интегрированном аудите](2026-09-16-integrated-audit.md).
 
-## Repository / governance
+Исправлены зависимость теста от диска E:, ложная готовность неисправного
+инструмента, поздняя проверка пути игровой квитанции и неполный состав архива.
+Новых зависимостей нет. Правила игры и критерии GATE-P01 не менялись.
 
-[FACT] Branch `docs/musca-foundations` published HEAD before this pending patch:
-`b42c125eeedd4e26b2cc6d5dcdf090e60077d4ec`.
-`main` remains `7c56ff5da706894e07bb3b3aa85798304c4ae925`; draft PR #1 is open and unmerged.
+## GitHub и локальное дерево
 
-[FACT] ADR-0005 lifecycle is `accepted`, bounded to Shiu/FlyWire-v630 as the first
-strict reproduction lineage only. Push CI #16 and PR CI #17 for `b42c125...` were
-`success` across tests, manifest schema, solver-gate, compile and smoke.
+[FACT] Ветка `docs/musca-foundations`; базовый HEAD совпадает с опубликованным
+`2bb02d4...`. Исправления этого аудита ещё находятся в рабочем дереве.
+`main` — `7c56ff5da706894e07bb3b3aa85798304c4ae925`.
+[PR #1](https://github.com/serhiipriadko2-sys/MUSCA/pull/1) открыт как draft,
+не слит.
 
-## Verified local R00 inputs
+**DRIFT:** прежний статус ссылался на успешный CI для `b42c125...`.
+Последние [PR CI](https://github.com/serhiipriadko2-sys/MUSCA/actions/runs/35116603825)
+и [push CI](https://github.com/serhiipriadko2-sys/MUSCA/actions/runs/35116599940)
+для `2bb02d4...` завершились **FAIL**: тест ожидал реальный каталог датасета
+на диске E: у GitHub runner. Локальное исправление ещё не проверено новым CI.
+В рамках этого аудита commit/push/merge/deploy не выполнялись.
 
-[FACT] Portable micromamba `2.9.0` exists project-locally at
-`E:\MUSCA_RESEARCH\tools\micromamba.exe` without persistent PATH/shell-init.
-Executable SHA-256:
-`a6d804394b2418991c4e29562853eaace2f2ce9d9da661a98e74e02e8dbb44b0`.
+## Исследовательская линия
 
-[FACT] Exact upstream commit snapshot was retrieved through GitHub codeload after
-Git transport stalled. Authoritative archive:
+[ADR-0005](../adr/ADR-0005-shiu-v630-reproduction-baseline.md) имеет статус
+`accepted`: Shiu/FlyWire-v630 выбран только для первого строгого воспроизведения.
+Это не выбор нейронного backend игры. Контекст ранее появившихся операций
+сохранён в [наблюдении расхождения](2026-09-16-concurrent-ops-drift.md);
+метаданные автора commit сами по себе не устанавливают авторизацию операции.
 
-`E:\MUSCA_RESEARCH\downloads\Drosophila_brain_model-91bdd1e7.zip`
+[FACT] В `E:/MUSCA_RESEARCH/shiu-91bdd1e7/source-snapshot` повторно прочитаны
+и хешированы `model.py`, `environment_full.yml`, таблица полноты и граф v630.
+Все четыре Git blob ID совпали с GitHub-деревом точного upstream commit
+`91bdd1e7dcf193f3e7ca5a8933497fcef63b7960`.
+Полные SHA-256 — в [квитанции происхождения](2026-09-16-r00-source-provenance.md).
 
-- bytes: `190814359`;
-- SHA-256: `0dc3778bd3b668d8c48d0a98e2ef33e2468335e6cd374f95a37426ce1fe5c4b0`;
-- artifact QC: PASS, 22 entries / 19 files, 19/19 round-trip hashes match;
-- extracted snapshot: `E:\MUSCA_RESEARCH\shiu-91bdd1e7\source-snapshot`.
+[FACT] Локальный micromamba 2.9.0 отвечает на проверку версии.
+Предварительная проверка возвращает `READY_FOR_OPERATIONAL_APPROVAL`;
+это проверка инструментов, не разрешение произвольных операций и не R00 PASS.
+Манифест данных проходит `runnable`; SCI-R00 ожидаемо отклоняется как
+`draft_not_run`. Валидатор не пересчитывает хеши данных: сверка выполнена отдельно.
 
-[FACT] Preregistered Git blob IDs match local `model.py`, `environment_full.yml`
-and both v630 input files. Dataset manifest is now locally retrievable/runnable
-as a dataset receipt; this does not make R00 runnable.
+Строгое окружение не создано в предусмотренном каталоге и здесь не решалось.
+Исходный `environment_full.yml` задаёт Python 3.10.11, старые Windows-сборки
+и каналы `defaults` / `conda-forge`. Возможность точного разрешения пакетов,
+их актуальная безопасность и применимость условий доступа к `defaults`
+для предполагаемого использования остаются непроверенными. Каналы не подменялись.
 
-## Preflight / tests
+## Игровая линия и сохранение версии
 
-[FACT @ local verification] Pending patch state:
+«Шлюз» работает со скриптовым контроллером. [Протокол GATE-P01](../PLAYTEST_PROTOCOL.md)
+остаётся `draft_not_run`: 12 фиксированных назначений, 0 человеческих сессий.
+Автоматические и разработческие прогоны не входят в эти 12.
 
-- `101` unit tests PASS;
-- R00 preflight tests PASS;
-- dataset runnable validation PASS;
-- SCI-R00 runnable validation FAIL as required on `status=draft_not_run`;
-- compile PASS;
-- `git diff --check` PASS.
+[Сборка пилота](../PILOT_BUILD.md) теперь использует формат v2 с 55 файлами.
+Прежний архив v1 сохранён и повторно проверен по внешнему SHA-256.
+Новая сборка предназначена для `experiments/results/gate-p01-build-v2.zip`;
+её точный хеш и результаты проверки извлечённой копии хранятся **вне архива**
+в `experiments/results/gate-p01-build-v2.verification.json`.
+Сам упаковщик тесты не запускает; отсутствие этой квитанции означает, что
+проверка конкретного архива ещё не подтверждена. Архивы локальные, вне Git.
 
-Preflight receipt semantics are explicit: `self_effects` describe only the
-preflight process, while `observed_preexisting_state` reports project-local
-solver/source artifacts. A runnable project-local micromamba now satisfies the
-solver-discovery gate without temporary PATH mutation.
+## Граница вывода
 
-Real-host preflight disposition: `READY_FOR_OPERATIONAL_APPROVAL`.
-This is readiness for a separate strict-environment operation, not R00 PASS.
+| Поверхность | Состояние |
+| --- | --- |
+| Локальный код и тесты | PASS, 105 тестов |
+| Опубликованный CI текущего HEAD | FAIL; новый локальный diff ещё не опубликован |
+| Происхождение четырёх файлов Shiu/v630 | PASS, независимое сопоставление байтов с upstream |
+| Строгое научное окружение | NOT SOLVED |
+| SCI-R00 / SCI-R01 | NOT PASSED / NOT RUN |
+| Превосходство биологической топологии | UNKNOWN |
+| Интерес GATE-P01 для людей | UNKNOWN, пилот NOT RUN |
+| Linux/macOS и другой Windows-хост | UNVERIFIED |
+| Слияние / развёртывание | NOT DONE |
 
-## Strict environment boundary
+## Следующие три действия
 
-`environment_full.yml` remains unmodified and declares `defaults` before
-`conda-forge` with exact historical Windows build strings. No strict solve or
-package download has started.
+1. После отдельного решения о публикации отправить проверенный локальный diff
+   на ревью и получить CI для его точного commit; текущий красный CI не обходить.
+2. Провести GATE-P01 по сохранённому снимку и протоколу; фиксировать отказы,
+   сбои и пропуски, не заменяя их успешными попытками.
+3. Отдельно уточнить условия доступа к каналам строгого окружения и выполнить
+   SCI-R00 по [плану воспроизведения](../research/SCI_R00_R01_REPRO_PLAN.md).
+   При несовместимости сохранить ошибку, не подменять окружение молча.
 
-Current Anaconda repository terms make access to Anaconda-maintained repositories
-context-dependent. The project has not established enough usage/organization
-context to classify `defaults` access, so the strict solve is intentionally stopped
-before that repository boundary. Channels are not silently rewritten.
-
-## Science / game claim ceiling
-
-- source/data: `VERIFIED LOCAL`;
-- strict solver executable: `VERIFIED LOCAL`;
-- strict environment: `NOT SOLVED`;
-- SCI-R00: `NOT PASSED`;
-- SCI-R01: `NOT RUN`;
-- published-result reproduction: `NOT CLAIMED`;
-- GATE-P01 human playtest: `NOT RUN`;
-- Linux/macOS full suite: `UNVERIFIED`;
-- `main` merge/deployment: `NOT DONE`.
-
-## Next gate
-
-1. Commit/push this provenance + preflight semantic repair and obtain push/PR CI.
-2. Keep PR #1 draft; merge remains a separate decision.
-3. Resolve the Anaconda-maintained repository access boundary for the intended use.
-4. Only then attempt the unmodified `environment_full.yml`, preserving solver
-   failure without dependency/channel substitution.
-
-∆ — R00 moved from preregistration-only to verified local solver + source/data provenance.
-D — artifact QC + 101 tests + runnable dataset gate; strict environment untouched.
-Ω — high for bytes/provenance; environment and scientific conclusions remain unknown.
-Λ — revise after CI of this patch or a governed strict-environment attempt.
+∆ — исправлены четыре дефекта и согласован текущий статус документов.
+D — 105 тестов двумя путями запуска, GitHub read-back, хеши исходных файлов.
+Ω — подтверждена локальная инженерная проверка; научная и игровая ценность неизвестны.
+Λ — вывод меняется после нового CI, строгого воспроизведения или реального пилота.

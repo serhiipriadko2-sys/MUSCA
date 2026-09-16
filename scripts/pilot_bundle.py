@@ -6,6 +6,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import posixpath
 import re
 import stat
 import sys
@@ -13,12 +14,12 @@ import zipfile
 import zlib
 
 
-FORMAT = 'musca-local-pilot-v1'
+FORMAT = 'musca-local-pilot-v2'
 MANIFEST = 'experiments/manifests/gate-p01.json'
 MAX_FILE_BYTES = 256 * 1024
 MAX_ARCHIVE_BYTES = 8 * 1024 * 1024
 # Deliberately explicit: adding a file to the repository does not put it in a bundle.
-PAYLOAD_FILES = (
+V1_FILES = (
     '.gitignore', '.python-version', 'AGENTS.md', 'README.md',
     'data/manifests/dataset.template.json',
     'docs/GAME_VISION.md', 'docs/PILOT_BUILD.md', 'docs/PLAYTEST_PROTOCOL.md',
@@ -36,6 +37,26 @@ PAYLOAD_FILES = (
     'scripts/pilot_bundle.py', 'tests/test_bundle.py', 'tests/test_cli.py',
     'tests/test_contracts.py', 'tests/test_puzzle.py', 'tests/test_simulation.py',
 )
+PAYLOAD_FILES = V1_FILES + (
+    '.github/workflows/ci.yml',
+    'data/manifests/SCI-DATA-SHIU-FW630.candidate.json',
+    'docs/LICENSING_DECISION.md',
+    'docs/adr/ADR-0005-shiu-v630-reproduction-baseline.md',
+    'docs/research/SCI_R00_R01_REPRO_PLAN.md',
+    'docs/status/2026-09-16-concurrent-ops-drift.md',
+    'docs/status/2026-09-16-gate0-candidate.md',
+    'docs/status/2026-09-16-gate0.md',
+    'docs/status/2026-09-16-manifest-validator.md',
+    'docs/status/2026-09-16-r00-preflight.md',
+    'docs/status/2026-09-16-r00-source-provenance.md',
+    'docs/status/2026-09-16-science-prereg.md',
+    'docs/status/2026-09-16-integrated-audit.md',
+    'experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json',
+    'experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json',
+    'scripts/research_r00_preflight.py', 'scripts/validate_manifests.py',
+    'tests/test_manifests.py', 'tests/test_research_r00_preflight.py',
+)
+PROFILES = {'musca-local-pilot-v1': V1_FILES, FORMAT: PAYLOAD_FILES}
 
 
 class BundleError(ValueError):
@@ -99,14 +120,28 @@ def _validate_manifest(data: bytes) -> dict:
     return experiment
 
 
-def _index(payload: dict[str, bytes]) -> dict:
+def _validate_links(payload: dict[str, bytes]) -> None:
+    for name, data in payload.items():
+        if not name.endswith('.md'):
+            continue
+        for target in re.findall(r'\[[^\]]+\]\(([^)]+)\)', data.decode('utf-8')):
+            if re.match(r'[a-zA-Z][a-zA-Z0-9+.-]*:', target) or target.startswith('#'):
+                continue
+            resolved = posixpath.normpath(posixpath.join(posixpath.dirname(name), target.split('#')[0]))
+            if resolved not in payload:
+                raise BundleError(f'local Markdown link is absent from bundle: {name} -> {target}')
+
+
+def _index(payload: dict[str, bytes], format_name: str = FORMAT) -> dict:
+    if format_name == FORMAT:
+        _validate_links(payload)
     experiment = _validate_manifest(payload[MANIFEST])
     python_version = payload['.python-version'].decode('utf-8').strip()
     if not re.fullmatch(r'\d+\.\d+\.\d+', python_version):
         raise BundleError('invalid reference Python version')
     hashes = {name: _sha(data) for name, data in sorted(payload.items())}
     return {
-        'format': FORMAT,
+        'format': format_name,
         'pilot_id': experiment['id'],
         'pilot_status': 'not_run',
         'python_reference': python_version,
@@ -119,10 +154,10 @@ def _index(payload: dict[str, bytes]) -> dict:
 
 def _receipt(raw: bytes, index: dict) -> dict:
     return {
-        'integrity': 'PASS', 'format': FORMAT,
+        'integrity': 'PASS', 'format': index['format'],
         'archive_sha256': _sha(raw), 'snapshot_id': index['snapshot_id'],
         'manifest_sha256': index['manifest_sha256'],
-        'payload_files': len(PAYLOAD_FILES), 'pilot_status': 'not_run',
+        'payload_files': len(index['payload_sha256']), 'pilot_status': 'not_run',
         'tests': 'not_run_by_packager',
     }
 
@@ -176,8 +211,7 @@ def verify(path: Path, expected_sha256: str | None = None) -> dict:
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
             entries = archive.infolist()
             names = [entry.filename for entry in entries]
-            expected = set(PAYLOAD_FILES) | {'bundle.json'}
-            if len(names) != len(set(names)) or set(names) != expected:
+            if len(names) > len(PAYLOAD_FILES) + 1 or len(names) != len(set(names)) or 'bundle.json' not in names:
                 raise BundleError('duplicate, missing or unexpected archive path')
             if any(entry.file_size > MAX_FILE_BYTES or entry.flag_bits & 1 for entry in entries):
                 raise BundleError('oversized or encrypted member')
@@ -187,11 +221,17 @@ def verify(path: Path, expected_sha256: str | None = None) -> dict:
                 raise BundleError('unsupported compression')
             if sum(entry.file_size for entry in entries) > MAX_ARCHIVE_BYTES:
                 raise BundleError('total uncompressed size exceeds limit')
-            payload = {name: archive.read(name) for name in PAYLOAD_FILES}
             index = _parse(archive.read('bundle.json'))
+            format_name = index.get('format')
+            if not isinstance(format_name, str) or format_name not in PROFILES:
+                raise BundleError('unknown bundle format')
+            expected = set(PROFILES[format_name]) | {'bundle.json'}
+            if set(names) != expected:
+                raise BundleError('missing or unexpected archive path')
+            payload = {name: archive.read(name) for name in PROFILES[format_name]}
     except (zipfile.BadZipFile, RuntimeError, EOFError, zlib.error) as exc:
         raise BundleError('invalid or unreadable ZIP archive') from exc
-    computed = _index(payload)
+    computed = _index(payload, format_name)
     if index != computed:
         raise BundleError('payload hashes or metadata do not match')
     return _receipt(raw, computed)

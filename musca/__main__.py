@@ -1,6 +1,7 @@
 """Run the local terminal prototype: ``py -3.14 -m musca --demo``."""
 
 import argparse
+from contextlib import ExitStack
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -144,6 +145,19 @@ def main(argv: list[str] | None = None) -> int:
         parser.error('--puzzle requires human input; it cannot be combined with --demo')
     if args.layout and not args.puzzle:
         parser.error('--layout requires --puzzle')
+    with ExitStack() as resources:
+        output = None
+        if args.output is not None:
+            try:
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                output = resources.enter_context(args.output.open('x', encoding='utf-8', newline='\n'))
+            except OSError as exc:
+                print(f"Cannot reserve a new receipt file: {exc}", file=sys.stderr)
+                return 2
+        return _run_episode(args, output)
+
+
+def _run_episode(args: argparse.Namespace, output) -> int:
     world = GridWorld(hazards=frozenset()) if args.puzzle else GridWorld()
     simulation = Simulation(world=world, backend=ScriptedBackend(), sensor_mode=SensorMode(args.mode))
     try:
@@ -173,13 +187,12 @@ def main(argv: list[str] | None = None) -> int:
         })
         receipt['config']['layout'] = args.layout or 'a'
     encoded = json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + '\n'
-    if args.output is not None:
+    if output is not None:
         try:
-            args.output.parent.mkdir(parents=True, exist_ok=True)
-            with args.output.open('x', encoding='utf-8', newline='\n') as stream:
-                stream.write(encoded)
+            output.write(encoded)
+            output.flush()
         except OSError as exc:
-            print(f"Cannot save receipt without overwriting an existing file: {exc}", file=sys.stderr)
+            print(f"Cannot finish receipt; retain the partial file for diagnosis: {exc}", file=sys.stderr)
             return 2
     if args.json:
         print(encoded, end='')

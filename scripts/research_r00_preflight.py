@@ -226,11 +226,11 @@ def assess(
         )
 
     git_probe = _probe_command("git")
-    if not git_probe["present"]:
-        blockers.append(_blocker("host_git", "git executable not found"))
+    if not git_probe["present"] or git_probe.get("exit_code") != 0:
+        blockers.append(_blocker("host_git", "git version probe did not complete successfully"))
 
     solver_probes = {name: _probe_command(name) for name in STRICT_SOLVERS}
-    strict_solver = next((name for name, probe in solver_probes.items() if probe["present"] and probe.get("exit_code", 0) == 0), None)
+    strict_solver = next((name for name, probe in solver_probes.items() if probe["present"] and probe.get("exit_code") == 0), None)
     if strict_solver is None:
         local_name = "micromamba.exe" if platform.system() == "Windows" else "micromamba"
         local_probe = _probe_executable_path(research_root / "tools" / local_name)

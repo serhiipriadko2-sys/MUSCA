@@ -76,6 +76,32 @@ class BundleTests(unittest.TestCase):
             bundle.freeze(self.root, self.archive)
         self.assertFalse(self.archive.exists())
 
+    def test_missing_markdown_target_blocks_new_bundle(self):
+        with (self.root / 'README.md').open('a', encoding='utf-8') as stream:
+            stream.write('\n[missing](docs/missing.md)\n')
+        with self.assertRaises(bundle.BundleError):
+            bundle.freeze(self.root, self.archive)
+        self.assertFalse(self.archive.exists())
+
+    def test_legacy_v1_remains_verifiable(self):
+        payload = {name: (self.root / name).read_bytes() for name in bundle.V1_FILES}
+        # Construct the documented v1 JSON/ZIP directly; old snapshots did not
+        # require closure of links to later research documents.
+        hashes = {name: hashlib.sha256(data).hexdigest() for name, data in sorted(payload.items())}
+        table = (json.dumps(hashes, sort_keys=True, ensure_ascii=False, indent=2) + '\n').encode('utf-8')
+        metadata = {
+            'format': 'musca-local-pilot-v1', 'pilot_id': 'GATE-P01-v0.1',
+            'pilot_status': 'not_run', 'python_reference': payload['.python-version'].decode().strip(),
+            'manifest_sha256': hashes[bundle.MANIFEST],
+            'snapshot_id': hashlib.sha256(table).hexdigest(), 'payload_sha256': hashes,
+            'tests': 'not_run_by_packager',
+        }
+        with zipfile.ZipFile(self.archive, 'w') as archive:
+            for name, data in payload.items():
+                archive.writestr(name, data)
+            archive.writestr('bundle.json', json.dumps(metadata))
+        self.assertEqual(bundle.verify(self.archive)['format'], 'musca-local-pilot-v1')
+
     def test_changed_payload_fails_internal_hash_check(self):
         bundle.freeze(self.root, self.archive)
         changed = self.mutate_zip(lambda files: files.update({'musca/world.py': b'changed'}))

@@ -29,7 +29,7 @@ Each layer can have a different license or privacy regime.
 `philshiu/Drosophila_brain_model` is reported by GitHub as MIT licensed.
 ### FlyWire public-release data
 
-FlyWire's current public-release guideline states `CC BY-NC 4.0`. The `NC` restriction is material for a future commercial game. Do not assume that an MIT license on an accompanying code repository removes restrictions attached to underlying connectome data.
+FlyWire's current [public-release guideline](https://flywire.ai/guidelines) states `CC BY-NC 4.0` (rechecked 2026-09-16). That page explicitly discusses v783; the applicable terms and attribution chain of a historical v630 artifact still need to be traced for its intended use. The `NC` restriction is material for a future commercial game. Do not assume that an MIT license on an accompanying code repository removes restrictions attached to underlying connectome data.
 
 Whether a learned/distilled controller is a derivative of licensed data is a fact-specific legal question. This note does not answer it.
 

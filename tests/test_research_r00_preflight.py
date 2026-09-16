@@ -28,6 +28,7 @@ def host_command_probe(*present_names):
             "present": name in present,
             "executable": name if name in present else None,
             "version": f"{name} fixture" if name in present else None,
+            "exit_code": 0 if name in present else None,
         }
 
     return probe
@@ -92,6 +93,26 @@ class R00PreflightTests(unittest.TestCase):
         codes = {item["code"] for item in receipt["blockers"]}
         self.assertIn("host_solver", codes)
         self.assertEqual(receipt["disposition"], "BLOCKED")
+
+    def test_probe_exception_cannot_be_treated_as_a_runnable_tool(self):
+        for broken, blocker in [('conda', 'host_solver'), ('git', 'host_git')]:
+            healthy_probe = host_command_probe('git', 'conda')
+
+            def probe(name, args=('--version',)):
+                if name == broken:
+                    return {'present': True, 'executable': name, 'version': None, 'error': 'timeout'}
+                return healthy_probe(name, args)
+
+            with (
+                self.subTest(broken=broken),
+                mock.patch.object(preflight, '_probe_command', side_effect=probe),
+                mock.patch.object(preflight, '_probe_executable_path', return_value={'present': False, 'runnable': False}),
+                mock.patch.object(preflight, '_probe_python310', return_value={'present': False}),
+                mock.patch.object(preflight, '_probe_storage', side_effect=self.ready_storage),
+            ):
+                receipt = preflight.assess(repo_root=ROOT, research_root=self.root / 'research', adr_path=self.accepted_adr())
+                self.assertIn(blocker, {item['code'] for item in receipt['blockers']})
+                self.assertEqual(receipt['disposition'], 'BLOCKED')
 
     def test_project_local_micromamba_satisfies_solver_gate(self):
         research_root = self.root / "research"
@@ -193,11 +214,13 @@ class R00PreflightTests(unittest.TestCase):
         self.assertFalse(observed["runnable"])
 
     def test_cli_can_require_current_host_solver_blocker(self):
-        code = preflight.main(["--repo-root", str(ROOT), "--research-root", str(self.root / "research"), "--require-blocker", "host_solver"])
+        with mock.patch.object(preflight, '_probe_command', side_effect=host_command_probe('git')):
+            code = preflight.main(["--repo-root", str(ROOT), "--research-root", str(self.root / "research"), "--require-blocker", "host_solver"])
         self.assertEqual(code, 0)
 
     def test_cli_require_ready_fails_closed_on_current_state(self):
-        code = preflight.main(["--repo-root", str(ROOT), "--research-root", str(self.root / "research"), "--require-ready"])
+        with mock.patch.object(preflight, '_probe_command', side_effect=host_command_probe('git')):
+            code = preflight.main(["--repo-root", str(ROOT), "--research-root", str(self.root / "research"), "--require-ready"])
         self.assertEqual(code, 2)
 
 

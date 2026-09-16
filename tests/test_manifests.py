@@ -97,8 +97,14 @@ class ManifestValidationTests(unittest.TestCase):
                 with self.assertRaises(validator.ManifestError):
                     validator.validate_path(path, level="schema", repo_root=ROOT)
 
-    def test_retrieved_dataset_candidate_is_runnable(self):
-        path = ROOT / "data/manifests/SCI-DATA-SHIU-FW630.candidate.json"
+    def test_retrieved_dataset_is_runnable_with_fixture_storage(self):
+        # Real-host dataset readiness is a separate integration command, not a
+        # prerequisite for running this suite on a clean checkout or CI host.
+        payload = json.loads((ROOT / "data/manifests/SCI-DATA-SHIU-FW630.candidate.json").read_text(encoding="utf-8"))
+        storage = self.root / "retrieved-dataset"
+        storage.mkdir()
+        payload["dataset"]["local_storage"] = str(storage)
+        path = self.write_json("retrieved.json", payload)
         validator.validate_dataset(path, runnable=True)
 
     def test_experiment_candidate_is_not_runnable_while_draft(self):
