@@ -48,14 +48,31 @@ const gate = openings.openings.find((opening) => opening.id === 'gate-a1-opening
 check(Boolean(arrival && gate), 'openings: required opening missing', findings);
 check(arrival?.width_m >= 2.4, 'openings: arrival aperture too narrow', findings);
 check(gate?.destination, 'openings: gate destination missing', findings);
-check(props.paid_generation === false, 'props: paid generation must be false at Function gate', findings);
-check(reviews.reviews.function.human_approval === null, 'reviews: Function approval must remain pending', findings);
-check(reviews.reviews.form.status === 'blocked_pending_function_approval', 'reviews: Form gate must remain blocked', findings);
+check(props.paid_generation === false, 'props: paid generation must remain false for the Function asset set', findings);
+const functionReview = reviews.reviews.function;
+const formReview = reviews.reviews.form;
+check(['ready_for_human_approval', 'approved'].includes(functionReview.status), 'reviews: invalid Function lifecycle state', findings);
+if (functionReview.status === 'ready_for_human_approval') {
+  check(functionReview.human_approval === null, 'reviews: pending Function must not have human approval', findings);
+  check(formReview.status === 'blocked_pending_function_approval', 'reviews: Form must remain blocked before Function approval', findings);
+}
+if (functionReview.status === 'approved') {
+  check(functionReview.human_approval?.status === 'approved', 'reviews: approved Function requires typed human approval', findings);
+  check(Boolean(functionReview.human_approval?.date && functionReview.human_approval?.scope), 'reviews: Function approval receipt incomplete', findings);
+  check(['in_progress', 'ready_for_human_approval', 'approved'].includes(formReview.status), 'reviews: invalid Form state after Function approval', findings);
+}
+if (formReview.status === 'approved') {
+  check(formReview.human_approval?.status === 'approved', 'reviews: approved Form requires human approval', findings);
+} else {
+  check(formReview.human_approval === null, 'reviews: non-approved Form must keep human approval null', findings);
+}
 const report = {
   status: findings.length ? 'FAIL' : 'PASS',
   gate: 'function',
   function_status: reviews.reviews.function.status,
-  human_approval: reviews.reviews.function.human_approval,
+  human_approval: functionReview.human_approval,
+  form_status: formReview.status,
+  form_human_approval: formReview.human_approval,
   findings,
 };
 

@@ -1,20 +1,20 @@
 {
   "schema": "musca.room-final-report.v1",
   "room_id": "gate-lab-v0.2",
-  "delivery_stage": "function_ready_for_human_approval",
-  "status": "READY_FOR_HUMAN_FUNCTION_APPROVAL",
-  "function_gate": "interactive browser + Unity standalone QA complete; explicit human layout approval pending",
-  "form_gate": "BLOCKED_PENDING_FUNCTION_APPROVAL",
-  "runtime_gate": "FUNCTION_RUNTIME_VERIFIED_NOT_APPROVED",
+  "delivery_stage": "form_ready_for_human_approval",
+  "status": "READY_FOR_HUMAN_FORM_APPROVAL",
+  "function_gate": "APPROVED by explicit human review on 2026-09-16",
+  "form_gate": "Blender 5.2.0 LTS Form candidate built, rendered, exported and read-back verified; explicit human Form approval pending",
+  "runtime_gate": "Unity Function runtime verified; Blender Form integration not started",
   "paid_assets": 0,
   "external_mesh_assets": 0,
   "runtime_dependency": "Unity 6000.6.1f1 authoritative prototype; three@0.186.0 browser reference",
   "known_limits": [
-    "procedural graybox materials only",
-    "desktop first-person keyboard/mouse only",
-    "no final Blender-authored shell or props",
-    "no character animation or final sound design",
+    "procedural materials and hard-surface Form language; no production texture set",
+    "player and MUSCA meshes are scale/Form proxies, not final character assets",
+    "no final animation, sound design, VFX, or accessibility pass",
+    "no Unity import/integration of Blender Form yet",
     "no GATE-P01 v0.1 participant use",
-    "Function human approval pending; Form and Runtime approval not granted"
+    "Form human approval and Runtime approval not granted"
   ]
 }

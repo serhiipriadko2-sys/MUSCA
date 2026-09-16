@@ -4,3 +4,7 @@ unity/MUSCA-Gate3D/**/*.meta -whitespace
 unity/MUSCA-Gate3D/**/*.mat -whitespace
 unity/MUSCA-Gate3D/**/*.unity -whitespace
 unity/MUSCA-Gate3D/**/*.asset -whitespace
+
+# Blender/FBX are binary authoring artifacts; do not attempt text diffs or EOL normalization.
+*.blend binary
+*.fbx binary
