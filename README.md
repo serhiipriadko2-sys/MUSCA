@@ -131,3 +131,21 @@ py -3.14 -m musca --demo --mode light_chemical --json --output experiments/resul
 Следующий игровой этап — проверить понятность и интерес сцены с людьми по
 подготовленному протоколу. Биологический опыт требует выбора и фиксации данных, динамики и
 согласованных контролей. MMO остаётся дальней перспективой.
+
+## Проверка manifest-контрактов
+
+Структурная проверка зарегистрированных manifests:
+
+```powershell
+py -3.14 scripts/validate_manifests.py --level schema data/manifests/SCI-DATA-SHIU-FW630.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json experiments/manifests/gate-p01.json
+```
+
+Перед реальным запуском используется более строгий gate:
+
+```powershell
+py -3.14 scripts/validate_manifests.py --level runnable --repo-root . experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json
+```
+
+Сейчас вторая команда обязана завершаться `FAIL`: scientific manifest имеет статус
+`draft_not_run`, а dataset ещё не получен. Это защитный gate, а не ошибка проекта.
+`schema PASS` подтверждает форму документа, но не разрешает эксперимент.

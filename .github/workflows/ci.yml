@@ -33,6 +33,13 @@ jobs:
       - name: Run unit tests
         run: python -m unittest discover -s tests -q
 
+      - name: Validate registered manifest schemas
+        run: >-
+          python scripts/validate_manifests.py --level schema
+          data/manifests/SCI-DATA-SHIU-FW630.candidate.json
+          experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json
+          experiments/manifests/gate-p01.json
+
       - name: Compile sources
         run: python -m compileall -q musca scripts tests
 
