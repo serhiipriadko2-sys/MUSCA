@@ -1,106 +1,95 @@
-# MUSCA — локальный статус
+# MUSCA — текущий статус
 
-Дата проверки: 2026-09-16, Europe/Moscow. Перечитывать перед следующей работой.
-Последняя квитанция — [сборка пилота](2026-09-16-pilot-build.md).
-Предыдущий игровой этап — [загадка](2026-09-16-gate.md).
-Предыдущий технический снимок — в [аудите](2026-09-16-audit.md).
+Дата свежей проверки: 2026-09-16. Для изменяемых GitHub/локальных фактов всегда
+предпочитать новый read-back этому документу.
+
+GATE 0 candidate receipt хранится в репозитории как `docs/status/2026-09-16-gate0-candidate.md`,
+но намеренно не входит в frozen pilot payload.
+Сборка игрового пилота — [2026-09-16-pilot-build.md](2026-09-16-pilot-build.md).
+Игровой этап «Шлюз» — [2026-09-16-gate.md](2026-09-16-gate.md).
+Исходный аудит — [2026-09-16-audit.md](2026-09-16-audit.md).
 
 ## Текущая стадия
 
-[FACT] Реализован локальный технический стенд: дискретный мир, скриптовый
-MuscaBackend, отдельный Bridge, интерпретатор событий и терминальный выбор
-человека. Добавлена законченная терминальная загадка «Шлюз» с платной пробой,
-двумя скрытыми вариантами и последствиями выбора. Биологической модели и внешнего
-LLM нет. Игровая приёмка с людьми и научный эксперимент ещё не проведены.
-Добавлен локальный упаковщик: сохраняет проверяемый снимок по явному списку
-файлов, не меняет манифест и не запускает игровые сессии.
+[FACT] Реализован технический стенд: дискретный мир, скриптовый `MuscaBackend`,
+отдельный Bridge, интерпретатор событий и терминальный выбор человека. Есть
+законченная терминальная загадка «Шлюз» с платной пробой, двумя скрытыми
+вариантами и последствиями выбора. Биологической модели и внешнего LLM нет.
+Игровая приёмка с добровольцами и научный connectome-эксперимент не проведены.
 
-[FACT] Локальная ветка `docs/musca-foundations`, базовый HEAD
-`7c56ff5da706894e07bb3b3aa85798304c4ae925`. Новые файлы и изменения не закоммичены.
-Это продолжение первоначального bootstrap, а не содержимое исходного commit.
+[FACT @ fresh read-back] До GATE 0 patch candidate удалённая ветка
+`docs/musca-foundations` имела HEAD
+`2ba60a95c888ade77fdfafcbe76bca8dabe27d26`; локальный checkout был чистым и
+совпадал с `origin/docs/musca-foundations`. `main` оставался на
+`7c56ff5da706894e07bb3b3aa85798304c4ae925`; candidate branch была на один commit
+впереди и не отставала от `main`. Это заменяет старую формулировку про
+«незакоммиченные/неопубликованные изменения».
 
-[FACT] В предыдущем этапе GitHub read-back показал: `main` на том же SHA, в дереве только README
-размером 7 байт; PR/issues/workflows/runs отсутствуют. Ветка не защищена,
-rulesets пусты, метаданные лицензии — null. В этапе «Шлюз» GitHub повторно
-не запрашивался; удалённых изменений не выполнялось.
+[FACT @ fresh read-back] PR и issues не наблюдались. Для HEAD `2ba60a95...` не
+наблюдалось GitHub Actions workflow run. Публичная лицензия проекта не выбрана.
+[CANDIDATE] GATE 0 предлагает добавить минимальный Windows CI для точной версии
+Python 3.14.6. До commit/push и GitHub read-back этот workflow имеет статус
+`not invoked`; наличие YAML в candidate не является CI PASS.
 
 ## Что реализовано и где
 
 | Файлы | Назначение |
 | --- | --- |
-| [contracts.py](../../musca/contracts.py), [bridge.py](../../musca/bridge.py) | Явно проверяемые намерения, сроки, телеметрия и семантические события |
-| [world.py](../../musca/world.py), [backends.py](../../musca/backends.py) | Локальные сенсоры, скриптовый выбор действия и защита тела |
-| [simulation.py](../../musca/simulation.py), [interpretation.py](../../musca/interpretation.py) | Замена backend, журнал, остановка при ошибках и объяснения из событий |
-| [__main__.py](../../musca/__main__.py), [__init__.py](../../musca/__init__.py) | Терминал и запуск пакета |
-| [puzzle.py](../../musca/puzzle.py), [test_puzzle.py](../../tests/test_puzzle.py) | Состояние шлюза, наблюдение, цена пробы, выбор и проверки |
-| [test_contracts.py](../../tests/test_contracts.py), [test_simulation.py](../../tests/test_simulation.py), [test_cli.py](../../tests/test_cli.py) | Контрактные, интеграционные и процессные проверки |
-| [ADR-0002](../adr/ADR-0002-local-prototype-runtime.md), [ADR-0003](../adr/ADR-0003-bridge-contract.md) | Ограниченный выбор среды и контракта |
-| [.python-version](../../.python-version), [.gitignore](../../.gitignore) | Опорная версия интерпретатора и исключения локальных файлов |
-| [README](../../README.md), [charter](../PROJECT_CHARTER.md), [protocol](../RESEARCH_PROTOCOL.md), [vision](../GAME_VISION.md), [ADR-0001](../adr/ADR-0001-project-boundaries.md) | Согласованные границы и актуальные команды |
-| [RESEARCH_EVIDENCE.md](../RESEARCH_EVIDENCE.md), [аудит](2026-09-16-audit.md) | Источники, дефекты, варианты и квитанции |
-| [ADR-0004](../adr/ADR-0004-terminal-gate-puzzle.md), [протокол](../PLAYTEST_PROTOCOL.md), [манифест](../../experiments/manifests/gate-p01.json) | Контракт загадки и план игрового пилота до сбора данных |
-| [pilot_bundle.py](../../scripts/pilot_bundle.py), [test_bundle.py](../../tests/test_bundle.py), [инструкция](../PILOT_BUILD.md) | Фиксация байтов сборки, проверки архива и воспроизводимый запуск |
+| [contracts.py](../../musca/contracts.py), [bridge.py](../../musca/bridge.py) | Намерения, сроки, телеметрия и семантические события |
+| [world.py](../../musca/world.py), [backends.py](../../musca/backends.py) | Локальные сенсоры, скриптовый нижний контроллер и защита тела |
+| [simulation.py](../../musca/simulation.py), [interpretation.py](../../musca/interpretation.py) | Backend substitution, журнал, fail-closed обратная телеметрия и объяснение событий |
+| [__main__.py](../../musca/__main__.py), [__init__.py](../../musca/__init__.py) | Терминальный запуск пакета |
+| [puzzle.py](../../musca/puzzle.py), [test_puzzle.py](../../tests/test_puzzle.py) | Загадка «Шлюз», наблюдение, цена пробы, выбор и проверки |
+| [test_contracts.py](../../tests/test_contracts.py), [test_simulation.py](../../tests/test_simulation.py), [test_cli.py](../../tests/test_cli.py) | Контрактные, интеграционные и process tests |
+| [ADR-0002](../adr/ADR-0002-local-prototype-runtime.md), [ADR-0003](../adr/ADR-0003-bridge-contract.md) | Локальный runtime и Bridge boundary |
+| [README](../../README.md), [charter](../PROJECT_CHARTER.md), [protocol](../RESEARCH_PROTOCOL.md), [vision](../GAME_VISION.md), [ADR-0001](../adr/ADR-0001-project-boundaries.md) | Архитектура, scientific boundary и game track |
+| [ADR-0004](../adr/ADR-0004-terminal-gate-puzzle.md), [PLAYTEST_PROTOCOL](../PLAYTEST_PROTOCOL.md), [gate-p01.json](../../experiments/manifests/gate-p01.json) | Игровой пилот до сбора данных |
+| [pilot_bundle.py](../../scripts/pilot_bundle.py), [test_bundle.py](../../tests/test_bundle.py), [PILOT_BUILD](../PILOT_BUILD.md) | Проверяемый локальный snapshot |
 
-[AGENTS.md](../../AGENTS.md) сохранён без смысловых изменений. Шаблоны
-[датасета](../../data/manifests/dataset.template.json) и
-[опыта](../../experiments/manifests/experiment.template.json) остаются незаполненными;
-не являются регистрацией выполненного научного опыта.
+`AGENTS.md` остаётся операционным контрактом проекта. Шаблоны датасета и
+эксперимента остаются шаблонами и не доказывают выполненный научный опыт.
 
-## Проверка и артефакты
+## Проверка
 
-**PASS — 75 тестов**, команда `py -3.14 -m unittest discover -s tests -q`, exit 0.
-14 новых тестов проверяют упаковщик, 18 — загадку, 43 — исходный стенд.
-Результат отдельного запуска тестов из финального архива сохраняется рядом с ним
-в `experiments/results/gate-p01-build.verification.json`.
-Remote Desktop Commander проверял предыдущую сборку (43 теста), не эту.
-Другие ОС и CI для новой версии не проверены.
+**PASS — reference Windows surface:** Python 3.14.6, 75 тестов, exit 0. Свежий
+Remote Desktop read-back также подтвердил clean working tree и `git diff --check`
+без ошибок.
 
-Демонстрации: `light` — harm за 2 тика, `light_chemical` — beacon за 6 тиков;
-оба запуска без столкновений. Второй режим имеет дополнительную информацию.
-Это ожидаемый инженерный контраст, не научное преимущество.
+**UNVERIFIED — full cross-platform suite:** в отдельной Linux/container среде все
+пять test modules прошли по отдельности (в сумме 75 тестов), однако общий
+`unittest discover` не завершился внутри доступного execution window. Это не
+доказанный дефект Linux, но и не основание объявлять Linux PASS.
 
-Локальные артефакты: `experiments/results/2026-09-16-light.json` и
-`experiments/results/2026-09-16-light-chemical.json`. Они исключены из Git.
-Это исторические квитанции предыдущей версии, их хеши исходников уже не
-обязаны совпадать с новым кодом; старые файлы не перезаписывались.
+**NOT RUN — GitHub CI для GATE 0 candidate:** до commit/push и run read-back.
 
-Новые технические прогоны: `experiments/results/gate-v1-developer-a.json`
-и `experiments/results/gate-v1-developer-b.json`. Оба: 4 тика навигации,
-0 столкновений, проба, открытие шлюза, остаток 1 ячейка. Ввод подан скриптом
-для проверки CLI; это не участники и не результаты GATE-P01.
-Манифест пилота остаётся `draft_not_run`, `code_commit=null`.
+## Научная и игровая граница
 
-Снимок для игрового пилота: `experiments/results/gate-p01-build.zip`.
-Точный хеш архива и результат его отдельной проверки — в соседней квитанции.
-Это локальный артефакт, исключённый из Git; не удалённая резервная копия.
-Метаданные архива честно говорят `tests=not_run_by_packager`: тесты выполняет
-отдельная проверка, не команда упаковки. Runtime игры на этом этапе не изменялся.
+- [UNKNOWN] Биологическая гипотеза не проверена: `ConnectomeBackend` отсутствует.
+- [UNKNOWN] Интерес игроков не проверен: GATE-P01 с добровольцами не запускался.
+- Скриптовый контраст `light` vs `light_chemical` является инженерной фикстурой,
+  а не доказательством biological advantage или fun.
+- Научные зависимости и connectome dataset пока не закреплены в реальном experiment manifest.
+- MMO, persistent world, экономика и большой multiplayer остаются вне текущего scope.
 
-## Ограничения
+## Открытые GATE 0 вопросы
 
-- [UNKNOWN] Биологическая гипотеза, игровой интерес, другие ОС и нагрузочная
-  пригодность не проверены. Научные зависимости не установлены.
-- Прототип использует только стандартную библиотеку Python. Текущий Python 3.14.6
-  не проверен на совместимость с окружением опубликованной модели Python 3.10/Brian2.
-- Локального CI workflow нет; удалённый CI в этом этапе повторно не проверялся.
-  Новый код не опубликован. Публичная лицензия проекта не выбрана.
-- `DRIFT:` глобальный AGENTS всё ещё содержит правила MUSCA. Он не изменялся;
-  новая сессия Codex для проверки загрузки инструкций не запускалась.
-- Отдельный финальный агент ревью не выполнил задачу из-за лимита сервиса.
-  Его заключения нет; итоговую проверку и исправление выполнил основной агент.
-- StateCycle/METRICS_ENGINE/EWS: `unavailable / not run`. Запись в память не выполнялась.
+1. Авторизовать и применить маленький status/CI patch, затем получить GitHub
+   workflow read-back.
+2. Выбрать лицензионную политику отдельно: отсутствие `LICENSE` сейчас означает,
+   что проект нельзя считать open-source только потому, что repository public.
+3. После CI решить Linux combined-suite uncertainty, не выдавая module-wise smoke
+   за полный cross-platform PASS.
 
-## Следующие три действия
+## Следующие продуктовые/исследовательские шаги после GATE 0
 
-1. Использовать проверенный снимок GATE-P01 для реальных добровольных сессий;
-   согласовать условия участия и хранения, затем сохранить
-   также отказы, пропуски и отрицательные результаты.
-2. Для научного направления выбрать узкую воспроизводимую задачу и данные через
-   ADR; заполнить манифест, закрепить лицензию, хеши и отдельную среду.
-3. До публикации оформить проверяемый commit и решить вопросы лицензии/CI;
-   удалённые записи и изменение настроек выполнять в явно разрешённом объёме.
+1. Провести GATE-P01 как отдельный human playtest с заранее согласованными
+   условиями участия и хранения результатов.
+2. Создать первый pinned scientific reproduction manifest: конкретная публикация,
+   dataset snapshot, environment, expected observation и falsifier.
+3. Только после воспроизведения известного результата переходить к первому
+   biological-vs-null MUSCA experiment.
 
-∆ — подготовлена воспроизводимая локальная сборка пилота.
-D — 75 локальных тестов, архив с хешами и отдельная квитанция проверки.
-Ω — PASS относится к программе и целостности; интерес и научная гипотеза не проверены.
-Λ — обновить после изменения исходников, HEAD, данных или внешнего состояния.
+∆ — статус приведён к свежему branch read-back и явно отделён от candidate CI.
+D — GitHub + Remote Desktop + isolated artifact checks; runtime code не менялся.
+Ω — высокий для Windows baseline и branch state; cross-platform/CI/science/game остаются bounded unknowns.
+Λ — обновить после любого нового commit, workflow run, player dataset или scientific experiment.
