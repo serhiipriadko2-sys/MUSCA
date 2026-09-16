@@ -62,7 +62,9 @@ class R00PreflightTests(unittest.TestCase):
             mock.patch.object(preflight, "_probe_python310", return_value={"present": False}),
             mock.patch.object(preflight, "_probe_storage", side_effect=self.ready_storage),
         ):
-            receipt = preflight.assess(repo_root=ROOT)
+            proposed = self.root / "proposed-ADR.md"
+            proposed.write_text("# ADR\n\nStatus: `proposed`\n", encoding="utf-8")
+            receipt = preflight.assess(repo_root=ROOT, adr_path=proposed)
         codes = {item["code"] for item in receipt["blockers"]}
         self.assertIn("governance", codes)
         self.assertEqual(receipt["disposition"], "BLOCKED")
@@ -139,8 +141,8 @@ class R00PreflightTests(unittest.TestCase):
             86630944,
         )
 
-    def test_cli_can_require_current_governance_blocker(self):
-        code = preflight.main(["--repo-root", str(ROOT), "--require-blocker", "governance"])
+    def test_cli_can_require_current_host_solver_blocker(self):
+        code = preflight.main(["--repo-root", str(ROOT), "--require-blocker", "host_solver"])
         self.assertEqual(code, 0)
 
     def test_cli_require_ready_fails_closed_on_current_state(self):

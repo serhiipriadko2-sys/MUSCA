@@ -41,8 +41,8 @@ jobs:
           experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json
           experiments/manifests/gate-p01.json
 
-      - name: Assess SCI-R00 preflight remains approval-gated
-        run: python scripts/research_r00_preflight.py --repo-root . --require-blocker governance
+      - name: Assess SCI-R00 preflight remains solver-gated
+        run: python scripts/research_r00_preflight.py --repo-root . --require-blocker host_solver
 
       - name: Compile sources
         run: python -m compileall -q musca scripts tests

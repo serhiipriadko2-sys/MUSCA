@@ -201,12 +201,10 @@ The tool must not create `E:\MUSCA_RESEARCH`, install packages, download upstrea
 bytes or execute a neural simulation. Its maximum positive disposition is
 `READY_FOR_OPERATIONAL_APPROVAL`, not `READY_TO_RUN`.
 
-Current policy requires ADR-0005 to be `accepted` before materialization. Strict
+ADR-0005 is now `accepted` for this bounded reproduction lineage. Strict
 `environment_full.yml` also requires an observed conda-compatible solver
 (`micromamba`, `mamba` or `conda`); `uv` is not silently treated as equivalent.
 A missing preinstalled Python 3.10 is informational rather than a blocker when a
 strict solver can materialize the pinned Python 3.10.11 environment.
 
-The CI invocation currently requires the `governance` blocker while ADR-0005 is
-`proposed`. Accepting that ADR therefore requires an intentional CI/gate update;
-it cannot silently turn the preregistration into execution authorization.
+The CI invocation now requires the `host_solver` blocker on the GitHub-hosted reference surface. ADR acceptance removes only the governance blocker; operational installation, download and materialization remain a separate verified write gate.

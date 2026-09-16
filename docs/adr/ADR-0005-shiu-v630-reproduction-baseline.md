@@ -1,6 +1,6 @@
 # ADR-0005 — Shiu/FlyWire-v630 as the first strict reproduction baseline
 
-Status: `proposed`
+Status: `accepted`
 Date: 2026-09-16
 Owner: MUSCA project
 Builder/package mirror: `not-needed`
@@ -88,9 +88,9 @@ If this ADR is rejected, keep the preregistration as historical research materia
 
 ## Acceptance boundary
 
-Current lifecycle: `proposed`.
+Current lifecycle: `accepted`.
 
-Promotion to `accepted` requires project-authority acceptance of this exact bounded decision: **Shiu/FlyWire-v630 for the first strict reproduction lineage only**. Acceptance does not authorize software installation, dataset download, experiment execution, merge to `main`, or use in a commercial game.
+Project authority accepted this exact bounded decision on 2026-09-16: **Shiu/FlyWire-v630 for the first strict reproduction lineage only**. Acceptance removes the governance blocker and permits a separately governed operational SCI-R00 materialization. It does not authorize merge to `main`, commercial use, or any claim of scientific reproduction before R00/R01 verification.
 
 ## ΔDΩΛ
 
