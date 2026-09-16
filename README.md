@@ -30,6 +30,9 @@ ISKRA формулирует цели и проверяемые гипотезы
 | [AGENTS.md](AGENTS.md) | Переданный пользователем локальный контракт Codex v0.1 |
 | [Манифест](docs/PROJECT_CHARTER.md) | Цель, границы архитектуры, первый этап, эксперимент и успех |
 | [Исследовательский протокол](docs/RESEARCH_PROTOCOL.md) | Сравнения, контроль смешивающих факторов и воспроизводимость |
+| [SCI-R00/R01 preregistration](docs/research/SCI_R00_R01_REPRO_PLAN.md) | Первый строгий gate воспроизведения опубликованной модели Drosophila |
+| [Licensing decision](docs/LICENSING_DECISION.md) | Разделение лицензий кода, datasets и будущей игры; решение LICENSE ещё открыто |
+| [GATE 0 CI receipt](docs/status/2026-09-16-gate0.md) | Commit/push/CI read-back для Windows/Python 3.14.6 baseline |
 | [Игровое видение](docs/GAME_VISION.md) | Основной цикл, развитие восприятия и первый игровой срез |
 | [Протокол игрового пилота](docs/PLAYTEST_PROTOCOL.md) | Условия, метрики и критерии до сбора игровых данных |
 | [Сборка пилота](docs/PILOT_BUILD.md) | Локальный архив, проверка хешей и запуск сохранённой версии |

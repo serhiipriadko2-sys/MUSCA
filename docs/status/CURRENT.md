@@ -3,93 +3,75 @@
 Дата свежей проверки: 2026-09-16. Для изменяемых GitHub/локальных фактов всегда
 предпочитать новый read-back этому документу.
 
-GATE 0 candidate receipt хранится в репозитории как `docs/status/2026-09-16-gate0-candidate.md`,
-но намеренно не входит в frozen pilot payload.
+Последняя подтверждённая репозиторная веха — [GATE 0](2026-09-16-gate0.md).
+Предшествующий candidate receipt сохранён как
+[2026-09-16-gate0-candidate.md](2026-09-16-gate0-candidate.md).
 Сборка игрового пилота — [2026-09-16-pilot-build.md](2026-09-16-pilot-build.md).
 Игровой этап «Шлюз» — [2026-09-16-gate.md](2026-09-16-gate.md).
-Исходный аудит — [2026-09-16-audit.md](2026-09-16-audit.md).
 
 ## Текущая стадия
 
 [FACT] Реализован технический стенд: дискретный мир, скриптовый `MuscaBackend`,
 отдельный Bridge, интерпретатор событий и терминальный выбор человека. Есть
-законченная терминальная загадка «Шлюз» с платной пробой, двумя скрытыми
-вариантами и последствиями выбора. Биологической модели и внешнего LLM нет.
-Игровая приёмка с добровольцами и научный connectome-эксперимент не проведены.
+терминальная загадка «Шлюз» с платной пробой, двумя скрытыми вариантами и
+последствиями выбора. Биологической модели и внешнего LLM нет. Игровая приёмка
+с добровольцами и научный connectome-эксперимент ещё не проведены.
 
-[FACT @ fresh read-back] До GATE 0 patch candidate удалённая ветка
-`docs/musca-foundations` имела HEAD
-`2ba60a95c888ade77fdfafcbe76bca8dabe27d26`; локальный checkout был чистым и
-совпадал с `origin/docs/musca-foundations`. `main` оставался на
-`7c56ff5da706894e07bb3b3aa85798304c4ae925`; candidate branch была на один commit
-впереди и не отставала от `main`. Это заменяет старую формулировку про
-«незакоммиченные/неопубликованные изменения».
+[FACT @ GitHub read-back] GATE 0 commit
+`428096325dc03bad9770266ae7328cc40f6f52d1` находится в
+`docs/musca-foundations` и запушен в `origin/docs/musca-foundations`.
+`main` остаётся на `7c56ff5da706894e07bb3b3aa85798304c4ae925`; merge в `main` не заявляется.
 
-[FACT @ fresh read-back] PR и issues не наблюдались. Для HEAD `2ba60a95...` не
-наблюдалось GitHub Actions workflow run. Публичная лицензия проекта не выбрана.
-[CANDIDATE] GATE 0 предлагает добавить минимальный Windows CI для точной версии
-Python 3.14.6. До commit/push и GitHub read-back этот workflow имеет статус
-`not invoked`; наличие YAML в candidate не является CI PASS.
+[FACT @ GitHub read-back] GitHub Actions run `35098073671` (`ci`, run #1) для
+commit `4280963...` завершился `success`. Job `Windows / Python 3.14.6` и его
+unit-test, compile и deterministic-smoke шаги завершились успешно.
+## Проверка и границы
 
-## Что реализовано и где
+**PASS — reference Windows surface:** Python 3.14.6, 75 тестов локально, compile
+PASS, deterministic smoke PASS; отдельный GitHub-hosted Windows CI также PASS.
 
-| Файлы | Назначение |
-| --- | --- |
-| [contracts.py](../../musca/contracts.py), [bridge.py](../../musca/bridge.py) | Намерения, сроки, телеметрия и семантические события |
-| [world.py](../../musca/world.py), [backends.py](../../musca/backends.py) | Локальные сенсоры, скриптовый нижний контроллер и защита тела |
-| [simulation.py](../../musca/simulation.py), [interpretation.py](../../musca/interpretation.py) | Backend substitution, журнал, fail-closed обратная телеметрия и объяснение событий |
-| [__main__.py](../../musca/__main__.py), [__init__.py](../../musca/__init__.py) | Терминальный запуск пакета |
-| [puzzle.py](../../musca/puzzle.py), [test_puzzle.py](../../tests/test_puzzle.py) | Загадка «Шлюз», наблюдение, цена пробы, выбор и проверки |
-| [test_contracts.py](../../tests/test_contracts.py), [test_simulation.py](../../tests/test_simulation.py), [test_cli.py](../../tests/test_cli.py) | Контрактные, интеграционные и process tests |
-| [ADR-0002](../adr/ADR-0002-local-prototype-runtime.md), [ADR-0003](../adr/ADR-0003-bridge-contract.md) | Локальный runtime и Bridge boundary |
-| [README](../../README.md), [charter](../PROJECT_CHARTER.md), [protocol](../RESEARCH_PROTOCOL.md), [vision](../GAME_VISION.md), [ADR-0001](../adr/ADR-0001-project-boundaries.md) | Архитектура, scientific boundary и game track |
-| [ADR-0004](../adr/ADR-0004-terminal-gate-puzzle.md), [PLAYTEST_PROTOCOL](../PLAYTEST_PROTOCOL.md), [gate-p01.json](../../experiments/manifests/gate-p01.json) | Игровой пилот до сбора данных |
-| [pilot_bundle.py](../../scripts/pilot_bundle.py), [test_bundle.py](../../tests/test_bundle.py), [PILOT_BUILD](../PILOT_BUILD.md) | Проверяемый локальный snapshot |
-
-`AGENTS.md` остаётся операционным контрактом проекта. Шаблоны датасета и
-эксперимента остаются шаблонами и не доказывают выполненный научный опыт.
-
-## Проверка
-
-**PASS — reference Windows surface:** Python 3.14.6, 75 тестов, exit 0. Свежий
-Remote Desktop read-back также подтвердил clean working tree и `git diff --check`
-без ошибок.
-
-**UNVERIFIED — full cross-platform suite:** в отдельной Linux/container среде все
-пять test modules прошли по отдельности (в сумме 75 тестов), однако общий
+**UNVERIFIED — full cross-platform suite:** в отдельной Linux/container среде
+пять test modules прошли по отдельности (суммарно 75 тестов), однако общий
 `unittest discover` не завершился внутри доступного execution window. Это не
 доказанный дефект Linux, но и не основание объявлять Linux PASS.
 
-**NOT RUN — GitHub CI для GATE 0 candidate:** до commit/push и run read-back.
+**[UNKNOWN] Science:** `ConnectomeBackend` отсутствует; pinned R00/R01
+preregistration подготовлен, но исследовательская среда, dataset и модель ещё не
+исполнялись как MUSCA experiment.
 
-## Научная и игровая граница
+**[UNKNOWN] Game:** GATE-P01 с добровольцами не запускался. Скриптовый контраст
+`light` vs `light_chemical` остаётся инженерной фикстурой, а не доказательством
+biological advantage или fun.
 
-- [UNKNOWN] Биологическая гипотеза не проверена: `ConnectomeBackend` отсутствует.
-- [UNKNOWN] Интерес игроков не проверен: GATE-P01 с добровольцами не запускался.
-- Скриптовый контраст `light` vs `light_chemical` является инженерной фикстурой,
-  а не доказательством biological advantage или fun.
-- Научные зависимости и connectome dataset пока не закреплены в реальном experiment manifest.
-- MMO, persistent world, экономика и большой multiplayer остаются вне текущего scope.
+MMO, persistent world, экономика и большой multiplayer остаются вне текущего scope.
 
-## Открытые GATE 0 вопросы
+## Научный следующий gate
 
-1. Авторизовать и применить маленький status/CI patch, затем получить GitHub
-   workflow read-back.
-2. Выбрать лицензионную политику отдельно: отсутствие `LICENSE` сейчас означает,
-   что проект нельзя считать open-source только потому, что repository public.
-3. После CI решить Linux combined-suite uncertainty, не выдавая module-wise smoke
-   за полный cross-platform PASS.
+Подготовлены candidate-файлы первой строгой репликации Shiu et al.:
 
-## Следующие продуктовые/исследовательские шаги после GATE 0
+- `docs/research/SCI_R00_R01_REPRO_PLAN.md`;
+- `data/manifests/SCI-DATA-SHIU-FW630.candidate.json`;
+- `experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json`.
 
-1. Провести GATE-P01 как отдельный human playtest с заранее согласованными
+Они фиксируют upstream commit, FlyWire-v630 lineage, strict original environment,
+150-vs-200-Hz drift, falsifier и claim ceiling. Их наличие не означает RUN/PASS.
+## Лицензирование
+
+Проектный `LICENSE` пока не выбран. Отдельный decision note хранится в
+`docs/LICENSING_DECISION.md`; public repository не трактуется как автоматически
+open-source. Лицензии кода и connectome/data рассматриваются отдельно.
+
+## Следующие ворота
+
+1. Закоммитить preregistration/licensing документы отдельным commit и получить
+   новый CI read-back для финального HEAD.
+2. Провести GATE-P01 как отдельный human playtest с заранее согласованными
    условиями участия и хранения результатов.
-2. Создать первый pinned scientific reproduction manifest: конкретная публикация,
-   dataset snapshot, environment, expected observation и falsifier.
-3. Только после воспроизведения известного результата переходить к первому
-   biological-vs-null MUSCA experiment.
+3. После отдельного environment/data write-gate выполнить SCI-R00; только после
+   воспроизведения известного upstream результата переходить к biological-vs-null
+   эксперименту MUSCA.
 
-∆ — статус приведён к свежему branch read-back и явно отделён от candidate CI.
-D — GitHub + Remote Desktop + isolated artifact checks; runtime code не менялся.
-Ω — высокий для Windows baseline и branch state; cross-platform/CI/science/game остаются bounded unknowns.
-Λ — обновить после любого нового commit, workflow run, player dataset или scientific experiment.
+∆ — GATE 0 удалённо подтверждён; science lineage переведена в preregistration.
+D — commit `4280963...`, Actions run `35098073671`, локальные 75 tests и manifests.
+Ω — высокий для Windows baseline; science/game/cross-platform остаются bounded unknowns.
+Λ — обновить после нового commit/CI, player dataset или scientific run.
