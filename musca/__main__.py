@@ -134,6 +134,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--mode', choices=[mode.value for mode in SensorMode], default='light')
     parser.add_argument('--demo', action='store_true', help='use a predefined semantic seek_signal intention')
     parser.add_argument('--puzzle', action='store_true', help='play the terminal gate puzzle after a safe approach')
+    parser.add_argument('--visual', action='store_true', help='use the local Tk visual shell; requires --puzzle')
     parser.add_argument('--layout', choices=['a', 'b'], help='gate fixture variant, assigned by the facilitator')
     parser.add_argument('--json', action='store_true', help='print a machine-readable demo receipt')
     parser.add_argument('--ticks', type=_tick_budget, default=16, help='total episode budget, 1..256')
@@ -145,6 +146,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error('--puzzle requires human input; it cannot be combined with --demo')
     if args.layout and not args.puzzle:
         parser.error('--layout requires --puzzle')
+    if args.visual and not args.puzzle:
+        parser.error('--visual requires --puzzle')
     with ExitStack() as resources:
         output = None
         if args.output is not None:
@@ -158,6 +161,8 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _run_episode(args: argparse.Namespace, output) -> int:
+    if args.visual:
+        return _run_visual_episode(args, output)
     world = GridWorld(hazards=frozenset()) if args.puzzle else GridWorld()
     simulation = Simulation(world=world, backend=ScriptedBackend(), sensor_mode=SensorMode(args.mode))
     try:
@@ -208,6 +213,46 @@ def _run_episode(args: argparse.Namespace, output) -> int:
         if args.output:
             print(f"Квитанция: {args.output}")
     return 1 if result['end_reason'] == 'backend_contract_error' else 0
+
+
+def _run_visual_episode(args: argparse.Namespace, output) -> int:
+    from .visual_tk import run_visual_puzzle
+
+    try:
+        navigation, gate_result = run_visual_puzzle(
+            SensorMode(args.mode), args.layout or 'a', max_ticks=args.ticks,
+        )
+    except (RuntimeError, ContractError) as exc:
+        print(f"Cannot start visual interface: {exc}", file=sys.stderr)
+        return 2
+    receipt = {
+        'receipt_version': 1,
+        'kind': 'game_puzzle_visual',
+        'fixture_id': 'gate-v1',
+        'config': {
+            'max_ticks': args.ticks, 'input_mode': 'human_visual',
+            'layout': args.layout or 'a', 'sensor_mode': args.mode,
+        },
+        'navigation': navigation,
+        'result': gate_result,
+        'provenance': _provenance(),
+        'limits': (
+            'Exploratory visual presentation of the synthetic fixture. '
+            'Not part of frozen GATE-P01 v0.1 and not a connectome result.'
+        ),
+    }
+    encoded = json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + '\n'
+    if output is not None:
+        try:
+            output.write(encoded)
+            output.flush()
+        except OSError as exc:
+            print(f"Cannot finish receipt; retain the partial file for diagnosis: {exc}", file=sys.stderr)
+            return 2
+    print(f"Visual episode: navigation={navigation['end_reason']}; gate={gate_result['end_reason']}.")
+    if args.output:
+        print(f"Квитанция: {args.output}")
+    return 1 if navigation['end_reason'] == 'backend_contract_error' else 0
 
 
 if __name__ == '__main__':

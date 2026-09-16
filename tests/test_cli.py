@@ -74,7 +74,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(output.read_text(encoding='utf-8'), 'preserve this')
 
     def test_budget_and_output_options_reject_invalid_values(self):
-        for arguments in (('--ticks', '0'), ('--ticks', '257'), ('--ticks', 'nan'), ('--json',), ('--mode', 'omniscient')):
+        for arguments in (('--ticks', '0'), ('--ticks', '257'), ('--ticks', 'nan'), ('--json',), ('--mode', 'omniscient'), ('--visual',)):
             with self.subTest(arguments=arguments):
                 completed = invoke(*arguments)
                 self.assertEqual(completed.returncode, 2)
