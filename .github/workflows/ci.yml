@@ -37,8 +37,12 @@ jobs:
         run: >-
           python scripts/validate_manifests.py --level schema
           data/manifests/SCI-DATA-SHIU-FW630.candidate.json
+          experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json
           experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json
           experiments/manifests/gate-p01.json
+
+      - name: Assess SCI-R00 preflight remains approval-gated
+        run: python scripts/research_r00_preflight.py --repo-root . --require-blocker governance
 
       - name: Compile sources
         run: python -m compileall -q musca scripts tests

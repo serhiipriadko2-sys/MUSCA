@@ -190,3 +190,23 @@ If R01 fails because the pinned upstream source/data are internally inconsistent
 ## Verification state
 
 `NOT RUN` — this file is a pre-registration candidate only. No research environment, package, dataset or upstream repository was installed/downloaded by this plan.
+
+## 11. Read-only R00 preflight
+
+`scripts/research_r00_preflight.py` is the non-mutating gate before any R00
+materialization. It validates the R00/dataset manifest shape, reads ADR-0005,
+probes host tooling/storage and reports typed blockers.
+
+The tool must not create `E:\MUSCA_RESEARCH`, install packages, download upstream
+bytes or execute a neural simulation. Its maximum positive disposition is
+`READY_FOR_OPERATIONAL_APPROVAL`, not `READY_TO_RUN`.
+
+Current policy requires ADR-0005 to be `accepted` before materialization. Strict
+`environment_full.yml` also requires an observed conda-compatible solver
+(`micromamba`, `mamba` or `conda`); `uv` is not silently treated as equivalent.
+A missing preinstalled Python 3.10 is informational rather than a blocker when a
+strict solver can materialize the pinned Python 3.10.11 environment.
+
+The CI invocation currently requires the `governance` blocker while ADR-0005 is
+`proposed`. Accepting that ADR therefore requires an intentional CI/gate update;
+it cannot silently turn the preregistration into execution authorization.

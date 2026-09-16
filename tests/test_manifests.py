@@ -80,6 +80,7 @@ class ManifestValidationTests(unittest.TestCase):
     def test_current_candidate_manifests_are_schema_valid(self):
         paths = [
             ROOT / "data/manifests/SCI-DATA-SHIU-FW630.candidate.json",
+            ROOT / "experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json",
             ROOT / "experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json",
         ]
         for path in paths:

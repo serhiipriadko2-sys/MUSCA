@@ -151,3 +151,20 @@ py -3.14 scripts/validate_manifests.py --level runnable --repo-root . experiment
 `schema PASS` подтверждает форму документа, но не разрешает эксперимент.
 
 Runnable дополнительно требует существующий local_storage; not_applicable допускается только с явной причиной.
+
+## SCI-R00 read-only preflight
+
+Before any neuroscience environment/data materialization, run:
+
+```powershell
+py -3.14 scripts/research_r00_preflight.py --repo-root .
+```
+
+The preflight is intentionally non-mutating. It reports governance, manifest,
+host-tooling and storage blockers and performs zero installs/downloads/simulations.
+With ADR-0005 still `proposed`, the expected disposition is `BLOCKED`; that is a
+correct guard result, not an experiment failure.
+
+The strict Shiu reproduction lineage requires a conda-compatible solver for the
+pinned `environment_full.yml`. `uv` may coexist on the host but is not treated as
+a silent replacement for that original environment contract.
