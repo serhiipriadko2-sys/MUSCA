@@ -107,6 +107,9 @@ def validate_dataset(path: Path, *, runnable: bool = False) -> dict[str, Any]:
     for name in ("retrieved_at", "content_hash_or_source_snapshot", "local_storage"):
         if _has_blocking_marker(section[name]):
             raise ManifestError(f"{path}: runnable dataset blocked by {name!r}")
+    local_storage = Path(section["local_storage"])
+    if not local_storage.exists():
+        raise ManifestError(f"{path}: local_storage does not exist: {local_storage}")
     return data
 
 
@@ -151,6 +154,11 @@ def validate_experiment(
     if not isinstance(dataset_ref, str):
         raise ManifestError(f"{path}: runnable experiment requires dataset_manifest")
     if dataset_ref.lower().startswith("not_applicable"):
+        parts = dataset_ref.split(":", 1)
+        if len(parts) != 2 or not parts[1].strip():
+            raise ManifestError(
+                f"{path}: not_applicable dataset reference requires an explicit reason"
+            )
         return data
     if repo_root is None:
         raise ManifestError(f"{path}: --repo-root is required to verify dataset linkage")

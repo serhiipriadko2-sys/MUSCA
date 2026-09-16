@@ -124,8 +124,11 @@ class ManifestValidationTests(unittest.TestCase):
             validator.validate_experiment(path)
 
     def test_runnable_experiment_checks_linked_dataset(self):
+        storage = self.root / "retrieved-dataset"
+        storage.mkdir()
         dataset = self.write_json(
-            "data/manifests/fixture-dataset.json", dataset_payload()
+            "data/manifests/fixture-dataset.json",
+            dataset_payload(local_storage=str(storage)),
         )
         experiment = self.write_json(
             "experiments/manifests/fixture.json", experiment_payload()
@@ -150,6 +153,21 @@ class ManifestValidationTests(unittest.TestCase):
             experiment_payload(dataset_manifest="not_applicable: no external dataset"),
         )
         validator.validate_experiment(experiment, runnable=True, repo_root=self.root)
+    def test_runnable_dataset_requires_existing_local_storage(self):
+        path = self.write_json(
+            "dataset.json",
+            dataset_payload(local_storage=str(self.root / "missing-dataset")),
+        )
+        with self.assertRaises(validator.ManifestError):
+            validator.validate_dataset(path, runnable=True)
+
+    def test_not_applicable_dataset_requires_reason(self):
+        experiment = self.write_json(
+            "game-no-reason.json",
+            experiment_payload(dataset_manifest="not_applicable"),
+        )
+        with self.assertRaises(validator.ManifestError):
+            validator.validate_experiment(experiment, runnable=True, repo_root=self.root)
 
     def test_cli_returns_nonzero_for_runnable_draft(self):
         path = ROOT / "experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json"

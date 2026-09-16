@@ -39,7 +39,7 @@ merge не выполнен.
 На каждом run unit-test, compile и deterministic-smoke steps завершились `success`.
 
 [FACT @ local verification] После добавления manifest validator локальный suite:
-`86 tests / PASS`. Compile и `git diff --check` также PASS.
+`88 tests / PASS`. Compile и `git diff --check` также PASS.
 
 **UNVERIFIED — full cross-platform suite:** в отдельной Linux/container среде
 предыдущие 75 тестов прошли по модулям, но общий `unittest discover` не завершился
@@ -52,6 +52,8 @@ merge не выполнен.
 - `schema` — обязательные поля, типы и непустые значения;
 - `runnable` — дополнительно fail-closed блокирует draft, незакреплённый код,
   неполученные данные и linked dataset без runnable provenance.
+
+Runnable dataset также требует реально существующий local_storage; not_applicable разрешён только с явной причиной.
 
 [FACT @ local verification] SCI dataset candidate, SCI-R01 и GATE-P01 проходят
 `schema`. SCI-R01 и GATE-P01 обязаны завершаться FAIL на `runnable`, пока их

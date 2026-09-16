@@ -149,3 +149,5 @@ py -3.14 scripts/validate_manifests.py --level runnable --repo-root . experiment
 Сейчас вторая команда обязана завершаться `FAIL`: scientific manifest имеет статус
 `draft_not_run`, а dataset ещё не получен. Это защитный gate, а не ошибка проекта.
 `schema PASS` подтверждает форму документа, но не разрешает эксперимент.
+
+Runnable дополнительно требует существующий local_storage; not_applicable допускается только с явной причиной.
