@@ -40,6 +40,7 @@ ISKRA формулирует цели и проверяемые гипотезы
 | [ADR-0002](docs/adr/ADR-0002-local-prototype-runtime.md) | Python и дискретный мир для локального стенда |
 | [ADR-0003](docs/adr/ADR-0003-bridge-contract.md) | Исполняемая граница Bridge и критерии проверки |
 | [ADR-0004](docs/adr/ADR-0004-terminal-gate-puzzle.md) | Загадка, цена наблюдения и дополнительный контракт (содержит ответы) |
+| [ADR-0005](docs/adr/ADR-0005-shiu-v630-reproduction-baseline.md) | Proposed: Shiu/FlyWire-v630 только как первый strict reproduction baseline |
 | [Карта научных свидетельств](docs/RESEARCH_EVIDENCE.md) | Проверенные первоисточники и пределы переноса выводов |
 | [Аудит](docs/status/2026-09-16-audit.md) | Найденные дефекты, исправления, GitHub и машинная проверка |
 | [Локальный статус](docs/status/CURRENT.md) | Что записано, что проверено и что остаётся неизвестным |

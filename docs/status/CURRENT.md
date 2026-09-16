@@ -17,24 +17,27 @@
 терминальная загадка «Шлюз». Биологической модели и внешнего LLM нет. Игровая
 приёмка с добровольцами и научный connectome-эксперимент ещё не проведены.
 
-[FACT @ GitHub read-back] `docs/musca-foundations` содержит GATE 0 commit
-`428096325dc03bad9770266ae7328cc40f6f52d1` и scientific-preregistration commit
-`67c95259c32f25cd787ff1adc229e0f0d1114297`; оба запушены.
+[FACT @ GitHub read-back] `docs/musca-foundations` опубликована и содержит
+последовательность GATE 0 → scientific preregistration → status receipt.
+До предлагаемого ADR текущий HEAD:
+`089553ab5d00e62893f063a0582931bec1509421`.
 
 [FACT @ GitHub read-back] `main` остаётся на
-`7c56ff5da706894e07bb3b3aa85798304c4ae925`. Candidate branch на три commits
-впереди `main` и не отстаёт. Merge в `main` не заявляется.
+`7c56ff5da706894e07bb3b3aa85798304c4ae925`. Merge в `main` не заявляется.
 ## CI и проверка
 
-[FACT @ GitHub Actions] Run `35098073671` (#1) для GATE 0 commit `4280963...`
-завершился `success`.
+[FACT @ GitHub Actions] Три последовательных push-runs завершили job
+`Windows / Python 3.14.6` успешно:
 
-[FACT @ GitHub Actions] Run `35098789752` (#2) для scientific-preregistration
-commit `67c95259...` также завершил job `Windows / Python 3.14.6` с conclusion
-`success`; unit-test, compile и deterministic-smoke steps — success.
+- run `35098073671` (#1), GATE 0 commit `4280963...`;
+- run `35098789752` (#2), scientific-preregistration commit `67c95259...`;
+- run `35099417750` (#3), status-receipt commit `089553ab...`.
 
-**PASS — reference Windows surface:** Python 3.14.6; 75 unit tests локально;
-GitHub-hosted Windows CI подтверждён на обоих опубликованных commits.
+На каждом опубликованном проверенном commit unit-test, compile и deterministic
+smoke steps завершились `success`.
+
+**PASS — reference Windows surface:** Python 3.14.6, 75 unit tests локально и
+независимый GitHub-hosted Windows CI.
 
 **UNVERIFIED — full cross-platform suite:** в отдельной Linux/container среде
 пять test modules прошли по отдельности (суммарно 75 тестов), но общий
@@ -43,16 +46,17 @@ GitHub-hosted Windows CI подтверждён на обоих опублико
 
 ## Scientific lineage
 
-В репозитории опубликованы:
-
-- `docs/research/SCI_R00_R01_REPRO_PLAN.md`;
-- `data/manifests/SCI-DATA-SHIU-FW630.candidate.json`;
-- `experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json`.
-
-Они фиксируют upstream commit, FlyWire-v630 lineage, original-environment gate,
+Опубликованы preregistration plan и candidate manifests для SCI-R00/R01. Они
+фиксируют Shiu upstream commit, FlyWire-v630 lineage, original-environment gate,
 `150 Hz executable code vs 200 Hz tutorial prose` drift, falsifier и claim ceiling.
-Статус science: `PREREGISTERED / NOT RUN`. Наличие manifests не означает
-созданную среду, полученный dataset, выполненный R00/R01 или научное подтверждение.
+
+Science status: `PREREGISTERED / NOT RUN`.
+## Governance
+
+[PROPOSED] `ADR-0005-shiu-v630-reproduction-baseline.md` ограничивает первый
+научный baseline точным Shiu/FlyWire-v630 reproduction lineage. ADR не выбирает
+будущий production/game controller и не разрешает installation/download/run.
+До project-authority acceptance он остаётся `proposed`.
 
 ## Game lineage
 
@@ -69,14 +73,13 @@ third-party code, connectome/data и будущих игровых assets не �
 
 ## Следующие ворота
 
-1. После этого status-only commit получить новый CI read-back для актуального HEAD.
-2. Провести GATE-P01 как отдельный human playtest с заранее согласованными
-   условиями участия и хранения результатов.
-3. Отдельным environment/data write-gate выполнить SCI-R00; только после R00/R01
-   и воспроизведения известного результата переходить к biological-vs-null MUSCA.
-4. Merge в `main` делать отдельным review/PR решением, не как побочный эффект.
+1. Опубликовать proposed ADR-0005 и получить CI read-back нового HEAD.
+2. После явного принятия ADR отдельно решить operational write-gate для SCI-R00:
+   isolated environment + pinned source/data + SHA-256 receipts, без изменения runtime.
+3. Провести GATE-P01 как независимый human playtest.
+4. Merge в `main` — отдельное review/PR решение, не побочный эффект.
 
-∆ — repo baseline и scientific preregistration опубликованы и CI-проверены.
-D — commits `4280963...` + `67c95259...`, Actions runs #1/#2, 75 local tests.
+∆ — repo baseline + preregistration имеют тройной зелёный CI; dataset/model choice вынесен в ADR.
+D — commits `4280963...`, `67c95259...`, `089553ab...` и Actions runs #1–#3.
 Ω — высокий для Windows/repo provenance; science/game/cross-platform bounded unknown.
-Λ — обновить после нового CI, player dataset, R00/R01 или merge/release transition.
+Λ — обновить после ADR/CI, player dataset, R00/R01 или merge/release transition.
