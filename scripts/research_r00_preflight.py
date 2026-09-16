@@ -87,6 +87,70 @@ def _probe_command(name: str, args: tuple[str, ...] = ("--version",)) -> dict[st
     }
 
 
+def _probe_executable_path(path: Path, args: tuple[str, ...] = ("--version",)) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "present": path.is_file(),
+        "path": str(path),
+        "bytes": None,
+        "runnable": False,
+        "version": None,
+    }
+    if not result["present"]:
+        return result
+    try:
+        result["bytes"] = path.stat().st_size
+    except OSError as exc:
+        result["stat_error"] = str(exc)
+        return result
+    try:
+        completed = subprocess.run(
+            [str(path), *args],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        result["run_error"] = str(exc)
+        return result
+    output = (completed.stdout or completed.stderr).strip().splitlines()
+    result["exit_code"] = completed.returncode
+    result["runnable"] = completed.returncode == 0
+    result["version"] = output[0] if output else None
+    return result
+
+
+def _observe_file(path: Path) -> dict[str, Any]:
+    result: dict[str, Any] = {"present": path.is_file(), "path": str(path), "bytes": None}
+    if result["present"]:
+        try:
+            result["bytes"] = path.stat().st_size
+        except OSError as exc:
+            result["stat_error"] = str(exc)
+    return result
+
+
+def _observe_preexisting_state(research_root: Path) -> dict[str, Any]:
+    tools = research_root / "tools"
+    downloads = research_root / "downloads"
+    source_root = research_root / "shiu-91bdd1e7"
+    micromamba_name = "micromamba.exe" if platform.system() == "Windows" else "micromamba"
+    return {
+        "research_root_exists": research_root.exists(),
+        "mamba_root_exists": (research_root / "mamba-root").exists(),
+        "source_dir_exists": (source_root / "source").exists(),
+        "source_snapshot_exists": (source_root / "source-snapshot").exists(),
+        "project_solver_candidates": {
+            "micromamba": _probe_executable_path(tools / micromamba_name),
+        },
+        "known_transfer_artifacts": {
+            "micromamba_archive": _observe_file(downloads / "micromamba-win-64-latest.tar.bz2"),
+            "source_zip_authoritative": _observe_file(downloads / "Drosophila_brain_model-91bdd1e7.zip"),
+            "source_qc_receipt": _observe_file(research_root / "receipts" / "2026-09-16-r00-source-artifact-qc.json"),
+        },
+    }
+
+
 def _probe_python310() -> dict[str, Any]:
     launcher = shutil.which("py")
     if launcher is None:
@@ -168,10 +232,22 @@ def assess(
     solver_probes = {name: _probe_command(name) for name in STRICT_SOLVERS}
     strict_solver = next((name for name, probe in solver_probes.items() if probe["present"] and probe.get("exit_code", 0) == 0), None)
     if strict_solver is None:
+        local_name = "micromamba.exe" if platform.system() == "Windows" else "micromamba"
+        local_probe = _probe_executable_path(research_root / "tools" / local_name)
+        if local_probe.get("runnable"):
+            solver_probes["micromamba"] = {
+                "present": True,
+                "executable": local_probe["path"],
+                "version": local_probe.get("version"),
+                "exit_code": local_probe.get("exit_code"),
+                "source": "project_local",
+            }
+            strict_solver = "micromamba"
+    if strict_solver is None:
         blockers.append(
             _blocker(
                 "host_solver",
-                "strict environment_full.yml requires a conda-compatible solver; none of micromamba/mamba/conda was found",
+                "strict environment_full.yml requires a runnable conda-compatible solver on PATH or under the project-local research tools directory",
             )
         )
 
@@ -188,6 +264,7 @@ def assess(
         )
 
     storage_probe = _probe_storage(research_root)
+    preexisting_state = _observe_preexisting_state(research_root)
     if not storage_probe["anchor_exists"]:
         blockers.append(
             _blocker(
@@ -202,7 +279,7 @@ def assess(
 
     disposition = "READY_FOR_OPERATIONAL_APPROVAL" if not blockers else "BLOCKED"
     return {
-        "receipt_version": 1,
+        "receipt_version": 2,
         "kind": "SCI-R00-read-only-preflight",
         "disposition": disposition,
         "blockers": blockers,
@@ -224,13 +301,15 @@ def assess(
             "commit": UPSTREAM_COMMIT,
             "expected_files": EXPECTED_UPSTREAM_FILES,
         },
-        "effects": {
+        "observed_preexisting_state": preexisting_state,
+        "self_effects": {
+            "scope": "preflight_process_only",
             "writes_performed": 0,
             "downloads_performed": 0,
             "installs_performed": 0,
             "simulations_run": 0,
         },
-        "claim_boundary": "Preflight readiness is not experiment execution and does not reproduce a neuroscience result.",
+        "claim_boundary": "Preflight self_effects describe only this process; they do not prove the surrounding session performed zero writes. Preflight readiness is not experiment execution and does not reproduce a neuroscience result.",
     }
 
 

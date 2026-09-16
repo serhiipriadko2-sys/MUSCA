@@ -15,7 +15,8 @@
       "FlyWire-v630 bundled completeness/connectivity inputs",
       "no upstream source edits",
       "no scientific-parameter edits",
-      "MUSCA runtime remains unchanged"
+      "MUSCA runtime remains unchanged",
+      "exact-commit source may be retrieved through GitHub codeload only when key file Git blob IDs match the pinned commit"
     ],
     "train_worlds": [],
     "validation_worlds": [],
@@ -30,7 +31,8 @@
       "model-construction wall time if attempted",
       "peak host RAM if measurable",
       "failure class and stderr when blocked"
-    ],    "compute_budget": "Read-only preflight first. Strict materialization uses isolated E:\\MUSCA_RESEARCH storage; preserve failure instead of silently substituting a modern environment.",
+    ],
+    "compute_budget": "Read-only preflight first. Strict materialization uses isolated E:\\MUSCA_RESEARCH storage; preserve failure instead of silently substituting a modern environment.",
     "analysis_plan": "Classify each gate independently: governance, source pin, host tooling, storage, strict environment, data load and optional model construction. Preserve the first blocking condition and all provenance receipts. Do not treat compatibility execution as strict R00.",
     "success_criterion": "Exact upstream commit observed; required files hashed locally; original/full environment solved and imports succeed; v630 inputs load; no source/data/scientific-parameter mutation; resource use remains within the declared operational budget.",
     "result_path": "PLANNED: E:\\MUSCA_RESEARCH\\results\\SCI-R00-SHIU-ENV-DATA",
@@ -38,7 +40,7 @@
     "trainable_parameters": [],
     "confounds": [
       "environment_full.yml contains old Windows-specific conda build pins",
-      "current host has no observed conda/mamba/micromamba solver at preregistration time",
+      "preregistration host initially lacked a solver; portable micromamba 2.9.0 was later materialized project-locally with SHA-256 receipt",
       "pre-existing Python 3.10 is not required if a strict conda-compatible solver can materialize it",
       "successful environment/data materialization does not reproduce a published biological result",
       "dataset licensing and game-commercial rights remain separate from local reproduction engineering"

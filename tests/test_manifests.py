@@ -97,10 +97,9 @@ class ManifestValidationTests(unittest.TestCase):
                 with self.assertRaises(validator.ManifestError):
                     validator.validate_path(path, level="schema", repo_root=ROOT)
 
-    def test_dataset_candidate_is_not_runnable_before_retrieval(self):
+    def test_retrieved_dataset_candidate_is_runnable(self):
         path = ROOT / "data/manifests/SCI-DATA-SHIU-FW630.candidate.json"
-        with self.assertRaises(validator.ManifestError):
-            validator.validate_dataset(path, runnable=True)
+        validator.validate_dataset(path, runnable=True)
 
     def test_experiment_candidate_is_not_runnable_while_draft(self):
         path = ROOT / "experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json"

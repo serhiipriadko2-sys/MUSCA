@@ -64,11 +64,12 @@ class R00PreflightTests(unittest.TestCase):
         ):
             proposed = self.root / "proposed-ADR.md"
             proposed.write_text("# ADR\n\nStatus: `proposed`\n", encoding="utf-8")
-            receipt = preflight.assess(repo_root=ROOT, adr_path=proposed)
+            receipt = preflight.assess(repo_root=ROOT, research_root=self.root / "research", adr_path=proposed)
         codes = {item["code"] for item in receipt["blockers"]}
         self.assertIn("governance", codes)
         self.assertEqual(receipt["disposition"], "BLOCKED")
-        self.assertEqual(receipt["effects"]["writes_performed"], 0)
+        self.assertEqual(receipt["self_effects"]["writes_performed"], 0)
+        self.assertEqual(receipt["self_effects"]["scope"], "preflight_process_only")
 
     def test_accepted_adr_with_strict_solver_reaches_approval_boundary(self):
         with (
@@ -76,7 +77,7 @@ class R00PreflightTests(unittest.TestCase):
             mock.patch.object(preflight, "_probe_python310", return_value={"present": False}),
             mock.patch.object(preflight, "_probe_storage", side_effect=self.ready_storage),
         ):
-            receipt = preflight.assess(repo_root=ROOT, adr_path=self.accepted_adr())
+            receipt = preflight.assess(repo_root=ROOT, research_root=self.root / "research", adr_path=self.accepted_adr())
         self.assertEqual(receipt["disposition"], "READY_FOR_OPERATIONAL_APPROVAL")
         self.assertEqual(receipt["blockers"], [])
         self.assertEqual(receipt["host"]["selected_strict_solver"], "conda")
@@ -87,10 +88,31 @@ class R00PreflightTests(unittest.TestCase):
             mock.patch.object(preflight, "_probe_python310", return_value={"present": False}),
             mock.patch.object(preflight, "_probe_storage", side_effect=self.ready_storage),
         ):
-            receipt = preflight.assess(repo_root=ROOT, adr_path=self.accepted_adr())
+            receipt = preflight.assess(repo_root=ROOT, research_root=self.root / "research", adr_path=self.accepted_adr())
         codes = {item["code"] for item in receipt["blockers"]}
         self.assertIn("host_solver", codes)
         self.assertEqual(receipt["disposition"], "BLOCKED")
+
+    def test_project_local_micromamba_satisfies_solver_gate(self):
+        research_root = self.root / "research"
+        local_probe = {
+            "present": True,
+            "path": str(research_root / "tools" / "micromamba.exe"),
+            "bytes": 123,
+            "runnable": True,
+            "version": "2.9.0",
+            "exit_code": 0,
+        }
+        with (
+            mock.patch.object(preflight, "_probe_command", side_effect=host_command_probe("git", "uv")),
+            mock.patch.object(preflight, "_probe_python310", return_value={"present": False}),
+            mock.patch.object(preflight, "_probe_storage", side_effect=self.ready_storage),
+            mock.patch.object(preflight, "_probe_executable_path", return_value=local_probe),
+        ):
+            receipt = preflight.assess(repo_root=ROOT, research_root=research_root, adr_path=self.accepted_adr())
+        self.assertEqual(receipt["disposition"], "READY_FOR_OPERATIONAL_APPROVAL")
+        self.assertEqual(receipt["host"]["selected_strict_solver"], "micromamba")
+        self.assertEqual(receipt["host"]["strict_solvers"]["micromamba"]["source"], "project_local")
 
     def test_missing_storage_anchor_blocks(self):
         missing = {
@@ -105,7 +127,7 @@ class R00PreflightTests(unittest.TestCase):
             mock.patch.object(preflight, "_probe_python310", return_value={"present": False}),
             mock.patch.object(preflight, "_probe_storage", return_value=missing),
         ):
-            receipt = preflight.assess(repo_root=ROOT, adr_path=self.accepted_adr())
+            receipt = preflight.assess(repo_root=ROOT, research_root=self.root / "research", adr_path=self.accepted_adr())
         self.assertIn("host_storage", {item["code"] for item in receipt["blockers"]})
 
     def test_invalid_dataset_manifest_blocks(self):
@@ -118,6 +140,7 @@ class R00PreflightTests(unittest.TestCase):
         ):
             receipt = preflight.assess(
                 repo_root=ROOT,
+                research_root=self.root / "research",
                 adr_path=self.accepted_adr(),
                 dataset_manifest=bad_dataset,
                 r00_manifest=R00,
@@ -141,12 +164,40 @@ class R00PreflightTests(unittest.TestCase):
             86630944,
         )
 
+    def test_receipt_scopes_self_effects_and_removes_ambiguous_legacy_key(self):
+        with (
+            mock.patch.object(preflight, "_probe_command", side_effect=host_command_probe("git", "conda")),
+            mock.patch.object(preflight, "_probe_python310", return_value={"present": False}),
+            mock.patch.object(preflight, "_probe_storage", side_effect=self.ready_storage),
+        ):
+            receipt = preflight.assess(
+                repo_root=ROOT,
+                research_root=self.root / "research",
+                adr_path=self.accepted_adr(),
+            )
+        self.assertEqual(receipt["receipt_version"], 2)
+        self.assertNotIn("effects", receipt)
+        self.assertEqual(receipt["self_effects"]["scope"], "preflight_process_only")
+        self.assertEqual(receipt["self_effects"]["writes_performed"], 0)
+
+    def test_preexisting_state_observes_project_local_solver_without_selecting_it(self):
+        research = self.root / "research"
+        tool = research / "tools" / ("micromamba.exe" if preflight.platform.system() == "Windows" else "micromamba")
+        tool.parent.mkdir(parents=True)
+        tool.write_bytes(b"not-an-executable")
+        state = preflight._observe_preexisting_state(research)
+        observed = state["project_solver_candidates"]["micromamba"]
+        self.assertTrue(state["research_root_exists"])
+        self.assertTrue(observed["present"])
+        self.assertEqual(observed["bytes"], len(b"not-an-executable"))
+        self.assertFalse(observed["runnable"])
+
     def test_cli_can_require_current_host_solver_blocker(self):
-        code = preflight.main(["--repo-root", str(ROOT), "--require-blocker", "host_solver"])
+        code = preflight.main(["--repo-root", str(ROOT), "--research-root", str(self.root / "research"), "--require-blocker", "host_solver"])
         self.assertEqual(code, 0)
 
     def test_cli_require_ready_fails_closed_on_current_state(self):
-        code = preflight.main(["--repo-root", str(ROOT), "--require-ready"])
+        code = preflight.main(["--repo-root", str(ROOT), "--research-root", str(self.root / "research"), "--require-ready"])
         self.assertEqual(code, 2)
 
 

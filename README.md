@@ -31,6 +31,7 @@ ISKRA формулирует цели и проверяемые гипотезы
 | [Манифест](docs/PROJECT_CHARTER.md) | Цель, границы архитектуры, первый этап, эксперимент и успех |
 | [Исследовательский протокол](docs/RESEARCH_PROTOCOL.md) | Сравнения, контроль смешивающих факторов и воспроизводимость |
 | [SCI-R00/R01 preregistration](docs/research/SCI_R00_R01_REPRO_PLAN.md) | Первый строгий gate воспроизведения опубликованной модели Drosophila |
+| [R00 source provenance](docs/status/2026-09-16-r00-source-provenance.md) | Solver/source/data hashes, artifact QC and strict-environment boundary |
 | [Licensing decision](docs/LICENSING_DECISION.md) | Разделение лицензий кода, datasets и будущей игры; решение LICENSE ещё открыто |
 | [GATE 0 CI receipt](docs/status/2026-09-16-gate0.md) | Commit/push/CI read-back для Windows/Python 3.14.6 baseline |
 | [Игровое видение](docs/GAME_VISION.md) | Основной цикл, развитие восприятия и первый игровой срез |
@@ -40,7 +41,7 @@ ISKRA формулирует цели и проверяемые гипотезы
 | [ADR-0002](docs/adr/ADR-0002-local-prototype-runtime.md) | Python и дискретный мир для локального стенда |
 | [ADR-0003](docs/adr/ADR-0003-bridge-contract.md) | Исполняемая граница Bridge и критерии проверки |
 | [ADR-0004](docs/adr/ADR-0004-terminal-gate-puzzle.md) | Загадка, цена наблюдения и дополнительный контракт (содержит ответы) |
-| [ADR-0005](docs/adr/ADR-0005-shiu-v630-reproduction-baseline.md) | Proposed: Shiu/FlyWire-v630 только как первый strict reproduction baseline |
+| [ADR-0005](docs/adr/ADR-0005-shiu-v630-reproduction-baseline.md) | Accepted: Shiu/FlyWire-v630 только как первый strict reproduction baseline |
 | [Карта научных свидетельств](docs/RESEARCH_EVIDENCE.md) | Проверенные первоисточники и пределы переноса выводов |
 | [Аудит](docs/status/2026-09-16-audit.md) | Найденные дефекты, исправления, GitHub и машинная проверка |
 | [Локальный статус](docs/status/CURRENT.md) | Что записано, что проверено и что остаётся неизвестным |
@@ -146,8 +147,8 @@ py -3.14 scripts/validate_manifests.py --level schema data/manifests/SCI-DATA-SH
 py -3.14 scripts/validate_manifests.py --level runnable --repo-root . experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json
 ```
 
-Сейчас вторая команда обязана завершаться `FAIL`: scientific manifest имеет статус
-`draft_not_run`, а dataset ещё не получен. Это защитный gate, а не ошибка проекта.
+Сейчас R01 runnable-check обязан завершаться `FAIL`: scientific manifest имеет статус
+`draft_not_run`. Dataset уже локально получен и проверен, но strict environment/R00 ещё не завершены. Это защитный gate, а не ошибка проекта.
 `schema PASS` подтверждает форму документа, но не разрешает эксперимент.
 
 Runnable дополнительно требует существующий local_storage; not_applicable допускается только с явной причиной.
@@ -162,8 +163,9 @@ py -3.14 scripts/research_r00_preflight.py --repo-root .
 
 The preflight is intentionally non-mutating. It reports governance, manifest,
 host-tooling and storage blockers and performs zero installs/downloads/simulations.
-With ADR-0005 still `proposed`, the expected disposition is `BLOCKED`; that is a
-correct guard result, not an experiment failure.
+ADR-0005 принят. На авторизованном research-host project-local micromamba может
+дать `READY_FOR_OPERATIONAL_APPROVAL`; GitHub-hosted CI без этого локального tool
+по-прежнему ожидаемо видит `host_solver`. Ни одно состояние не является R00 PASS.
 
 The strict Shiu reproduction lineage requires a conda-compatible solver for the
 pinned `environment_full.yml`. `uv` may coexist on the host but is not treated as
