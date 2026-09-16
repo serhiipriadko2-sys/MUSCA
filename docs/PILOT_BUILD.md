@@ -7,6 +7,11 @@
 игровой код, проверки, протокол и связанные исследовательские документы.
 Проверка прежнего формата `musca-local-pilot-v1` сохранена; старый архив не меняется.
 
+**Distribution boundary:** v2 is a developer/facilitator archive, not a participant package.
+It includes source and spoiler-bearing ADR material. Self-run or remote participants require a
+separately built sanitized participant package with its own receipt; otherwise hidden truth can
+leak before the decision and the session is not blind.
+
 ## Создание и проверка
 
 Из корня MUSCA:

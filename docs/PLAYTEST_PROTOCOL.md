@@ -52,6 +52,10 @@
    видео и свободный личный текст не собирать; приглашения в этой задаче не отправляются.
 2. Выдать следующий номер назначения; запустить режим и вариант из манифеста.
    Не показывать командную строку, исходники, ADR или диагностический JSON до конца.
+   FACILITATOR-ONLY BUILD: the full source/archive contains ADRs and other spoiler-bearing material.
+   Do not distribute it to participants. A self-run or remote participant flow requires a separate
+   sanitized participant package with its own receipt; otherwise treat blinding as compromised and
+   do not pool that session with GATE-P01 v0.1.
 3. Читать только экранную инструкцию. На вопрос о правильном реагенте не давать
    подсказку; техническую помощь отметить как вмешательство. Не просить думать
    вслух во время выбора, чтобы не менять поведение.

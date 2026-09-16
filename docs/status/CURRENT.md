@@ -1,99 +1,95 @@
 # MUSCA — текущий статус
 
-Дата: 2026-09-16. GitHub read-back: 15:55 UTC. Этот документ — датированный
-снимок; перед новым решением перечитать репозиторий и нужную внешнюю поверхность.
+Дата проверки: 2026-09-16. Это оперативная сводка, а не вечная истина.
+Для HEAD, CI, PR и состояния рабочего дерева перед решением всегда делать fresh
+GitHub/Remote Desktop read-back; исторические receipts ниже не переписываются.
 
-## Проверенный результат
+## Что проверено
 
-[FACT] Локальные исправления поверх `2bb02d40ddb909051a178f48b6216a42173741c8`
-прошли **105 тестов** на Windows / Python 3.14.6. Повтор через Remote Desktop
-Commander тоже прошёл 105 тестов на той же машине. Полный разбор, команды,
-источники и пределы — в [интегрированном аудите](2026-09-16-integrated-audit.md).
+[FACT] Последний полностью проверенный кодовый снимок перед этим hardening diff —
+`c46d814e3692c5a6330f803341e9a62d80794c73` на `docs/musca-foundations`.
+На нём локально Windows/Python 3.14.6: **105 unit tests PASS**, `git diff --check`
+PASS, compile PASS, четыре manifest schema PASS; dataset runnable PASS; SCI-R00
+ожидаемо отклоняется как `draft_not_run`.
 
-Исправлены зависимость теста от диска E:, ложная готовность неисправного
-инструмента, поздняя проверка пути игровой квитанции и неполный состав архива.
-Новых зависимостей нет. Правила игры и критерии GATE-P01 не менялись.
-
-## GitHub и локальное дерево
-
-[FACT] Ветка `docs/musca-foundations`; базовый HEAD совпадает с опубликованным
-`2bb02d4...`. Исправления этого аудита ещё находятся в рабочем дереве.
-`main` — `7c56ff5da706894e07bb3b3aa85798304c4ae925`.
-[PR #1](https://github.com/serhiipriadko2-sys/MUSCA/pull/1) открыт как draft,
-не слит.
-
-**DRIFT:** прежний статус ссылался на успешный CI для `b42c125...`.
-Последние [PR CI](https://github.com/serhiipriadko2-sys/MUSCA/actions/runs/35116603825)
-и [push CI](https://github.com/serhiipriadko2-sys/MUSCA/actions/runs/35116599940)
-для `2bb02d4...` завершились **FAIL**: тест ожидал реальный каталог датасета
-на диске E: у GitHub runner. Локальное исправление ещё не проверено новым CI.
-В рамках этого аудита commit/push/merge/deploy не выполнялись.
+[FACT @ GitHub] Для exact `c46d814...` push CI #22 и PR CI #23 завершились
+`success`. Draft PR #1 открыт и не слит; `main` остаётся отдельной веткой.
+Green CI не означает review, merge, deployment, human pilot или neuroscience result.
 
 ## Исследовательская линия
 
-[ADR-0005](../adr/ADR-0005-shiu-v630-reproduction-baseline.md) имеет статус
-`accepted`: Shiu/FlyWire-v630 выбран только для первого строгого воспроизведения.
-Это не выбор нейронного backend игры. Контекст ранее появившихся операций
-сохранён в [наблюдении расхождения](2026-09-16-concurrent-ops-drift.md);
-метаданные автора commit сами по себе не устанавливают авторизацию операции.
+[FACT] ADR-0005 имеет статус `accepted` только для первого strict reproduction
+baseline Shiu/FlyWire-v630. Это не выбор будущего игрового neural backend.
 
-[FACT] В `E:/MUSCA_RESEARCH/shiu-91bdd1e7/source-snapshot` повторно прочитаны
-и хешированы `model.py`, `environment_full.yml`, таблица полноты и граф v630.
-Все четыре Git blob ID совпали с GitHub-деревом точного upstream commit
-`91bdd1e7dcf193f3e7ca5a8933497fcef63b7960`.
-Полные SHA-256 — в [квитанции происхождения](2026-09-16-r00-source-provenance.md).
+[FACT] Exact upstream snapshot
+`philshiu/Drosophila_brain_model@91bdd1e7dcf193f3e7ca5a8933497fcef63b7960`
+получен локально и прошёл byte/QC verification. Четыре preregistered Git blob ID
+совпали с вычисленными локально. Полные SHA-256 и размеры — в
+`2026-09-16-r00-source-provenance.md`.
 
-[FACT] Локальный micromamba 2.9.0 отвечает на проверку версии.
-Предварительная проверка возвращает `READY_FOR_OPERATIONAL_APPROVAL`;
-это проверка инструментов, не разрешение произвольных операций и не R00 PASS.
-Манифест данных проходит `runnable`; SCI-R00 ожидаемо отклоняется как
-`draft_not_run`. Валидатор не пересчитывает хеши данных: сверка выполнена отдельно.
+[FACT] Project-local micromamba 2.9.0 отвечает на version probe; real-host
+preflight возвращает `READY_FOR_OPERATIONAL_APPROVAL`, source snapshot present.
+Это readiness gate, не R00 PASS. Strict `environment_full.yml` не solved/installed;
+R00 не пройден, R01 не запускался. Каналы и build pins не подменялись.
 
-Строгое окружение не создано в предусмотренном каталоге и здесь не решалось.
-Исходный `environment_full.yml` задаёт Python 3.10.11, старые Windows-сборки
-и каналы `defaults` / `conda-forge`. Возможность точного разрешения пакетов,
-их актуальная безопасность и применимость условий доступа к `defaults`
-для предполагаемого использования остаются непроверенными. Каналы не подменялись.
+[BOUNDARY] Историческое окружение содержит старые Python/OpenSSL builds и должно
+оставаться изолированной reproduction surface, не production/network runtime.
+Контекст применимости доступа к `defaults` нужно установить до strict solve.
 
-## Игровая линия и сохранение версии
+## Игровая линия
 
-«Шлюз» работает со скриптовым контроллером. [Протокол GATE-P01](../PLAYTEST_PROTOCOL.md)
-остаётся `draft_not_run`: 12 фиксированных назначений, 0 человеческих сессий.
-Автоматические и разработческие прогоны не входят в эти 12.
+[FACT] GATE-P01 v0.1 подготовлен до данных: 12 fixed assignments, 0 human sessions.
+Автотесты и developer checks не являются playtest evidence.
 
-[Сборка пилота](../PILOT_BUILD.md) теперь использует формат v2 с 55 файлами.
-Прежний архив v1 сохранён и повторно проверен по внешнему SHA-256.
-Новая сборка предназначена для `experiments/results/gate-p01-build-v2.zip`;
-её точный хеш и результаты проверки извлечённой копии хранятся **вне архива**
-в `experiments/results/gate-p01-build-v2.verification.json`.
-Сам упаковщик тесты не запускает; отсутствие этой квитанции означает, что
-проверка конкретного архива ещё не подтверждена. Архивы локальные, вне Git.
+[FACT] `gate-p01-build-v2.zip` имеет SHA-256
+`f70981ac197203ad21effcf6e9ba3ab4c620a3df72a9b1315ee8abf2ae91ae2a`,
+55 payload files и integrity PASS. Fresh comparison показал 55/55 payload hashes
+равными clean `c46d814...`. Это фиксированный pilot snapshot, даже если ветка позже
+получит docs/CI hardening commits.
 
-## Граница вывода
+[BOUNDARY] v2 — facilitator/developer archive: в нём есть source и spoiler-bearing
+ADR. Участнику его не выдавать. Self-run/remote pilot требует отдельного sanitized
+participant package или считается нарушением blinding.
+
+## Инженерная поверхность
+
+[FACT] Терминальный MUSCA runtime остаётся stdlib-only Python prototype: внешний LLM,
+connectome backend и biological dynamics в игровой runtime не подключены.
+
+[FACT] На текущем Windows host Unity/UnityHub, Blender и `game-dev` CLI не обнаружены;
+MUSCA не содержит Unity project markers. Поэтому Unity/3D — будущий implementation
+gate, а не уже существующая часть проекта.
+
+[FACT] CI использует только `contents: read`. В этом hardening diff official GitHub
+Actions переводятся с mutable major tags на full immutable commit SHAs и добавляется
+CI self-test pilot bundle tooling. Этот diff должен получить собственный CI read-back.
+
+## Текущие границы вывода
 
 | Поверхность | Состояние |
 | --- | --- |
-| Локальный код и тесты | PASS, 105 тестов |
-| Опубликованный CI текущего HEAD | FAIL; новый локальный diff ещё не опубликован |
-| Происхождение четырёх файлов Shiu/v630 | PASS, независимое сопоставление байтов с upstream |
-| Строгое научное окружение | NOT SOLVED |
+| Python prototype / tests | PASS на verified `c46d814...` |
+| Exact c46 GitHub CI | PASS, push #22 + PR #23 |
+| Independent PR review | NOT DONE |
+| Pilot build v2 bytes | PASS, 55/55 = c46 payload |
+| Human GATE-P01 | NOT RUN, 0 sessions |
+| Shiu source/data provenance | PASS |
+| Strict Shiu environment | NOT SOLVED |
 | SCI-R00 / SCI-R01 | NOT PASSED / NOT RUN |
-| Превосходство биологической топологии | UNKNOWN |
-| Интерес GATE-P01 для людей | UNKNOWN, пилот NOT RUN |
-| Linux/macOS и другой Windows-хост | UNVERIFIED |
-| Слияние / развёртывание | NOT DONE |
+| Topology advantage | UNKNOWN |
+| Unity/3D implementation | NOT STARTED |
+| Merge / deployment | NOT DONE |
 
-## Следующие три действия
+## Следующие gates
 
-1. После отдельного решения о публикации отправить проверенный локальный diff
-   на ревью и получить CI для его точного commit; текущий красный CI не обходить.
-2. Провести GATE-P01 по сохранённому снимку и протоколу; фиксировать отказы,
-   сбои и пропуски, не заменяя их успешными попытками.
-3. Отдельно уточнить условия доступа к каналам строгого окружения и выполнить
-   SCI-R00 по [плану воспроизведения](../research/SCI_R00_R01_REPRO_PLAN.md).
-   При несовместимости сохранить ошибку, не подменять окружение молча.
+1. Получить CI для hardening commit и независимый review draft PR #1.
+2. Провести facilitator-owned GATE-P01 по frozen v2 snapshot; не раздавать source ZIP.
+3. Отдельно разрешить repository-access premise и выполнить strict R00; failure
+   сохранить как результат, а compatibility lineage именовать отдельно.
+4. Только после продуктового или научного discriminating signal принимать ADR о Unity
+   shell / embodied backend. Shiu reproduction baseline не наследуется автоматически.
 
-∆ — исправлены четыре дефекта и согласован текущий статус документов.
-D — 105 тестов двумя путями запуска, GitHub read-back, хеши исходных файлов.
-Ω — подтверждена локальная инженерная проверка; научная и игровая ценность неизвестны.
-Λ — вывод меняется после нового CI, строгого воспроизведения или реального пилота.
+∆ — mutable status отделён от исторических receipts; claim boundaries уточнены.
+D — fresh GitHub/DC read-back, 105 tests, manifest gates, artifact hash comparison.
+Ω — высокая для перечисленных инженерных фактов; science/product value UNKNOWN.
+Λ — пересмотреть при новом HEAD/CI, review, первой human session или R00/R01 result.
