@@ -1,0 +1,14 @@
+{
+    "status": "PASS",
+    "unityVersion": "6000.6.1f1",
+    "scene": "Assets/MUSCA/Scenes/GateLab.unity",
+    "rootObjects": 6,
+    "missingScripts": 0,
+    "cameraFov": 72.0,
+    "playerEyeHeight": 1.6799999475479126,
+    "amberX": -4.099999904632568,
+    "cobaltX": 4.099999904632568,
+    "stationZ": -7.199999809265137,
+    "buildSceneCount": 1,
+    "findings": []
+}

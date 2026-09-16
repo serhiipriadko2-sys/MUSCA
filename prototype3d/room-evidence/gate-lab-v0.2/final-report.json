@@ -1,0 +1,20 @@
+{
+  "schema": "musca.room-final-report.v1",
+  "room_id": "gate-lab-v0.2",
+  "delivery_stage": "function_ready_for_human_approval",
+  "status": "READY_FOR_HUMAN_FUNCTION_APPROVAL",
+  "function_gate": "interactive browser + Unity standalone QA complete; explicit human layout approval pending",
+  "form_gate": "BLOCKED_PENDING_FUNCTION_APPROVAL",
+  "runtime_gate": "FUNCTION_RUNTIME_VERIFIED_NOT_APPROVED",
+  "paid_assets": 0,
+  "external_mesh_assets": 0,
+  "runtime_dependency": "Unity 6000.6.1f1 authoritative prototype; three@0.186.0 browser reference",
+  "known_limits": [
+    "procedural graybox materials only",
+    "desktop first-person keyboard/mouse only",
+    "no final Blender-authored shell or props",
+    "no character animation or final sound design",
+    "no GATE-P01 v0.1 participant use",
+    "Function human approval pending; Form and Runtime approval not granted"
+  ]
+}

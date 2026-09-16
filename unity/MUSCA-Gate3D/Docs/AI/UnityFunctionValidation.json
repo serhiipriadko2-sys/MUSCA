@@ -1,0 +1,110 @@
+{
+  "schema": "musca.unity-function-validation.v1",
+  "date": "2026-09-16",
+  "repo_head_before_commit": "65a1e892cbef1dcef816efaed7b0c5a1e28c72c7",
+  "branch": "feature/3d-gate-prototype",
+  "unity_version": "6000.6.1f1",
+  "status": "PASS_READY_FOR_HUMAN_FUNCTION_APPROVAL",
+  "claim_boundary": "Function/runtime engineering evidence only; not Form approval, not GATE-P01 evidence, not release readiness.",
+  "scene_validation": {
+    "status": "PASS",
+    "unityVersion": "6000.6.1f1",
+    "scene": "Assets/MUSCA/Scenes/GateLab.unity",
+    "rootObjects": 6,
+    "missingScripts": 0,
+    "cameraFov": 72.0,
+    "playerEyeHeight": 1.6799999475479126,
+    "amberX": -4.099999904632568,
+    "cobaltX": 4.099999904632568,
+    "stationZ": -7.199999809265137,
+    "buildSceneCount": 1,
+    "findings": []
+  },
+  "editmode_tests": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0,
+    "result": "Passed"
+  },
+  "windows_build": {
+    "result": "Succeeded",
+    "errors": 0,
+    "warnings": 0,
+    "reported_total_bytes": 157369479
+  },
+  "standalone_runtime": {
+    "spawn": "PASS",
+    "station_interaction": "PASS",
+    "physical_gate_open": "PASS",
+    "hidden_answer_rendered": false
+  },
+  "browser_oracle": {
+    "tests": "8/8 PASS",
+    "npm_audit": "0 vulnerabilities",
+    "room_validator": "PASS",
+    "human_approval": null
+  },
+  "python_regression": "113/113 PASS",
+  "pilot_bundle_regression": {
+    "integrity": "PASS",
+    "payload_files": 55
+  },
+  "known_warning": "Unity emitted Curl error 35 on external certificate checks during Editor shutdown; local import/tests/build/runtime were unaffected.",
+  "artifact": {
+    "path": "E:\\MUSCA_RESEARCH\\game-builds\\MUSCA-Gate3D-v0.2-function-dev.zip",
+    "bytes": 64223706,
+    "sha256": "146501d277e2060bbbdb3a794ae7395a6aedcca8608f7305a72582d945531cba"
+  },
+  "evidence_files": [
+    {
+      "path": "C:\\github\\MUSCA\\unity\\MUSCA-Gate3D\\Assets\\MUSCA\\Scenes\\GateLab.unity",
+      "bytes": 243452,
+      "sha256": "56add358798b6f10211655a60b8ef87c0fc436c95356c9e8af68802c066d2900"
+    },
+    {
+      "path": "C:\\github\\MUSCA\\unity\\MUSCA-Gate3D\\Assets\\MUSCA\\Editor\\GateSceneBuilder.cs",
+      "bytes": 19638,
+      "sha256": "b98650a7536483a34ad0b45a5992ebc808542a4ae382dcfa423b99e41661a443"
+    },
+    {
+      "path": "C:\\github\\MUSCA\\unity\\MUSCA-Gate3D\\Assets\\MUSCA\\Runtime\\GateDomain.cs",
+      "bytes": 6526,
+      "sha256": "432cfbe96d8695d1cfc9f151f5e576a9165ac0ca675ac225e2a0226398eb5745"
+    },
+    {
+      "path": "C:\\github\\MUSCA\\unity\\MUSCA-Gate3D\\Assets\\MUSCA\\Runtime\\GateHud.cs",
+      "bytes": 13916,
+      "sha256": "3a41e9ee7201146dc0cb3bf87dc064fbc1c262033db4ac283c840c21251f8152"
+    },
+    {
+      "path": "C:\\github\\MUSCA\\unity\\MUSCA-Gate3D\\Docs\\AI\\UnitySceneValidation.json",
+      "bytes": 371,
+      "sha256": "362e7404b6b28357177a602e8d5f11d6fd8a4727ace265ce10641c5e59132747"
+    },
+    {
+      "path": "C:\\github\\MUSCA\\unity\\MUSCA-Gate3D\\Docs\\AI\\RuntimeQA\\pass5-spawn.png",
+      "bytes": 307955,
+      "sha256": "704762ac67d742eeb23c8b7b8ea4fb515ca6e6b6d3aa100ac588ec9bc10cb786"
+    },
+    {
+      "path": "C:\\github\\MUSCA\\unity\\MUSCA-Gate3D\\Docs\\AI\\RuntimeQA\\pass5-amber.png",
+      "bytes": 441884,
+      "sha256": "43498f4e1fad08e6957b750e2b506c00dea570e5d2ca5968506a59cd39db1d30"
+    },
+    {
+      "path": "C:\\github\\MUSCA\\unity\\MUSCA-Gate3D\\Docs\\AI\\RuntimeQA\\pass5-openedworld.png",
+      "bytes": 491180,
+      "sha256": "f72a9805b13b605f85a52a2c43344a385390ddb444d1f5121d7941ff4cbd4769"
+    },
+    {
+      "path": "C:\\github\\MUSCA\\prototype3d\\package-lock.json",
+      "bytes": 633,
+      "sha256": "2df636b69dcacc59388e7836c44371c47f1ac175330642d2271719fd944466ee"
+    },
+    {
+      "path": "C:\\github\\MUSCA\\prototype3d\\room-evidence\\gate-lab-v0.2\\room-layout.json",
+      "bytes": 1230,
+      "sha256": "0a7475b76059bc767ff497bb8970944b035b388c122e1b6745d64da047a8075b"
+    }
+  ]
+}

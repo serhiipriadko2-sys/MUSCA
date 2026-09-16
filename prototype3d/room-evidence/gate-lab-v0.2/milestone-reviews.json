@@ -1,0 +1,34 @@
+{
+  "schema": "musca.room-reviews.v1",
+  "room_id": "gate-lab-v0.2",
+  "reviews": {
+    "function": {
+      "status": "ready_for_human_approval",
+      "human_approval": null,
+      "purpose_defined": true,
+      "runtime_surface_defined": true,
+      "bounds_defined": true,
+      "hero_reserved": true,
+      "circulation_defined": true,
+      "performance_budget_defined": true,
+      "paid_service_budget_defined": true,
+      "opening_schedule_complete": true,
+      "interactive_graybox_required_before_approval": true,
+      "browser_graybox_verified": true,
+      "unity_standalone_verified": true,
+      "unity_version": "6000.6.1f1",
+      "scene_validation": "PASS",
+      "editmode_tests": "7/7 PASS",
+      "windows_build": "PASS",
+      "physical_gate_response_verified": true
+    },
+    "form": {
+      "status": "blocked_pending_function_approval",
+      "human_approval": null
+    },
+    "runtime": {
+      "status": "unity_function_runtime_verified",
+      "human_approval": null
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "musca.opening-schedule.v1",
+  "room_id": "gate-lab-v0.2",
+  "openings": [
+    {
+      "id": "arrival-hall",
+      "type": "door",
+      "wall": "south",
+      "width_m": 4.0,
+      "height_m": 3.2,
+      "threshold_m": 0,
+      "destination": "gate-lab main axis",
+      "state": "open"
+    },
+    {
+      "id": "gate-a1-opening",
+      "type": "door",
+      "wall": "north",
+      "width_m": 4.5,
+      "height_m": 3.5,
+      "threshold_m": 0,
+      "destination": "sector beyond graybox",
+      "state": "locked_until_world_accepts_neutral_reagent"
+    }
+  ]
+}

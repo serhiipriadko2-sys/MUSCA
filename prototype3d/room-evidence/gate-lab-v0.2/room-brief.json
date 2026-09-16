@@ -1,0 +1,24 @@
+{
+  "schema": "musca.room-brief.v1",
+  "room_id": "gate-lab-v0.2",
+  "stage": "function_graybox",
+  "purpose": "Teach the MUSCA evidence loop through a navigable 3D gate room.",
+  "runtime_surface": "local browser WebGL",
+  "bounds_m": {"width": 16, "depth": 30, "height": 5.2},
+  "primary_arrival": {
+    "type": "open_hallway",
+    "clear_width_m": 4.0,
+    "visible_destination": "GATE A-1"
+  },
+  "hero_object": "gate-a1",
+  "circulation": {
+    "primary_axis": "spawn z=12 to gate z=-13.25",
+    "minimum_clear_path_m": 3.4,
+    "decision_bay": "two symmetric reagent stations at z=-7.2"
+  },
+  "production_camera": {"mode": "first_person", "eye_height_m": 1.68, "fov_deg": 72},
+  "performance_budget": {"target_fps": 60, "max_draw_calls": 200, "max_triangles": 150000},
+  "paid_service_budget": {"credits": 0, "currency": "none"},
+  "symmetry": {"mode": "bilateral", "axis": "x=0", "exceptions": ["MUSCA companion follows player"]},
+  "claim_boundary": "Function graybox only; not Form approval, final art, GATE-P01 v0.1, or neuroscience evidence."
+}

@@ -1,0 +1,14 @@
+{
+  "name": "MUSCA.Gate3D.Editor",
+  "rootNamespace": "MUSCA.Gate3D.Editor",
+  "references": ["MUSCA.Gate3D.Runtime"],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

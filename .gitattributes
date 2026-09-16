@@ -1,0 +1,6 @@
+# Unity serializes empty YAML values with a trailing space by design.
+# Keep authored source under normal Git whitespace checks; suppress only engine-serialized assets.
+unity/MUSCA-Gate3D/**/*.meta -whitespace
+unity/MUSCA-Gate3D/**/*.mat -whitespace
+unity/MUSCA-Gate3D/**/*.unity -whitespace
+unity/MUSCA-Gate3D/**/*.asset -whitespace

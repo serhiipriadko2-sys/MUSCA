@@ -1,0 +1,15 @@
+{
+  "name": "MUSCA.Gate3D.Tests",
+  "rootNamespace": "MUSCA.Gate3D.Tests",
+  "references": ["MUSCA.Gate3D.Runtime"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
