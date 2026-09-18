@@ -157,19 +157,30 @@ MMO/multiplayer не входят в активный roadmap.
 py -3.14 scripts/validate_manifests.py --level schema data/manifests/SCI-DATA-SHIU-FW630.candidate.json experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.run.json experiments/manifests/gate-p01.json
 ```
 
-Перед реальным запуском используется более строгий gate:
+Перед R01 execution использовался более строгий local gate:
 
 ```powershell
 py -3.14 scripts/validate_manifests.py --level runnable --repo-root . experiments/manifests/SCI-R01-SHIU-SUGAR.run.json
 ```
 
 Исторический `SCI-R01-SHIU-SUGAR.candidate.json` остаётся замороженным preregistration
-candidate со статусом `draft_not_run`. После operational SCI-R00 PASS создан отдельный
-`SCI-R01-SHIU-SUGAR.run.json`: только он может проходить local runnable-gate перед запуском.
-`schema PASS` подтверждает форму документа, а `runnable PASS` на конкретном research-host
-подтверждает лишь готовность входов/метаданных, не результат эксперимента.
+candidate со статусом `draft_not_run`. После operational SCI-R00 PASS был создан отдельный
+frozen `SCI-R01-SHIU-SUGAR.run.json`; его `ready_to_run` фиксирует pre-execution envelope
+и не переписывается после просмотра результата. `schema PASS` подтверждает форму документа,
+а `runnable PASS` на конкретном research-host подтверждает лишь готовность входов/метаданных.
 
 Runnable дополнительно требует существующий local_storage; not_applicable допускается только с явной причиной.
+
+[FACT local] SCI-R01 strict tutorial sugar execution завершён как engineering **PASS**:
+30/30 trials, `406978` spike rows, `430` active neurons. Output SHA-256:
+`657f4ae3d54f90bb0c2a5f13db4156449fec0b24cff74efb84afe03035e6c9e2`.
+Execution receipt SHA-256:
+`38d7ed8bf191fce5f0495b8e3561483f5fcbe2da4a3140bcad069e7cdb8eec5d`.
+Independent artifact verification also PASS; details are in
+`docs/status/2026-09-19-r01-execution.md`.
+
+This is **not** a Nature-figure reproduction, biological validation, topology-superiority
+result, commercial clearance or game-value result. R02/topology controls remain separate gates.
 
 ## SCI-R00 read-only preflight
 

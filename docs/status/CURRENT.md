@@ -115,8 +115,19 @@ research host. Operational receipt SHA-256:
 `e4770a9b7493fb5dfee4a7ef9d0ff3a62ca8da9126ed5bcf6c4465470f9135b0`.
 The historical R00 preregistration candidate remains unchanged.
 
-[FACT] R01 has a separate frozen execution manifest candidate for local runnable
-validation; the 30-trial sugar simulation has not yet run. Topology advantage remains UNKNOWN.
+[FACT local] SCI-R01 strict tutorial sugar execution **PASSED** from frozen
+`SCI-R01-SHIU-SUGAR.run.json` at commit
+`583e0874c1d2fa0cc70c21e6f56d698bce0bc988`: 30/30 trials completed,
+`406978` spike rows, `430` active neurons. Output SHA-256:
+`657f4ae3d54f90bb0c2a5f13db4156449fec0b24cff74efb84afe03035e6c9e2`.
+Execution receipt SHA-256:
+`38d7ed8bf191fce5f0495b8e3561483f5fcbe2da4a3140bcad069e7cdb8eec5d`.
+Independent artifact verification: PASS, SHA-256
+`d932e6b31d4e1519dff37f31677f59bc411358276d44671ab46853e5a774f7bf`.
+
+[BOUNDARY] R01 PASS establishes local executable/structural validity only.
+R02 is NOT RUN; no Nature-figure reproduction, biological validation, topology
+advantage, commercial clearance or game-value claim follows. Topology advantage remains UNKNOWN.
 
 ## Current gates
 
@@ -132,7 +143,7 @@ validation; the 30-trial sugar simulation has not yet run. Topology advantage re
 | Final production art | NOT APPROVED |
 | Local Codex Runtime | SEPARATE / NOT ACTIVE |
 | GATE-P01 v0.1 | 1/12, no aggregate verdict |
-| SCI-R00 / R01 | PASS (strict env/data smoke, local host) / NOT RUN |
+| SCI-R00 / R01 | PASS (strict env/data smoke) / PASS (30-trial execution gate only) |
 | Release/deployment | NOT CLAIMED |
 
 ## Следующие gates
@@ -141,9 +152,9 @@ validation; the 30-trial sugar simulation has not yet run. Topology advantage re
    prototype и отдельный human runtime/gameplay-feel review.
 2. Не повышать prototype Form approval до production-art approval без нового explicit decision.
 3. Codex Runtime продолжать только в dedicated worktrees по собственным P4/P6 gates.
-4. GATE-P01 и scientific R01 продолжать как независимые evidence lanes; R00 PASS не повышать до biological-result claim.
+4. GATE-P01 продолжать независимо; science после R01 двигать только через новый preregistered R02 либо matched-control topology experiment. R01 PASS не повышать до biological-result claim.
 
-∆ — SCI-R00 strict environment/data smoke operationally PASSED; frozen R01 run-manifest prepared, R01 not run.
-D — R00 receipt read-back → lifecycle sync → separate execution manifest → schema/runnable gate → 128 tests.
-Ω — высокая для R00 local execution и repository metadata; R01 result и topology advantage остаются UNKNOWN.
-Λ — пересмотреть после R01 execution, remote CI/PR verification или если R00 receipt/hash/strict-env audit перестанет проходить.
+∆ — SCI-R00 и SCI-R01 engineering gates локально PASSED; R02 и topology comparison не запускались.
+D — frozen R01 manifest → 30-trial strict-env run → output/receipt hashes → independent artifact verification.
+Ω — высокая для local executability/provenance R00-R01; topology advantage и biological-result reproduction остаются UNKNOWN.
+Λ — пересмотреть после preregistered R02, matched-control topology experiment, remote CI/PR verification или artifact/hash drift.
