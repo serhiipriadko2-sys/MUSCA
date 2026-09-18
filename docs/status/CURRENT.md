@@ -1,71 +1,96 @@
 # MUSCA — текущий статус
 
-Дата проверки: 2026-09-16. Это оперативная сводка; для HEAD/CI/PR перед решением всегда делать fresh connector read-back.
+Дата проверки: 2026-09-18. Это оперативная сводка; исторические receipts не переписываются.
+Для HEAD, CI, PR и локального рабочего дерева перед новым решением делать fresh read-back.
 
-## Репозиторий и инженерная линия
+## Репозиторий и интеграция
 
-[FACT] Последний substantive 3D snapshot: `bdb8935989c486c46ce2a293051d7be026c93ec2` на `feature/3d-gate-prototype`.
+[FACT @ GitHub] `main` = `200f3f85a9a9468ca49a24ad62de9f98e3085d46`.
 
-[FACT @ GitHub] Для этого SHA push CI #29 и PR CI #30 завершились SUCCESS. В обоих runs зелёные Windows/Python 3.14.6 и Browser 3D Function/Node 24.18.1 jobs.
+[FACT @ GitHub] PR #1–#5 merged. В `main` теперь находятся foundation, local visual
+interface, Unity Gate3D Function prototype, Blender Form v0.1 candidate и ADR-0012
+с принятым single-player souls-like направлением.
 
-[FACT] Draft PR #3 открыт в `feature/visual-interface`, mergeable, не merged. `main` не затронут.
+[FACT] PR #5 exact head `d07d609...` прошёл свежий remote CI:
+Windows/Python 3.14.6 SUCCESS и Browser 3D Function/Node 24.18.1 SUCCESS.
 
-[FACT] Python baseline: **113/113 tests PASS**. Frozen pilot packager freeze+verify: PASS, 55 payload files.
+[BOUNDARY] Merge в `main` означает интеграцию проверенных артефактов и решений,
+но не означает release, deployment, scientific reproduction или human playtest success.
 
-[FACT] Browser Function oracle: Three.js `0.186.0`, 8/8 state tests PASS, `npm audit` 0 vulnerabilities, room validator PASS.
+## Игровое направление
 
-## Unity Gate3D v0.2
+[FACT] Активная продуктовая цель: **single-player third-person action-RPG / souls-like**.
+`Elden Ring` — ориентир по ощущению исследования, напряжению боя и ритму встреч,
+а не обязательство по размеру мира, количеству контента или копированию механик.
 
-[FACT] Unity `6000.6.1f1` и Blender `5.2.0 LTS` подтверждены на authorized Windows host.
+[FACT] MMO, co-op, PvP, matchmaking, persistent-online world, server economy и
+live-service infrastructure исключены из активного roadmap. Их возврат требует нового ADR.
 
-[FACT] `unity/MUSCA-Gate3D` существует как реальный Unity project. GateLab scene создаётся Editor-builder-ом, а не ручным YAML.
+[FACT] Ядро HUMAN ↔ ISKRA ↔ Bridge ↔ MUSCA сохранено: HUMAN принимает значимые решения,
+ISKRA интерпретирует наблюдения и гипотезы, Bridge остаётся typed/testable boundary,
+MUSCA остаётся отдельным perception/sensorimotor участником; прямого authoritative
+frame-level motor control со стороны ISKRA/LLM нет.
+## Gate3D / Blender Form
 
-[FACT] Unity scene validation: PASS; missing scripts 0; camera FOV 72°; eye height 1.68 m; AMBER/COBALT x=±4.1 m, z=-7.2 m; one build scene.
-[FACT] Unity Test Framework EditMode: **7/7 PASS**. Windows Development build: Succeeded, zero build errors. Standalone player production-camera QA: PASS.
+[FACT] Function layout `gate-lab-v0.2` имеет explicit human approval от 2026-09-16.
 
-[FACT] Player can navigate with WASD/mouse, inspect mirrored reagent stations, use contextual `Q` scan / `E` choice, and physically open the 4.5 m gate to visible Sector B. Hidden answer is not rendered.
+[FACT] Blender `GateLab_Form_v0.1` находится в `main` как reproducible Form candidate.
+Static Blender artifact validation PASS; checked artifacts = 7.
 
-[FACT] Function lifecycle = `READY_FOR_HUMAN_FUNCTION_APPROVAL`; `human_approval=null`. Blender Form = `BLOCKED_PENDING_FUNCTION_APPROVAL`.
+[FACT] Form lifecycle = `ready_for_human_approval`; Form `human_approval=null`.
+Unity Form integration для этого committed v0.1 lifecycle = `not_started`.
 
-[BOUNDARY] GitHub Actions currently does not execute Unity Editor. Unity engine evidence is local authorized-host evidence; remote CI verifies source/oracle/contracts only.
+[BOUNDARY] Наличие Form candidate в `main` не является human Form approval,
+final art approval, runtime approval или release claim.
 
-[WARN] Unity external TLS checks emit recurring `Curl error 35` during Editor shutdown. Local UPM/import/tests/build/runtime work; external package/network reliability is not claimed clean.
+[FACT local] Основной рабочий каталог `C:\github\MUSCA` содержит более новое
+незакоммиченное продолжение v0.3/v0.31 и Unity integration experiments.
+Оно не является состоянием `main` и не должно продвигаться без отдельного audit/gate.
 
 ## Игровой эксперимент
 
-[FACT] GATE-P01 v0.1 remains `IN PROGRESS`, 1/12 completed on frozen terminal snapshot SHA-256 `f70981ac197203ad21effcf6e9ba3ab4c620a3df72a9b1315ee8abf2ae91ae2a`.
+[FACT] GATE-P01 v0.1 остаётся `IN PROGRESS`: 1/12 human sessions completed
+на frozen terminal snapshot. Aggregate verdict не разрешён до preregistered analysis.
 
-[BOUNDARY] Gate3D v0.2 is **not** substituted into remaining GATE-P01 v0.1 participants. A visual/3D human test requires a new preregistered version.
+[BOUNDARY] Gate3D/Form/souls-like работа не подменяет оставшиеся сессии GATE-P01 v0.1.
+Новый souls-like combat/exploration slice требует отдельного playtest protocol/version.
 
 ## Научная линия
 
-[FACT] ADR-0005 remains accepted only for strict Shiu/FlyWire-v630 reproduction baseline. Exact source/data provenance is PASS.
+[FACT] ADR-0005 принят только для strict Shiu/FlyWire-v630 reproduction baseline.
+Exact source/data provenance PASS.
 
-[FACT] Strict historical environment remains NOT SOLVED. SCI-R00 NOT PASSED; SCI-R01 NOT RUN; topology advantage UNKNOWN.
-
+[FACT] Strict historical environment не завершён; SCI-R00 NOT PASSED; SCI-R01 NOT RUN;
+topology advantage UNKNOWN. Game-direction merge не меняет эти scientific claims.
 ## Current gates
 
 | Surface | State |
 | --- | --- |
-| Python/Tk baseline | PASS, 113/113 |
-| Browser Function oracle | PASS, 8/8 |
-| Unity Gate3D local runtime | PASS engineering verification |
-| Unity remote engine CI | NOT IMPLEMENTED |
-| Gate3D Function human approval | PENDING |
-| Blender Form composition | BLOCKED pending Function approval |
+| `main` consolidation | PASS: PR #1–#5 merged |
+| Python baseline | PASS: 113/113 local verification on integration lineage |
+| Browser Function oracle | PASS: 8/8 + room validation |
+| PR #5 remote CI | PASS: Windows + Browser jobs |
+| Gate3D Function human approval | APPROVED |
+| Blender Form v0.1 | READY_FOR_HUMAN_FORM_APPROVAL |
+| Blender Form human approval | PENDING / null |
+| New local v0.3/v0.31 work | UNCOMMITTED / not main |
+| Solo souls-like direction | ACCEPTED / documented |
 | GATE-P01 v0.1 | 1/12, no aggregate verdict |
 | SCI-R00 / R01 | NOT PASSED / NOT RUN |
-| PR #3 | draft / mergeable / unmerged |
-| main/deployment | unchanged / NOT DONE |
+| Release/deployment | NOT CLAIMED |
+
 ## Следующие gates
 
-1. Получить explicit human Function approval текущего `gate-lab-v0.2` layout либо зафиксировать конкретные правки Function.
-2. Только после approval перейти в Blender 5.2 LTS Form: authored shell/props, openings, support/contact, review renders, затем обратно в Unity runtime.
-3. Не менять frozen GATE-P01 v0.1; продолжать его отдельно по preregistered assignments.
-4. На research lane отдельно решить strict environment/access premise и выполнить R00.
-5. Independent code/visual review PR #3 остаётся желательным до merge.
+1. Провести явный human review Form-кандидата: approve либо reject с конкретными правками.
+2. До любого продвижения v0.3/v0.31 сделать lineage inventory незакоммиченных файлов,
+   отделить Form/Unity work от Codex/tooling work и сформировать reviewable commits.
+3. Создать отдельный souls-like combat/exploration slice и новый playtest protocol;
+   не менять frozen GATE-P01 v0.1.
+4. Продолжать GATE-P01 и scientific R00 как независимые evidence lanes.
+5. Remote branch cleanup считать housekeeping; он не должен удалять ветку с текущей
+   незакоммиченной работой до её безопасной фиксации.
 
-∆ — 3D surface перешла из `NOT STARTED` в verified Unity Function prototype.
-D — browser oracle → Unity scene builder → 7/7 tests → standalone build/captures → push #29 + PR #30 green.
-Ω — высокая для local Windows engineering execution; human spatial usability, final Form art and science remain unvalidated.
-Λ — пересмотреть после Function approval/rejection, visual human test, new Unity/network evidence or R00 result.
+∆ — `main` стал фактической интеграционной базой проекта; игровой курс обновлён на solo souls-like.
+D — PR #1→#5 merged последовательно, fresh CI PR #5 PASS, lifecycle boundaries сохранены.
+Ω — высокая для repo/game-direction состояния; Form approval, local v0.3 и science остаются незавершёнными.
+Λ — пересмотреть после Form review, фиксации local v0.3 lineage, нового combat playtest или R00 result.
