@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - docs/musca-foundations
+      - 'feature/**'
   pull_request:
     branches:
       - main
@@ -29,6 +30,9 @@ jobs:
 
       - name: Show interpreter
         run: python --version
+
+      - name: Check Tk capability
+        run: python -c "import tkinter as tk; print('Tk', tk.TkVersion)"
 
       - name: Run unit tests
         run: python -m unittest discover -s tests -q
