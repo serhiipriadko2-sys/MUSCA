@@ -1,0 +1,22 @@
+{
+  "dataset": {
+    "name": "Shiu et al. FlyWire v630 inputs bundled with Drosophila_brain_model",
+    "organism": "Drosophila melanogaster",
+    "sex": "female (adult brain connectome lineage used by the cited FlyWire whole-brain dataset)",
+    "anatomical_scope": "adult brain / central-brain connectome inputs used by the pinned Shiu computational model; exact upstream inclusion/exclusion semantics must be preserved from source",
+    "release": "FlyWire materialization v630 as bundled by philshiu/Drosophila_brain_model",
+    "source": "philshiu/Drosophila_brain_model@91bdd1e7dcf193f3e7ca5a8933497fcef63b7960",
+    "retrieved_at": "2026-09-16",
+    "citation": "Shiu PK et al. A Drosophila computational brain model reveals sensorimotor processing. Nature 634, 210-219 (2024). doi:10.1038/s41586-024-07763-9",
+    "license": "UNRESOLVED_FOR_COMMERCIAL_DISTRIBUTION: current FlyWire public-release guideline states CC-BY-NC-4.0; upstream code repository is MIT. Confirm file-level rights for bundled v630 data before redistribution or commercial derivative use.",
+    "content_hash_or_source_snapshot": "git_commit=91bdd1e7dcf193f3e7ca5a8933497fcef63b7960; codeload_archive_sha256=0dc3778bd3b668d8c48d0a98e2ef33e2468335e6cd374f95a37426ce1fe5c4b0; completeness_git_blob=be745f0ce054308df21accc5c4b3883aa38498f9; completeness_sha256=e6b71e17671a9bdb05f55e4bc6774640a1418cb7a05125e0fc994ad40f9bfdfb; connectivity_git_blob=8b4d9531bc0acbda7c2074ae577e6ac9e2fca166; connectivity_sha256=94db8c650533bc36ffa3223f2e62325d5648b8d6bd31c3a4e1c804628c7557b3",
+    "local_storage": "E:\\MUSCA_RESEARCH\\shiu-91bdd1e7\\source-snapshot",
+    "transformations": []
+  },
+  "candidate_status": "retrieved_verified_local",
+  "non_claims": [
+    "Local retrieval and byte/hash verification do not grant redistribution or commercial-use rights.",
+    "No strict dependency environment has been solved by this dataset receipt.",
+    "No newer FlyWire release is silently substituted for v630."
+  ]
+}

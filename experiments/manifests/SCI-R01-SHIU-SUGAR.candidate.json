@@ -1,0 +1,57 @@
+{
+  "experiment": {
+    "id": "SCI-R01-SHIU-SUGAR",
+    "question": "Can the unmodified pinned Shiu et al. whole-brain model execute its tutorial right-hemisphere sugar-stimulation experiment on the local research host and produce a structurally valid 30-trial spike result?",
+    "hypothesis": "The pinned upstream source, original dependency environment and bundled FlyWire-v630 inputs can execute the official tutorial sugar-stimulation path locally without source or scientific-parameter modification.",
+    "falsifier": "The exact pinned source/data cannot be executed under the declared strict environment and resource budget without modifying source, data or scientific parameters, or the produced artifact is unreadable/structurally invalid.",
+    "code_commit": "philshiu/Drosophila_brain_model@91bdd1e7dcf193f3e7ca5a8933497fcef63b7960",
+    "dataset_manifest": "SCI-DATA-SHIU-FW630.candidate.json",
+    "model": "Upstream Brian2 leaky-integrate-and-fire model in model.py; unmodified; strict environment uses environment_full.yml first",
+    "task": "Activate the 21 right-hemisphere sugar-sensing FlyWire neuron IDs from pinned example.ipynb and collect the model's spike output",
+    "controls": [],
+    "fixed_conditions": [
+      "FlyWire v630 bundled inputs",
+      "model.py unchanged",
+      "t_run=1000 ms from pinned model.py",
+      "n_run=30 from pinned model.py",
+      "r_poi=150 Hz from pinned executable model.py for the first tutorial call",
+      "no silenced neurons",
+      "no second excitation class",
+      "record n_proc and platform as execution parameters"
+    ],
+    "train_worlds": [],
+    "validation_worlds": [],
+    "test_worlds": [],
+    "random_seeds": [],
+    "repetitions": 30,
+    "metrics": [
+      "process exit/exception status",
+      "wall time",
+      "peak host RAM if measurable",
+      "output bytes and SHA-256 for artifact integrity",
+      "trial identifiers present",
+      "total spike rows",
+      "number of active neurons",
+      "per-trial spike-count/rate distribution where practical"
+    ],
+    "compute_budget": "R00 environment/data smoke precedes R01. For R01, record wall time/RAM and stop on resource exhaustion; no claim of real-time performance.",
+    "analysis_plan": "Validate provenance and output schema first. Because PoissonInput is stochastic and no explicit upstream seed was observed in the inspected path, report numerical outputs as distributions/observations; do not require exact spike hashes or a preselected exact spike count. R01 only establishes local execution, not figure-level scientific reproduction.",
+    "success_criterion": "All 30 requested trials complete; output is readable and structurally valid; source/data/environment receipts are complete; no source/data/scientific-parameter mutation occurred.",
+    "result_path": "PLANNED: E:\\MUSCA_RESEARCH\\results\\SCI-R01-SHIU-SUGAR",
+    "study_type": "strict_upstream_reproduction_engineering_gate",
+    "trainable_parameters": [],
+    "confounds": [
+      "DRIFT-SHIU-ACTIVATION-FREQ-001: example.ipynb prose says default 200 Hz while pinned model.py defines r_poi=150 Hz",
+      "Upstream model uses stochastic PoissonInput and no explicit seed was observed in the inspected tutorial/model path",
+      "environment.yml asks for NumPy 1.24 while environment_full.yml used for original work pins NumPy 1.22.3",
+      "Changing parallel process count may affect stochastic realization and performance",
+      "This experiment does not compare biological topology against artificial/randomized controls"
+    ],
+    "status": "draft_not_run"
+  },
+  "non_claims": [
+    "This is not a topology-superiority experiment.",
+    "This is not yet a reproduction of a specific Nature figure or behavioural validation.",
+    "No package installation, dataset retrieval or simulation run is asserted."
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "experiment": {
+    "id": "SCI-R00-SHIU-ENV-DATA",
+    "question": "Can the exact pinned Shiu source, bundled FlyWire-v630 inputs and original dependency environment be materialized and smoke-checked without modifying MUSCA runtime or upstream scientific parameters?",
+    "hypothesis": "The pinned upstream source and bundled v630 inputs can be materialized in an isolated strict environment derived from environment_full.yml, with complete provenance and without source/data mutation.",
+    "falsifier": "The exact source/data cannot be materialized or read under the declared strict lineage without silent dependency substitution, source/data mutation or an unrecorded provenance gap.",
+    "code_commit": "philshiu/Drosophila_brain_model@91bdd1e7dcf193f3e7ca5a8933497fcef63b7960",
+    "dataset_manifest": "SCI-DATA-SHIU-FW630.candidate.json",
+    "model": "R00 environment/data smoke for the unmodified upstream Brian2 model; no 30-trial R01 experiment",
+    "task": "Verify exact source state and hashes, solve the original full environment, import dependencies, load v630 inputs and optionally construct the model once under a bounded resource check",
+    "controls": [],
+    "fixed_conditions": [
+      "upstream commit=91bdd1e7dcf193f3e7ca5a8933497fcef63b7960",
+      "environment_full.yml is attempted before any compatibility environment",
+      "FlyWire-v630 bundled completeness/connectivity inputs",
+      "no upstream source edits",
+      "no scientific-parameter edits",
+      "MUSCA runtime remains unchanged",
+      "exact-commit source may be retrieved through GitHub codeload only when key file Git blob IDs match the pinned commit"
+    ],
+    "train_worlds": [],
+    "validation_worlds": [],
+    "test_worlds": [],
+    "random_seeds": [],
+    "repetitions": 1,
+    "metrics": [
+      "source commit verification",
+      "required-file presence and SHA-256 receipt",
+      "strict environment solve/import status",
+      "v630 data-load status",
+      "model-construction wall time if attempted",
+      "peak host RAM if measurable",
+      "failure class and stderr when blocked"
+    ],
+    "compute_budget": "Read-only preflight first. Strict materialization uses isolated E:\\MUSCA_RESEARCH storage; preserve failure instead of silently substituting a modern environment.",
+    "analysis_plan": "Classify each gate independently: governance, source pin, host tooling, storage, strict environment, data load and optional model construction. Preserve the first blocking condition and all provenance receipts. Do not treat compatibility execution as strict R00.",
+    "success_criterion": "Exact upstream commit observed; required files hashed locally; original/full environment solved and imports succeed; v630 inputs load; no source/data/scientific-parameter mutation; resource use remains within the declared operational budget.",
+    "result_path": "PLANNED: E:\\MUSCA_RESEARCH\\results\\SCI-R00-SHIU-ENV-DATA",
+    "study_type": "strict_upstream_environment_data_reproduction_gate",
+    "trainable_parameters": [],
+    "confounds": [
+      "environment_full.yml contains old Windows-specific conda build pins",
+      "preregistration host initially lacked a solver; portable micromamba 2.9.0 was later materialized project-locally with SHA-256 receipt",
+      "pre-existing Python 3.10 is not required if a strict conda-compatible solver can materialize it",
+      "successful environment/data materialization does not reproduce a published biological result",
+      "dataset licensing and game-commercial rights remain separate from local reproduction engineering"
+    ],
+    "status": "draft_not_run"
+  },
+  "non_claims": [
+    "This manifest does not authorize installation, download or simulation execution.",
+    "This is not R01 and does not execute the 30-trial sugar experiment.",
+    "This is not a topology-superiority or game-value experiment."
+  ]
+}

@@ -1,0 +1,17 @@
+# Local secrets; examples must contain fake placeholders only.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Raw datasets and run outputs stay outside ordinary Git tracking.
+# Small, explicitly reviewed fixtures and receipts may live elsewhere.
+/data/raw/
+/data/processed/
+/experiments/results/
+
+# Local Python cache/environment for the dependency-free prototype.
+__pycache__/
+*.py[cod]
+.venv/

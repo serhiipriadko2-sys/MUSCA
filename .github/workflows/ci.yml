@@ -1,0 +1,58 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - docs/musca-foundations
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-python-314:
+    name: Windows / Python 3.14.6
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python 3.14.6
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14.6'
+
+      - name: Show interpreter
+        run: python --version
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -q
+
+      - name: Validate registered manifest schemas
+        run: >-
+          python scripts/validate_manifests.py --level schema
+          data/manifests/SCI-DATA-SHIU-FW630.candidate.json
+          experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json
+          experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json
+          experiments/manifests/gate-p01.json
+
+      - name: Assess SCI-R00 preflight remains solver-gated
+        run: python scripts/research_r00_preflight.py --repo-root . --require-blocker host_solver
+
+      - name: Compile sources
+        run: python -m compileall -q musca scripts tests
+
+      - name: Verify pilot bundle tooling
+        shell: pwsh
+        run: |
+          $bundle = Join-Path $env:RUNNER_TEMP 'gate-p01-ci.zip'
+          python scripts/pilot_bundle.py freeze --output $bundle
+          python scripts/pilot_bundle.py verify $bundle
+
+      - name: Smoke deterministic demo
+        run: python -m musca --demo --mode light_chemical --json
