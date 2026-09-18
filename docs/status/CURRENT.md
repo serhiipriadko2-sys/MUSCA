@@ -5,13 +5,13 @@
 
 ## Репозиторий и интеграция
 
-[FACT @ GitHub] База этой status-only правки: `main@f69be4d09768fffed3b97859031523eac48dc8e5`. После merge точный HEAD проверять fresh read-back.
+[FACT @ GitHub] Проверенный integration baseline перед этой status-only правкой: `main@ab43b1e13a48d947003ae2d9ccd3bcc13dc33189`. Сам status commit продвигает HEAD; точный HEAD после push проверять fresh read-back.
 
-[FACT @ GitHub] PR #1–#6 и status PR #9 merged. В `main` находятся foundation,
+[FACT @ GitHub] PR #1–#6, tooling PR #8 и status PR #9/#10 merged. В `main` находятся foundation,
 visual interface, Unity Gate3D Function, Blender Form v0.1 candidate, ADR-0012
-с single-player souls-like направлением и актуальный integration status.
+с single-player souls-like направлением, ADR-0010 visible GUI MCP tooling и актуальный integration status.
 
-[FACT @ GitHub] `main@f69be4d...` прошёл Windows/Python и Browser/Node CI.
+[FACT @ GitHub] `main@ab43b1e...` прошёл Windows/Python и Browser/Node CI после merge PR #8.
 
 [BOUNDARY] Merge в `main` не означает release, deployment, scientific reproduction,
 human playtest success или Form human approval.
@@ -71,20 +71,20 @@ Process-local `ProgramData=C:\ProgramData` восстановил обычный
 [BOUNDARY] Form lifecycle остаётся `ready_for_human_approval`;
 Form `human_approval=null`. Engineering/CI PASS не является Form approval.
 
-## GUI tooling — PR #8
+## GUI tooling — ADR-0010 / merged PR #8
 
-[FACT @ GitHub] Draft PR #8 `tooling/visible-gui-mcp-connectors` открыт от `main`;
-head = `3201eecb5537d6ab2047c02743effb4f611f07e5`; mergeable = true.
+[FACT @ GitHub] PR #8 `tooling/visible-gui-mcp-connectors` merged в `main` как commit
+`ab43b1e13a48d947003ae2d9ccd3bcc13dc33189`; его remote branch удалена.
 
-[FACT @ GitHub] PR #8 прошёл Windows/Python и Browser/Node CI.
+[FACT @ GitHub] PR #8 прошёл Windows/Python и Browser/Node CI до merge.
 
-[BOUNDARY] PR #8 — отдельная authoring/tooling surface; он не является
+[BOUNDARY] Merge PR #8 реализует принятую authoring/tooling surface; он не является
 gameplay approval, Form approval, remote exposure, deployment или Codex activation.
 
 ## Workspace hygiene
 
-[FACT local] Основной каталог `C:\github\MUSCA` находится на
-`main@f69be4d...` и после точечного restore EOL-only drift имеет **0 Git changes**.
+[FACT local] Основной каталог `C:\github\MUSCA` синхронизирован с
+`main@ab43b1e...` перед этой status-only правкой и имеет **0 Git changes**.
 
 [FACT] Прежние 158 dirty entries сохранены до очистки в safety snapshot:
 `E:\MUSCA_RESEARCH\worktree-snapshots\2026-09-18-feature-blender-form-dirty-158`.
@@ -117,9 +117,9 @@ topology advantage UNKNOWN.
 
 | Surface | State |
 | --- | --- |
-| `main` | CLEAN; verified baseline `f69be4d...`; status-only merge may advance HEAD |
+| `main` | CLEAN; integration baseline `ab43b1e...`; this status-only commit advances HEAD |
 | PR #7 Form v0.3/v0.31 + Unity candidate | DRAFT / remote CI PASS / fresh Unity 7/7 PASS |
-| PR #8 visible GUI MCP tooling | DRAFT / CI PASS |
+| ADR-0010 / PR #8 visible GUI MCP tooling | MERGED / CI PASS |
 | Gate3D Function human approval | APPROVED |
 | Form human approval | PENDING / null |
 | Primary VS Code worktree | CLEAN / 0 changes |
@@ -132,11 +132,11 @@ topology advantage UNKNOWN.
 
 1. Провести явный human Form review v0.3/v0.31: approve либо reject с конкретными правками.
 2. PR #7 не merge до explicit human Form decision; engineering/CI PASS не является Form approval.
-3. PR #8 рассматривать отдельно как tooling decision; не смешивать его с gameplay PR.
+3. ADR-0010/PR #8 считать отдельной merged tooling surface; не смешивать её lifecycle с gameplay PR #7.
 4. Codex Runtime продолжать только в dedicated worktrees и по собственным P4/P6 gates.
 5. GATE-P01 и scientific R00 продолжать как независимые evidence lanes.
 
 ∆ — UPM IPC block закрыт без системной мутации; PR #7 получил fresh Unity 7/7 PASS.
 D — root-cause ProgramData → process-local fix → clean import/resolve/compile → EditMode PASS → evidence hash/read-back.
 Ω — высокая для engineering verification PR #7; Form approval всё ещё отсутствует.
-Λ — пересмотреть после explicit Form review, PR #7/#8 decisions или нового runtime/gameplay evidence.
+Λ — пересмотреть после explicit Form review, решения по PR #7 или нового runtime/gameplay evidence.
