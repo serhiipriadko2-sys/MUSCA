@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MUSCA // Gate 3D Prototype</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "/vendor/three/build/three.module.js",
+        "three/addons/": "/vendor/three/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="viewport"></div>
+  <div id="hud" aria-live="polite">
+    <section id="mission-panel" class="panel">
+      <div class="eyebrow">MUSCA // GATE · FUNCTION PROTOTYPE</div>
+      <h1>ЦЕЛЬ ЭКСПЕДИЦИИ</h1>
+      <ol id="objectives"></ol>
+    </section>
+
+    <section id="telemetry-panel" class="panel compact">
+      <div class="metric"><span>Сигнал</span><b id="signal-number">2</b></div>
+      <div class="bar"><i id="signal-bar"></i></div>
+      <div class="metric"><span>Запас</span><b id="cells-text">2/2</b></div>
+      <div id="cells" class="cells"></div>
+      <div class="metric"><span>Режим</span><b>light_chemical</b></div>
+    </section>
+
+    <section id="explain-panel" class="panel">
+      <div class="eyebrow">КАК ЭТО РАБОТАЕТ</div>
+      <p><b>Ты</b> выбираешь намерение и решение.</p>
+      <p><b>ISKRA</b> отделяет факт от гипотезы.</p>
+      <p><b>MUSCA</b> замечает среду и сопровождает.</p>
+      <button id="toggle-log" class="ghost">TAB · журнал наблюдений</button>
+    </section>
+  </div>
+
+  <div id="reticle" aria-hidden="true"><span></span><span></span></div>
+  <div id="interaction" class="prompt hidden"></div>
+  <div id="companion-line" class="companion-line">MUSCA: сигнал обнаружен впереди.</div>
+
+  <aside id="log-panel" class="panel hidden">
+    <div class="log-head">
+      <div><span class="eyebrow">ISKRA</span><h2>Журнал наблюдений</h2></div>
+      <button id="close-log" class="ghost">Закрыть · TAB</button>
+    </div>
+    <div id="log-entries"></div>
+  </aside>
+
+  <div id="start-overlay" class="overlay">
+    <div class="start-card">
+      <div class="eyebrow">ISKRA // MUSCA</div>
+      <h2>ШЛЮЗ A-1</h2>
+      <p class="lead">Исследуй пространство. Сигнал приведёт к шлюзу. Свет показывает заряд, но не состав реагента.</p>
+      <div class="controls-grid">
+        <span><kbd>WASD</kbd> движение</span><span><kbd>мышь</kbd> обзор</span>
+        <span><kbd>Q</kbd> химическая проба</span><span><kbd>E</kbd> взаимодействие</span>
+        <span><kbd>TAB</kbd> журнал</span><span><kbd>R</kbd> начать заново</span>
+      </div>
+      <div class="truth-box">
+        <p><span class="fact">FACT</span> Световой сигнал реально измеряется.</p>
+        <p><span class="hyp">HYP</span> Более яркий реагент может подойти — но это только гипотеза.</p>
+        <p><span class="unknown">UNKNOWN</span> Состав станет известен только после наблюдения или действия.</p>
+      </div>
+      <button id="start-button" class="primary">НАЧАТЬ ИССЛЕДОВАНИЕ</button>
+      <p class="fineprint">Graybox v0.2 · не входит в frozen GATE-P01 v0.1</p>
+    </div>
+  </div>
+
+  <div id="pause-overlay" class="overlay hidden">
+    <div class="start-card small">
+      <h2>ПАУЗА</h2>
+      <p>Курсор освобождён. Нажми кнопку, чтобы вернуться в пространство.</p>
+      <button id="resume-button" class="primary">ПРОДОЛЖИТЬ</button>
+    </div>
+  </div>
+
+  <div id="result-overlay" class="overlay hidden">
+    <div id="result-card" class="start-card result-card">
+      <div class="eyebrow">РЕЗУЛЬТАТ МИРА</div>
+      <h2 id="result-title">ШЛЮЗ</h2>
+      <p id="result-text" class="lead"></p>
+      <button id="restart-button" class="primary">R · ПРОЙТИ СНОВА</button>
+    </div>
+  </div>
+
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

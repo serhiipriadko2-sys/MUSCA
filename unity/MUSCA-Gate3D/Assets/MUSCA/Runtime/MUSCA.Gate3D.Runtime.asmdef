@@ -1,0 +1,14 @@
+{
+  "name": "MUSCA.Gate3D.Runtime",
+  "rootNamespace": "MUSCA.Gate3D",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

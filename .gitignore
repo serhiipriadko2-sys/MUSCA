@@ -15,3 +15,26 @@
 __pycache__/
 *.py[cod]
 .venv/
+
+# Local Node dependencies for the browser 3D Function prototype.
+prototype3d/node_modules/
+
+# Unity Function prototype generated state.
+unity/MUSCA-Gate3D/Library/
+unity/MUSCA-Gate3D/Temp/
+unity/MUSCA-Gate3D/Logs/
+unity/MUSCA-Gate3D/UserSettings/
+unity/MUSCA-Gate3D/obj/
+unity/MUSCA-Gate3D/.vs/
+unity/MUSCA-Gate3D/.vscode/
+unity/MUSCA-Gate3D/*.csproj
+unity/MUSCA-Gate3D/*.sln
+unity/MUSCA-Gate3D/*.slnx
+unity/MUSCA-Gate3D.failed-upm-*/
+unity/*.log
+unity/MUSCA-Gate3D/Builds/
+unity/MUSCA-Gate3D/Docs/AI/EditModeResults.xml
+unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/*
+!unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/pass5-spawn.png
+!unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/pass5-amber.png
+!unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/pass5-openedworld.png

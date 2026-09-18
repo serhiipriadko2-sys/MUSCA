@@ -9,6 +9,8 @@ on:
   pull_request:
     branches:
       - main
+      - docs/musca-foundations
+      - 'feature/**'
   workflow_dispatch:
 
 permissions:
@@ -60,3 +62,52 @@ jobs:
 
       - name: Smoke deterministic demo
         run: python -m musca --demo --mode light_chemical --json
+
+
+  browser-3d-function:
+    name: Browser 3D Function / Node 24.18.1
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node 24.18.1
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24.18.1'
+          cache: npm
+          cache-dependency-path: prototype3d/package-lock.json
+
+      - name: Install pinned browser prototype dependency
+        working-directory: prototype3d
+        run: npm ci
+
+      - name: Audit runtime dependency
+        working-directory: prototype3d
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Run browser 3D state tests
+        working-directory: prototype3d
+        run: npm test
+
+      - name: Check pinned Three.js server surface
+        working-directory: prototype3d
+        run: npm run check
+
+      - name: Validate room Function evidence
+        working-directory: prototype3d
+        run: npm run validate:room
+
+      - name: Check Unity source boundary
+        shell: pwsh
+        run: |
+          $required = @(
+            'unity/MUSCA-Gate3D/ProjectSettings/ProjectVersion.txt',
+            'unity/MUSCA-Gate3D/Assets/MUSCA/Scenes/GateLab.unity',
+            'unity/MUSCA-Gate3D/Docs/AI/UnitySceneValidation.json'
+          )
+          foreach ($path in $required) { if (-not (Test-Path $path)) { throw "Missing Unity source/evidence: $path" } }
+          $forbidden = git ls-files 'unity/MUSCA-Gate3D/Library/**' 'unity/MUSCA-Gate3D/Temp/**' 'unity/MUSCA-Gate3D/Builds/**'
+          if ($forbidden) { throw "Generated Unity state is tracked: $forbidden" }
+          Get-Content 'unity/MUSCA-Gate3D/ProjectSettings/ProjectVersion.txt'

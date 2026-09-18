@@ -1,0 +1,31 @@
+{
+  "schema": "musca.room-layout.v1",
+  "room_id": "gate-lab-v0.2",
+  "units": "metres",
+  "spawn": {"position": [0, 1.68, 12], "yaw_deg": 180},
+  "route": {
+    "type": "axial",
+    "waypoints": [[0, 12], [0, 6], [0, 0], [0, -5], [0, -9], [0, -11.6]],
+    "floor_markers": "cyan chevrons"
+  },
+  "objects": [
+    {"id": "gate-a1", "type": "interactive_gate", "position": [0, 1.76, -13.25], "size": [4.5, 3.5, 0.34], "hero": true},
+    {"id": "amber-station", "type": "reagent_station", "position": [-4.1, 0, -7.2], "size": [2.15, 3.3, 1.55], "reagent": "amber"},
+    {"id": "cobalt-station", "type": "reagent_station", "position": [4.1, 0, -7.2], "size": [2.15, 3.3, 1.55], "reagent": "cobalt"},
+    {"id": "signal-beacon", "type": "light", "position": [0, 3.3, -11.2], "role": "navigation"},
+    {"id": "musca-companion", "type": "moving_companion", "attachment": "player-follow", "role": "explain and orient"}
+  ],
+  "containment": {
+    "x_min": -7.15,
+    "x_max": 7.15,
+    "z_min": -13.0,
+    "z_max": 13.4,
+    "gate_blocks_until": "neutral reagent accepted"
+  },
+  "critical_sightlines": [
+    "spawn -> gate beacon",
+    "decision bay -> both reagent labels",
+    "station -> gate"
+  ],
+  "intentional_exceptions": []
+}

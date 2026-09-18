@@ -1,0 +1,42 @@
+{
+  "schema": "musca.props.v1",
+  "room_id": "gate-lab-v0.2",
+  "asset_generation": "procedural_only_at_function_gate",
+  "paid_generation": false,
+  "props": [
+    {
+      "id": "gate-a1",
+      "function": "hero destination and world-response object",
+      "dimensions_m": [4.5, 3.5, 0.34],
+      "attachment_face": "north wall",
+      "semantic_front": "south/inward",
+      "class": "hero",
+      "construction": "procedural boxes and emissive strips",
+      "polygon_target": 5000,
+      "rejection": "route, opening state, or response cannot be read from production camera"
+    },
+    {
+      "id": "reagent-station-family",
+      "function": "present one spatially distinct evidence/action choice",
+      "dimensions_m": [2.15, 3.3, 1.55],
+      "attachment_face": "floor",
+      "semantic_front": "toward central decision bay",
+      "class": "reusable",
+      "instances": ["amber", "cobalt"],
+      "construction": "procedural base, cylinder, cage, label",
+      "polygon_target": 4000,
+      "rejection": "AMBER/COBALT identity or interaction range is ambiguous"
+    },
+    {
+      "id": "musca-companion",
+      "function": "orient player and embody lower-loop companion",
+      "dimensions_m": [0.9, 0.5, 0.6],
+      "attachment_face": "none",
+      "semantic_front": "toward player",
+      "class": "moving_support",
+      "construction": "procedural sphere, eye, translucent wings",
+      "polygon_target": 2500,
+      "rejection": "occludes reticle, objectives, or reagent stations"
+    }
+  ]
+}

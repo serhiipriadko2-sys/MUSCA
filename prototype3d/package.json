@@ -1,0 +1,20 @@
+{
+  "name": "musca-gate-3d-prototype",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Local MUSCA first-person 3D graybox; not part of frozen GATE-P01 v0.1.",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "check": "node server.mjs --check",
+    "validate:room": "node validate-room.mjs"
+  },
+  "dependencies": {
+    "three": "0.186.0"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "license": "UNLICENSED"
+}
