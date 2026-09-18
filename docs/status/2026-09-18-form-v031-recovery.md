@@ -48,14 +48,21 @@ source Unity project, the latest runtime/editor assemblies were built after the 
 corresponding source files and the project Editor log contained no recent C# compiler
 errors.
 
-[WARN] A new batchmode EditMode run from the clean worktree did **not** complete because
-Unity Package Manager failed to open its local IPC stream after 30 seconds. No new
-test-result XML was produced. This is recorded as an environment/toolchain block, not
-as a fresh Unity test PASS.
+[FACT] Fresh clean-worktree Unity verification now passes on Unity 6000.6.1f1.
+A clean Library/Temp import resolved packages through the ordinary UPM path, compiled
+the MUSCA runtime/editor/test assemblies, and completed **7/7 EditMode tests PASS**
+with Unity exit code 0.
 
-[FACT] Earlier local receipts recorded Unity compile errors = 0 and 7/7 EditMode tests
-for the v0.3 gameplay/third-person candidate. They remain historical evidence and are
-not silently upgraded to a fresh clean-branch engine run.
+[FACT] The earlier UPM IPC block was reproduced to the UPM executable itself:
+`getLocalConfigFolder()` received an undefined path because the Remote Desktop
+Commander process environment omitted `ProgramData`. Setting
+`ProgramData=C:\ProgramData` only for the verification process made the same UPM
+binary start its IPC server normally. No system environment or project package config
+was changed.
+
+[FACT] Raw local verification evidence is preserved outside the Git worktree under
+`E:\MUSCA_RESEARCH\evidence\2026-09-18-pr7-unity-fresh`. The test XML reports
+total=7, passed=7, failed=0, skipped=0.
 
 ## Repository hygiene decisions
 
@@ -76,10 +83,15 @@ worktree contains a newer candidate state.
   candidate receipt hashes independently matched.
 - Browser Function oracle: **8/8 PASS**.
 - Three.js server check: **PASS**.
+- Fresh Unity 6000.6.1f1 clean-worktree compile: **PASS**.
+- Fresh Unity EditMode: **7/7 PASS**, 0 failed, 0 skipped; Unity exit code 0.
+- Fresh UPM resolve: **PASS**; IPC server started and resolve-packages returned 200.
 - Room lifecycle validator: **PASS**; Function approved, Form human approval remains null.
 - npm audit: **0 vulnerabilities**.
 - `git diff origin/main..HEAD --check`: **PASS**.
 - staged high-confidence secret patterns: **0 hit files**.
+- Fresh Unity test XML SHA-256:
+  `1220e140ec2b833c9154da666f60fb68332f57bda253336e471c617e4ebd57fa`.
 
 ## Lifecycle boundary
 
@@ -95,6 +107,6 @@ release readiness, scientific reproduction, or deployment.
 
 ∆ — mixed local Form/Unity work was separated into a clean game lineage based on current main.
 D — external byte snapshot → selective recovery → receipt/hash checks → Python/Node/static QA →
-two reviewable commits; Unity fresh engine rerun recorded as UPM-blocked.
-Ω — high for recovered bytes and non-Unity QA; medium for current Unity engine verification.
-Λ — revise after a successful clean-branch Unity EditMode/runtime run or explicit human Form review.
+fresh Unity import/compile → UPM resolve PASS → EditMode 7/7 PASS.
+Ω — high for recovered bytes and current clean-worktree engineering verification.
+Λ — revise after explicit human Form review or new gameplay/runtime evidence.
