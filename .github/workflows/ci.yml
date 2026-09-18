@@ -53,6 +53,16 @@ jobs:
       - name: Compile sources
         run: python -m compileall -q musca scripts tests
 
+      - name: Compile Blender Form tooling
+        run: >-
+          python -m py_compile
+          blender/gate-lab-v0.2/scripts/build_gate_lab_form.py
+          blender/gate-lab-v0.2/scripts/validate_gate_lab_form.py
+          scripts/validate_blender_form.py
+
+      - name: Verify checked-in Blender Form artifact integrity
+        run: python scripts/validate_blender_form.py
+
       - name: Verify pilot bundle tooling
         shell: pwsh
         run: |

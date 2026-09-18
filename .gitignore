@@ -38,3 +38,8 @@ unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/*
 !unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/pass5-spawn.png
 !unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/pass5-amber.png
 !unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/pass5-openedworld.png
+
+# Blender Form authoring backups/cache; authoritative .blend/.fbx outputs are explicit.
+*.blend1
+*.blend2
+*.blend@

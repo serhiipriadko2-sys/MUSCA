@@ -1,0 +1,23 @@
+{
+  "schema": "musca.blender-form-readback.v1",
+  "status": "PASS",
+  "blender_version": "5.2.0 LTS",
+  "checks": {
+    "collections_present": true,
+    "objects_present": true,
+    "amber_position": true,
+    "cobalt_position": true,
+    "gate_closed_width": true,
+    "spawn_camera_height": true,
+    "route_clear": true,
+    "blend_exists": true,
+    "environment_fbx_exists": true,
+    "musca_fbx_exists": true
+  },
+  "route_blockers": [],
+  "objects_total": 268,
+  "blend_sha256": "312020191d0111092107f414b63f2db901ff053efb5bc1184e16329fd9e8b007",
+  "environment_fbx_sha256": "2a61eb7b42ce675865078fa19bdb29bc41e093406ad948f76bfc5b1807d472df",
+  "musca_fbx_sha256": "c6db8db036602d40441b1a6737a710ad172e758b9c7a1547c75d1065c0124000",
+  "claim_boundary": "Read-back validates saved Form artifact structure only; no human Form approval or Unity integration claim."
+}

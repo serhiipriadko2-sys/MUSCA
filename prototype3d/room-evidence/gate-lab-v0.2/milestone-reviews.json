@@ -3,8 +3,13 @@
   "room_id": "gate-lab-v0.2",
   "reviews": {
     "function": {
-      "status": "ready_for_human_approval",
-      "human_approval": null,
+      "status": "approved",
+      "human_approval": {
+        "status": "approved",
+        "date": "2026-09-16",
+        "source": "explicit_user_chat_approval",
+        "scope": "gate-lab-v0.2 Function layout"
+      },
       "purpose_defined": true,
       "runtime_surface_defined": true,
       "bounds_defined": true,
@@ -23,8 +28,15 @@
       "physical_gate_response_verified": true
     },
     "form": {
-      "status": "blocked_pending_function_approval",
-      "human_approval": null
+      "status": "ready_for_human_approval",
+      "human_approval": null,
+      "authoring_surface": "Blender 5.2.0 LTS background workflow",
+      "candidate": "GateLab_Form_v0.1",
+      "blender_version": "5.2.0 LTS",
+      "build_receipt": "blender/gate-lab-v0.2/receipts/form-build.json",
+      "readback_receipt": "blender/gate-lab-v0.2/receipts/form-readback.json",
+      "visual_qc": "PASS_AS_FORM_CANDIDATE",
+      "unity_form_integration": "not_started"
     },
     "runtime": {
       "status": "unity_function_runtime_verified",

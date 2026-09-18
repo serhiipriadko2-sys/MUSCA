@@ -1,0 +1,26 @@
+{
+  "schema": "musca.blender-form-visual-qc.v1",
+  "room_id": "gate-lab-v0.2",
+  "status": "PASS_AS_FORM_CANDIDATE",
+  "reviewed_renders": {
+    "form_spawn.png": "b0eb45416e07a13d9d1911745884fd1425f29c2d179e49ac0b03076a02878002",
+    "form_hero.png": "6952ca1588370f1152c5794b5cae05e8520932c7eb352ae0e0be639e23d771ab",
+    "form_amber.png": "487fb7c55041c45162c9552e36e86f33f5e59f55c0c4fb964cae256f1047558c",
+    "form_gate_open.png": "891d0bfbb8a3d12080e35c3db9bebdc0801592d15b47b783dd12a526a7e639d9"
+  },
+  "checks": {
+    "spawn_to_gate_sightline_readable": true,
+    "amber_and_cobalt_labels_readable": true,
+    "route_markers_readable": true,
+    "open_gate_is_visually_clear": true,
+    "sector_b_destination_visible": true,
+    "mirrored_or_upside_down_signage": false,
+    "form_permanent_geometry_blocks_route": false
+  },
+  "notes": [
+    "MUSCA and player are scale/Form proxies, not final character assets.",
+    "Materials are procedural Form materials, not a production texture pass.",
+    "The candidate captures the reference language without claiming image-level parity."
+  ],
+  "claim_boundary": "Visual QC qualifies the Blender scene as a Form candidate only; explicit human Form approval remains required."
+}

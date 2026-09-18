@@ -1,0 +1,67 @@
+{
+  "schema": "musca.blender-form-build.v1",
+  "room_id": "gate-lab-v0.2",
+  "status": "PASS",
+  "blender_version": "5.2.0 LTS",
+  "source_function_layout_sha256": "0a7475b76059bc767ff497bb8970944b035b388c122e1b6745d64da047a8075b",
+  "checks": {
+    "room_id": true,
+    "gate_size": true,
+    "amber_position": true,
+    "cobalt_position": true,
+    "spawn": true,
+    "route_clear": true
+  },
+  "route_blockers": [],
+  "exports": {
+    "environment_fbx": "PASS",
+    "musca_fbx": "PASS"
+  },
+  "collections": {
+    "SHELL": 70,
+    "GATE": 12,
+    "STATIONS": 30,
+    "ROUTE": 38,
+    "PROPS": 66,
+    "MUSCA_PROXY": 11,
+    "PLAYER_PROXY": 8,
+    "LIGHTS": 11,
+    "CAMERAS": 4,
+    "TEXT": 5,
+    "SECTOR_B_PREVIEW": 13
+  },
+  "objects_total": 268,
+  "meshes_total": 254,
+  "materials_total": 13,
+  "artifacts": {
+    "GateLab_Form_v0.1.blend": {
+      "bytes": 1065675,
+      "sha256": "312020191d0111092107f414b63f2db901ff053efb5bc1184e16329fd9e8b007"
+    },
+    "GateLab_Form_v0.1.fbx": {
+      "bytes": 3126940,
+      "sha256": "2a61eb7b42ce675865078fa19bdb29bc41e093406ad948f76bfc5b1807d472df"
+    },
+    "MUSCA_FormProxy_v0.1.fbx": {
+      "bytes": 254508,
+      "sha256": "c6db8db036602d40441b1a6737a710ad172e758b9c7a1547c75d1065c0124000"
+    },
+    "form_spawn.png": {
+      "bytes": 854522,
+      "sha256": "b0eb45416e07a13d9d1911745884fd1425f29c2d179e49ac0b03076a02878002"
+    },
+    "form_hero.png": {
+      "bytes": 876636,
+      "sha256": "6952ca1588370f1152c5794b5cae05e8520932c7eb352ae0e0be639e23d771ab"
+    },
+    "form_amber.png": {
+      "bytes": 791717,
+      "sha256": "487fb7c55041c45162c9552e36e86f33f5e59f55c0c4fb964cae256f1047558c"
+    },
+    "form_gate_open.png": {
+      "bytes": 743453,
+      "sha256": "891d0bfbb8a3d12080e35c3db9bebdc0801592d15b47b783dd12a526a7e639d9"
+    }
+  },
+  "claim_boundary": "Form authoring artifact only; no Form human approval, Unity import approval, playtest evidence, or release claim."
+}
