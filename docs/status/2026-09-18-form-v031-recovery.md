@@ -70,15 +70,16 @@ total=7, passed=7, failed=0, skipped=0.
 not runtime assets: their meta GUIDs had zero references from scenes/materials/prefabs/
 scripts. They were intentionally not added to this branch and remain in the safety snapshot.
 
-[FACT] `com.coplaydev.unity-mcp` manifest/lock changes and ADR-0010 were intentionally
-excluded from this game branch; they belong to a separate tooling lane.
+[FACT] `com.coplaydev.unity-mcp` and ADR-0010 were not authored by this game lane.
+After synchronizing PR #7 with current `main`, the accepted tooling dependency is inherited
+from `main` but remains outside the PR #7 gameplay/Form diff.
 
 [FACT] Local Codex Runtime files were intentionally excluded; the dedicated Codex
 worktree contains a newer candidate state.
 
 ## QA
 
-- Python: **126 tests PASS**.
+- Python: **128 tests PASS** after prototype-approval lifecycle coverage.
 - Blender static integrity: **PASS**, 7 required v0.1 artifacts checked; v0.3/v0.31
   candidate receipt hashes independently matched.
 - Browser Function oracle: **8/8 PASS**.
@@ -86,27 +87,30 @@ worktree contains a newer candidate state.
 - Fresh Unity 6000.6.1f1 clean-worktree compile: **PASS**.
 - Fresh Unity EditMode: **7/7 PASS**, 0 failed, 0 skipped; Unity exit code 0.
 - Fresh UPM resolve: **PASS**; IPC server started and resolve-packages returned 200.
-- Room lifecycle validator: **PASS**; Function approved, Form human approval remains null.
+- Room lifecycle validator: **PASS**; Function approved; Form v0.31 prototype human approval recorded on 2026-09-18.
 - npm audit: **0 vulnerabilities**.
 - `git diff origin/main..HEAD --check`: **PASS**.
 - staged high-confidence secret patterns: **0 hit files**.
-- Fresh Unity test XML SHA-256:
-  `1220e140ec2b833c9154da666f60fb68332f57bda253336e471c617e4ebd57fa`.
+- Post-main-sync fresh Unity test XML SHA-256:
+  `92ee06865368841e8d6098332667c8e46857061257440fd314b666ffdb1fcd54`.
 
 ## Lifecycle boundary
 
 Function approval remains recorded as approved.
 
-Form v0.1/v0.3/v0.31 engineering artifacts do **not** create Form human approval:
-`human_approval=null` remains authoritative until an explicit typed human review.
+[FACT] On 2026-09-18 the Owner explicitly approved **FORM v0.31 as a prototype**.
+The authoritative Form lifecycle is now `approved` with typed scope
+`GateLab Form v0.31 prototype only`.
 
-This branch does not prove final character art, final camera behavior, final combat feel,
-release readiness, scientific reproduction, or deployment.
+This approval does **not** approve final production art, final character design,
+runtime/gameplay feel, final camera/combat behavior, release readiness, scientific
+reproduction, or deployment. Runtime human approval remains null.
 
 ## ΔDΩΛ
 
 ∆ — mixed local Form/Unity work was separated into a clean game lineage based on current main.
 D — external byte snapshot → selective recovery → receipt/hash checks → Python/Node/static QA →
-fresh Unity import/compile → UPM resolve PASS → EditMode 7/7 PASS.
+fresh Unity import/compile → UPM resolve PASS → EditMode 7/7 PASS → explicit prototype approval →
+current-main sync → fresh Unity 7/7 PASS again.
 Ω — high for recovered bytes and current clean-worktree engineering verification.
-Λ — revise after explicit human Form review or new gameplay/runtime evidence.
+Λ — revise after a later production-art/runtime approval decision or new gameplay/runtime evidence.

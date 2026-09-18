@@ -140,9 +140,32 @@ class BlenderFormValidationTests(unittest.TestCase):
         self.assertEqual('not_run', result['visual_validation'])
 
     def test_lifecycle_cannot_silently_gain_approval(self):
+        self.reviews['reviews']['form']['human_approval'] = {
+            'status': 'approved',
+            'date': '2026-09-18',
+            'source': 'explicit_user_chat_approval',
+            'scope': 'prototype only',
+        }
+        self.write_documents()
+        self.assert_fails()
+
+    def test_approved_form_requires_complete_typed_receipt(self):
+        self.reviews['reviews']['form']['status'] = 'approved'
         self.reviews['reviews']['form']['human_approval'] = {'status': 'approved'}
         self.write_documents()
         self.assert_fails()
+
+    def test_approved_form_with_typed_receipt_passes(self):
+        self.reviews['reviews']['form']['status'] = 'approved'
+        self.reviews['reviews']['form']['human_approval'] = {
+            'status': 'approved',
+            'date': '2026-09-18',
+            'source': 'explicit_user_chat_approval',
+            'scope': 'GateLab Form v0.31 prototype only',
+        }
+        self.write_documents()
+        result = validator.validate(self.form, self.evidence)
+        self.assertEqual('PASS', result['status'], result)
 
 
 if __name__ == '__main__':

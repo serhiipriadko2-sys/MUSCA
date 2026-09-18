@@ -1,20 +1,21 @@
 {
   "schema": "musca.room-final-report.v1",
   "room_id": "gate-lab-v0.2",
-  "delivery_stage": "form_ready_for_human_approval",
-  "status": "READY_FOR_HUMAN_FORM_APPROVAL",
+  "delivery_stage": "form_v031_prototype_approved",
+  "status": "FORM_V031_PROTOTYPE_APPROVED",
   "function_gate": "APPROVED by explicit human review on 2026-09-16",
-  "form_gate": "Blender 5.2.0 LTS Form candidate built, rendered, exported and read-back verified; explicit human Form approval pending",
-  "runtime_gate": "Unity Function runtime verified; Blender Form integration not started",
+  "form_gate": "GateLab Form v0.31 approved by explicit human review on 2026-09-18 for prototype use only",
+  "runtime_gate": "Unity Form v0.3/v0.31 prototype integration engineering-verified; runtime/gameplay human approval not granted",
   "paid_assets": 0,
   "external_mesh_assets": 0,
   "runtime_dependency": "Unity 6000.6.1f1 authoritative prototype; three@0.186.0 browser reference",
   "known_limits": [
+    "prototype approval only; final production art is not approved",
     "procedural materials and hard-surface Form language; no production texture set",
-    "player and MUSCA meshes are scale/Form proxies, not final character assets",
-    "no final animation, sound design, VFX, or accessibility pass",
-    "no Unity import/integration of Blender Form yet",
+    "player and MUSCA meshes remain prototype character/Form assets, not final production characters",
+    "no final animation, sound design, VFX, accessibility or combat-feel approval",
+    "runtime/gameplay feel has engineering verification but no human runtime approval",
     "no GATE-P01 v0.1 participant use",
-    "Form human approval and Runtime approval not granted"
+    "release readiness and production approval not granted"
   ]
 }

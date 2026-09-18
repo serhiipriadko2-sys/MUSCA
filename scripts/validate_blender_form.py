@@ -147,10 +147,18 @@ def validate(form_root: Path, evidence_root: Path, require_visual: bool = True) 
         errors.append('Function gate not approved')
     if not isinstance(approval, dict) or approval.get('status') != 'approved':
         errors.append('Function human approval receipt missing or invalid')
-    if form.get('status') != 'ready_for_human_approval':
-        errors.append('Form lifecycle is not ready_for_human_approval')
-    if 'human_approval' not in form or form['human_approval'] is not None:
-        errors.append('Form human approval must explicitly remain null')
+    form_status = form.get('status')
+    form_approval = form.get('human_approval')
+    if form_status not in {'ready_for_human_approval', 'approved'}:
+        errors.append('Form lifecycle must be ready_for_human_approval or approved')
+    if form_status == 'ready_for_human_approval':
+        if 'human_approval' not in form or form_approval is not None:
+            errors.append('Pending Form must explicitly keep human approval null')
+    if form_status == 'approved':
+        if not isinstance(form_approval, dict) or form_approval.get('status') != 'approved':
+            errors.append('Approved Form requires typed human approval')
+        elif not all(form_approval.get(key) for key in ('date', 'source', 'scope')):
+            errors.append('Approved Form human approval receipt incomplete')
     if any(form_root.rglob('*.blend[0-9]')):
         errors.append('Blender backup files present')
     return {'status': 'FAIL' if errors else 'PASS', 'errors': errors, 'checked_artifacts': checked,
