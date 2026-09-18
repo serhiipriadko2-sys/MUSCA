@@ -83,6 +83,7 @@ class ManifestValidationTests(unittest.TestCase):
             ROOT / "experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json",
             ROOT / "experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json",
             ROOT / "experiments/manifests/SCI-R01-SHIU-SUGAR.run.json",
+            ROOT / "experiments/manifests/SCI-R02-SHIU-MN9-LATERALITY-200HZ.candidate.json",
         ]
         for path in paths:
             with self.subTest(path=path.name):

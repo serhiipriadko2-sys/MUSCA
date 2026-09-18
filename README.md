@@ -154,7 +154,7 @@ MMO/multiplayer не входят в активный roadmap.
 Структурная проверка зарегистрированных manifests:
 
 ```powershell
-py -3.14 scripts/validate_manifests.py --level schema data/manifests/SCI-DATA-SHIU-FW630.candidate.json experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.run.json experiments/manifests/gate-p01.json
+py -3.14 scripts/validate_manifests.py --level schema data/manifests/SCI-DATA-SHIU-FW630.candidate.json experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.run.json experiments/manifests/SCI-R02-SHIU-MN9-LATERALITY-200HZ.candidate.json experiments/manifests/gate-p01.json
 ```
 
 Перед R01 execution использовался более строгий local gate:
