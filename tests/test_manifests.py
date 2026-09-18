@@ -77,11 +77,12 @@ class ManifestValidationTests(unittest.TestCase):
         path.write_text(json.dumps(payload), encoding="utf-8")
         return path
 
-    def test_current_candidate_manifests_are_schema_valid(self):
+    def test_current_registered_manifests_are_schema_valid(self):
         paths = [
             ROOT / "data/manifests/SCI-DATA-SHIU-FW630.candidate.json",
             ROOT / "experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json",
             ROOT / "experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json",
+            ROOT / "experiments/manifests/SCI-R01-SHIU-SUGAR.run.json",
         ]
         for path in paths:
             with self.subTest(path=path.name):

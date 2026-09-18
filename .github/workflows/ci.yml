@@ -45,6 +45,7 @@ jobs:
           data/manifests/SCI-DATA-SHIU-FW630.candidate.json
           experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json
           experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json
+          experiments/manifests/SCI-R01-SHIU-SUGAR.run.json
           experiments/manifests/gate-p01.json
 
       - name: Assess SCI-R00 preflight remains solver-gated

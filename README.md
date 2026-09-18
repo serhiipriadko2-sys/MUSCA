@@ -154,18 +154,20 @@ MMO/multiplayer не входят в активный roadmap.
 Структурная проверка зарегистрированных manifests:
 
 ```powershell
-py -3.14 scripts/validate_manifests.py --level schema data/manifests/SCI-DATA-SHIU-FW630.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json experiments/manifests/gate-p01.json
+py -3.14 scripts/validate_manifests.py --level schema data/manifests/SCI-DATA-SHIU-FW630.candidate.json experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.run.json experiments/manifests/gate-p01.json
 ```
 
 Перед реальным запуском используется более строгий gate:
 
 ```powershell
-py -3.14 scripts/validate_manifests.py --level runnable --repo-root . experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json
+py -3.14 scripts/validate_manifests.py --level runnable --repo-root . experiments/manifests/SCI-R01-SHIU-SUGAR.run.json
 ```
 
-Сейчас R01 runnable-check обязан завершаться `FAIL`: scientific manifest имеет статус
-`draft_not_run`. Dataset уже локально получен и проверен, но strict environment/R00 ещё не завершены. Это защитный gate, а не ошибка проекта.
-`schema PASS` подтверждает форму документа, но не разрешает эксперимент.
+Исторический `SCI-R01-SHIU-SUGAR.candidate.json` остаётся замороженным preregistration
+candidate со статусом `draft_not_run`. После operational SCI-R00 PASS создан отдельный
+`SCI-R01-SHIU-SUGAR.run.json`: только он может проходить local runnable-gate перед запуском.
+`schema PASS` подтверждает форму документа, а `runnable PASS` на конкретном research-host
+подтверждает лишь готовность входов/метаданных, не результат эксперимента.
 
 Runnable дополнительно требует существующий local_storage; not_applicable допускается только с явной причиной.
 
@@ -179,9 +181,10 @@ py -3.14 scripts/research_r00_preflight.py --repo-root .
 
 The preflight is intentionally non-mutating. It reports governance, manifest,
 host-tooling and storage blockers and performs zero installs/downloads/simulations.
-ADR-0005 принят. На авторизованном research-host project-local micromamba может
-дать `READY_FOR_OPERATIONAL_APPROVAL`; GitHub-hosted CI без этого локального tool
-по-прежнему ожидаемо видит `host_solver`. Ни одно состояние не является R00 PASS.
+ADR-0005 принят. SCI-R00 operational strict environment/data smoke теперь имеет
+локальный PASS с датированным receipt в `docs/status/2026-09-18-r00-execution.md`.
+GitHub-hosted CI без project-local solver по-прежнему ожидаемо видит `host_solver`;
+это CI-проверка fail-closed preflight semantics, а не опровержение локального R00 PASS.
 
 The strict Shiu reproduction lineage requires a conda-compatible solver for the
 pinned `environment_full.yml`. `uv` may coexist on the host but is not treated as

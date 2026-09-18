@@ -1,6 +1,6 @@
 # MUSCA — текущий статус
 
-Дата проверки: 2026-09-18. Это оперативная сводка; исторические receipts не переписываются.
+Дата проверки: 2026-09-19. Это оперативная сводка; исторические receipts не переписываются.
 Перед новым решением по HEAD, CI, PR или локальному workspace делать fresh read-back.
 
 ## Репозиторий и интеграция
@@ -109,7 +109,14 @@ Aggregate verdict до preregistered analysis не разрешён.
 [BOUNDARY] Souls-like / Form gameplay не подменяет frozen GATE-P01 v0.1.
 
 [FACT] ADR-0005 принят только для strict Shiu/FlyWire-v630 reproduction baseline.
-SCI-R00 NOT PASSED; SCI-R01 NOT RUN; topology advantage UNKNOWN.
+
+[FACT local] SCI-R00 strict environment/data smoke **PASSED** on the authorized
+research host. Operational receipt SHA-256:
+`e4770a9b7493fb5dfee4a7ef9d0ff3a62ca8da9126ed5bcf6c4465470f9135b0`.
+The historical R00 preregistration candidate remains unchanged.
+
+[FACT] R01 has a separate frozen execution manifest candidate for local runnable
+validation; the 30-trial sugar simulation has not yet run. Topology advantage remains UNKNOWN.
 
 ## Current gates
 
@@ -125,7 +132,7 @@ SCI-R00 NOT PASSED; SCI-R01 NOT RUN; topology advantage UNKNOWN.
 | Final production art | NOT APPROVED |
 | Local Codex Runtime | SEPARATE / NOT ACTIVE |
 | GATE-P01 v0.1 | 1/12, no aggregate verdict |
-| SCI-R00 / R01 | NOT PASSED / NOT RUN |
+| SCI-R00 / R01 | PASS (strict env/data smoke, local host) / NOT RUN |
 | Release/deployment | NOT CLAIMED |
 
 ## Следующие gates
@@ -134,10 +141,9 @@ SCI-R00 NOT PASSED; SCI-R01 NOT RUN; topology advantage UNKNOWN.
    prototype и отдельный human runtime/gameplay-feel review.
 2. Не повышать prototype Form approval до production-art approval без нового explicit decision.
 3. Codex Runtime продолжать только в dedicated worktrees по собственным P4/P6 gates.
-4. GATE-P01 и scientific R00 продолжать как независимые evidence lanes.
+4. GATE-P01 и scientific R01 продолжать как независимые evidence lanes; R00 PASS не повышать до biological-result claim.
 
-∆ — Form v0.31 prototype approved, PR #7 merged, feature branch/worktree cleaned.
-D — typed approval → lifecycle QA → main sync → fresh Unity 7/7 → remote CI PASS →
-merge → ancestry/semantic cleanup.
-Ω — высокая для repository/Form engineering state; gameplay feel и production art ещё открыты.
-Λ — пересмотреть после human gameplay-feel review, production-art gate, Codex P4/P6 или new science evidence.
+∆ — SCI-R00 strict environment/data smoke operationally PASSED; frozen R01 run-manifest prepared, R01 not run.
+D — R00 receipt read-back → lifecycle sync → separate execution manifest → schema/runnable gate → 128 tests.
+Ω — высокая для R00 local execution и repository metadata; R01 result и topology advantage остаются UNKNOWN.
+Λ — пересмотреть после R01 execution, remote CI/PR verification или если R00 receipt/hash/strict-env audit перестанет проходить.
