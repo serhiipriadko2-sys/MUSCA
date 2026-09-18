@@ -1,8 +1,13 @@
-import bpy, math, json, hashlib
+import bpy, math, json, hashlib, argparse, sys
 from pathlib import Path
 from mathutils import Vector
 
-ROOT = Path(__file__).resolve().parents[1]
+SOURCE_ROOT = Path(__file__).resolve().parents[1]
+parser = argparse.ArgumentParser()
+parser.add_argument('--output-dir', type=Path, required=True)
+options = parser.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else [])
+ROOT = options.output_dir.resolve()
+ROOT.mkdir(parents=True, exist_ok=False)
 EXPORTS = ROOT / 'exports'
 RENDERS = ROOT / 'renders'
 RECEIPTS = ROOT / 'receipts'
@@ -87,15 +92,15 @@ def add_text(name, body, loc, scale, mat, rot=(math.radians(90),0,math.radians(1
     o.data.size=scale; o.data.extrude=0.015; o.data.bevel_depth=0.004; o.data.materials.append(mat); move_to_collection(o,'TEXT'); return o
 # Frozen Function envelope mapped as Function X/Z -> Blender X/Y, height -> Z.
 ROOM_X = 7.15; SOUTH_Y = 13.4; NORTH_Y = -13.0; CEILING_Z = 4.6
-add_box('Floor',(0,0,-0.12),(14.3,26.4,0.24),MAT_FLOOR,'SHELL',0.03)
-add_box('Ceiling',(0,0,CEILING_Z),(14.3,26.4,0.22),MAT_DARK,'SHELL',0.03)
+add_box('Floor',(0,0.2,-0.12),(14.3,26.4,0.24),MAT_FLOOR,'SHELL',0.03)
+add_box('Ceiling',(0,0.2,CEILING_Z),(14.3,26.4,0.22),MAT_DARK,'SHELL',0.03)
 add_box('Wall_W',(-ROOM_X-0.13,0,2.25),(0.26,26.8,4.5),MAT_DARK,'SHELL',0.03)
 add_box('Wall_E',( ROOM_X+0.13,0,2.25),(0.26,26.8,4.5),MAT_DARK,'SHELL',0.03)
 # North gate wall leaves exact 4.5 x 3.5 m opening.
 side_w=(14.3-4.5)/2
 add_box('NorthWall_L',(-(4.5/2+side_w/2),NORTH_Y-0.13,2.25),(side_w,0.26,4.5),MAT_DARK,'SHELL')
 add_box('NorthWall_R',((4.5/2+side_w/2),NORTH_Y-0.13,2.25),(side_w,0.26,4.5),MAT_DARK,'SHELL')
-add_box('NorthWall_Top',(0,NORTH_Y-0.13,4.05),(4.5,0.26,0.9),MAT_DARK,'SHELL')
+add_box('NorthWall_Top',(0,NORTH_Y-0.13,4.0),(4.5,0.26,1.0),MAT_DARK,'SHELL')
 # South arrival wall leaves exact 4.0 x 3.2 m opening.
 side_s=(14.3-4.0)/2
 add_box('SouthWall_L',(-(2.0+side_s/2),SOUTH_Y+0.13,2.25),(side_s,0.26,4.5),MAT_DARK,'SHELL')
@@ -134,21 +139,22 @@ for side,y in [(-1,4.2),(1,4.2),(-1,-2.6),(1,-2.6)]:
 # Hero gate A-1: exact opening retained, Form adds frame, signage and readable center motif.
 add_box('GateFrame_L',(-2.42,-12.86,1.86),(0.34,0.42,3.72),MAT_MID,'GATE',0.06)
 add_box('GateFrame_R',( 2.42,-12.86,1.86),(0.34,0.42,3.72),MAT_MID,'GATE',0.06)
-add_box('GateFrame_T',(0,-12.86,3.68),(5.18,0.42,0.32),MAT_MID,'GATE',0.06)
-add_box('GateDoor_L',(-1.13,-12.97,1.75),(2.22,0.28,3.42),MAT_DARK,'GATE',0.04)
-add_box('GateDoor_R',( 1.13,-12.97,1.75),(2.22,0.28,3.42),MAT_DARK,'GATE',0.04)
+add_box('GateFrame_T',(0,-12.86,3.66),(5.18,0.42,0.32),MAT_MID,'GATE',0.06)
+# Match the Unity Function leaves, including its 0.01 m centre seam.
+add_box('GateDoor_L',(-1.13,-13.25,1.76),(2.25,0.34,3.5),MAT_DARK,'GATE',0.04)
+add_box('GateDoor_R',( 1.13,-13.25,1.76),(2.25,0.34,3.5),MAT_DARK,'GATE',0.04)
 add_box('GateSeam',(0,-12.74,1.75),(0.08,0.06,3.1),MAT_CYAN,'GATE',0.01)
-add_box('GateBeacon',(0,-12.70,3.92),(0.16,0.14,0.72),MAT_CYAN,'GATE',0.02)
+add_box('GateBeacon',(0,-12.70,3.88),(0.16,0.14,0.12),MAT_CYAN,'GATE',0.02)
 # Circular visual anchor.
 bpy.ops.mesh.primitive_torus_add(major_radius=0.72, minor_radius=0.055, major_segments=64, minor_segments=12, location=(0,-12.72,1.75), rotation=(math.radians(90),0,0))
 ring=bpy.context.object; ring.name='GateRing'; ring.data.materials.append(MAT_CYAN); move_to_collection(ring,'GATE')
 add_text('GateLabel','GATE A-1',(0,-12.62,4.18),0.34,MAT_CYAN,rot=(math.radians(90),0,math.radians(180)))
 
 # Sector B preview exists only beyond the approved north opening; it does not alter Function circulation.
-add_box('SectorBFloor',(0,-16.45,-0.10),(4.45,6.7,0.20),MAT_FLOOR,'SECTOR_B_PREVIEW',0.03)
-add_box('SectorBCeiling',(0,-16.45,3.85),(4.45,6.7,0.18),MAT_DARK,'SECTOR_B_PREVIEW',0.03)
-add_box('SectorBWallL',(-2.17,-16.45,1.9),(0.18,6.7,3.8),MAT_MID,'SECTOR_B_PREVIEW',0.03)
-add_box('SectorBWallR',(2.17,-16.45,1.9),(0.18,6.7,3.8),MAT_MID,'SECTOR_B_PREVIEW',0.03)
+add_box('SectorBFloor',(0,-16.45,-0.10),(4.68,6.9,0.20),MAT_FLOOR,'SECTOR_B_PREVIEW',0.03)
+add_box('SectorBCeiling',(0,-16.45,3.85),(4.68,6.7,0.18),MAT_DARK,'SECTOR_B_PREVIEW',0.03)
+add_box('SectorBWallL',(-2.34,-16.45,1.9),(0.18,6.7,3.8),MAT_MID,'SECTOR_B_PREVIEW',0.03)
+add_box('SectorBWallR',(2.34,-16.45,1.9),(0.18,6.7,3.8),MAT_MID,'SECTOR_B_PREVIEW',0.03)
 add_box('SectorBPortal',(0,-19.72,1.9),(4.25,0.20,3.8),MAT_DARK,'SECTOR_B_PREVIEW',0.04)
 for iy,y in enumerate([-14.0,-15.5,-17.0,-18.5]):
     add_box(f'SectorBLight_{iy}',(0,y,3.68),(2.8,0.10,0.06),MAT_CYAN,'SECTOR_B_PREVIEW',0.01)
@@ -171,8 +177,8 @@ def build_station(prefix, x, mat, label):
         add_cyl(prefix+f'_Cage{a}',(x+r*math.cos(rad),y+r*math.sin(rad),1.61),0.035,1.63,MAT_MID,'STATIONS',16)
     add_box(prefix+'_Header',(x,y,2.88),(1.72,0.82,0.34),MAT_DARK,'STATIONS',0.05)
     add_box(prefix+'_HeaderGlow',(x,y+0.43,2.88),(1.42,0.05,0.11),mat,'STATIONS',0.01)
-    add_box(prefix+'_Console',(x,y+0.73,1.02),(1.08,0.18,0.56),MAT_DARK,'STATIONS',0.04)
-    add_box(prefix+'_ConsoleGlow',(x,y+0.83,1.06),(0.82,0.03,0.30),MAT_CYAN,'STATIONS',0.01)
+    add_box(prefix+'_Console',(x,y+0.68,1.02),(1.08,0.18,0.56),MAT_DARK,'STATIONS',0.04)
+    add_box(prefix+'_ConsoleGlow',(x,y+0.77,1.06),(0.82,0.01,0.30),MAT_CYAN,'STATIONS',0.005)
     add_text(prefix+'_Label',label,(x,y+0.48,3.11),0.25,mat,rot=(math.radians(90),0,math.radians(180)))
     # Slim side pylons keep the total footprint within the Function station volume.
     for sx in (-0.80,0.80):
@@ -200,7 +206,7 @@ for sx in (-0.18,0.18):
 add_box('PlayerPackGlow',(0,6.14,1.5),(0.16,0.04,0.22),MAT_CYAN,'PLAYER_PROXY',0.02)
 # MUSCA Form proxy: readable companion silhouette, not a final biological/mechanical claim.
 MAT_WING = make_mat('M_Wing',(0.06,0.18,0.24),0.15,0.18,(0.08,0.55,0.9),2.2)
-mx,my,mz=1.75,6.20,1.62
+mx,my,mz=2.05,6.20,1.62
 add_uvsphere('MuscaBody',(mx,my,mz),(0.24,0.30,0.20),MAT_WHITE,'MUSCA_PROXY')
 add_uvsphere('MuscaCore',(mx,my-0.34,mz),(0.15,0.09,0.15),MAT_DARK,'MUSCA_PROXY')
 add_uvsphere('MuscaEye',(mx,my-0.46,mz),(0.10,0.04,0.10),MAT_CYAN,'MUSCA_PROXY')
@@ -254,7 +260,6 @@ for obj in list(collections['TEXT'].objects):
     bpy.ops.object.convert(target='MESH')
 
 BLEND = ROOT / 'GateLab_Form_v0.1.blend'
-bpy.ops.wm.save_as_mainfile(filepath=str(BLEND))
 
 def set_collection_render(name, visible):
     collections[name].hide_render = not visible
@@ -277,7 +282,11 @@ ring.hide_render=True; seam.hide_render=True
 render(cam_gate,'form_gate_open.png',player=False)
 left.location.x=lx; right.location.x=rx
 ring.hide_render=False; seam.hide_render=False
-set_collection_render('PLAYER_PROXY', True)
+set_collection_render('PLAYER_PROXY', False)
+scene.camera = cam_spawn
+scene.render.filepath = str(RENDERS / 'form_spawn.png')
+bpy.context.view_layer.update()
+bpy.ops.wm.save_as_mainfile(filepath=str(BLEND))
 def select_collections(names):
     bpy.ops.object.select_all(action='DESELECT')
     selected=[]
@@ -304,7 +313,7 @@ try:
     exports['musca_fbx']='PASS'
 except Exception as exc:
     exports['musca_fbx']='FAIL: '+repr(exc)
-repo=ROOT.parents[1]
+repo=SOURCE_ROOT.parents[1]
 layout_path=repo/'prototype3d'/'room-evidence'/'gate-lab-v0.2'/'room-layout.json'
 layout=json.loads(layout_path.read_text(encoding='utf-8'))
 checks={
@@ -358,3 +367,5 @@ print('FORM_RECEIPT='+str(receipt_path))
 print('FORM_OBJECTS='+str(receipt['objects_total']))
 print('FORM_BLOCKERS='+json.dumps(blockers))
 print('FORM_EXPORTS='+json.dumps(exports))
+if receipt['status'] != 'PASS' or len(artifacts) != len(artifact_paths):
+    raise RuntimeError('Form build postconditions failed; inspect the receipt')
