@@ -28,19 +28,34 @@
       "physical_gate_response_verified": true
     },
     "form": {
-      "status": "ready_for_human_approval",
-      "human_approval": null,
+      "status": "approved",
+      "human_approval": {
+        "status": "approved",
+        "date": "2026-09-18",
+        "source": "explicit_user_chat_approval",
+        "scope": "GateLab Form v0.31 prototype only",
+        "qualifier": "approved as a prototype; not final production art, combat feel, runtime approval, or release approval"
+      },
+      "approval_kind": "prototype_form_only",
       "authoring_surface": "Blender 5.2.0 LTS background workflow",
-      "candidate": "GateLab_Form_v0.1",
+      "candidate": "GateLab_Form_v0.31 prototype",
       "blender_version": "5.2.0 LTS",
       "build_receipt": "blender/gate-lab-v0.2/receipts/form-build.json",
       "readback_receipt": "blender/gate-lab-v0.2/receipts/form-readback.json",
+      "prototype_receipts": [
+        "blender/gate-lab-v0.2/receipts/form-v03-readback.json",
+        "blender/gate-lab-v0.2/receipts/character-art-v031.json",
+        "docs/status/2026-09-18-form-v031-recovery.md"
+      ],
       "visual_qc": "PASS_AS_FORM_CANDIDATE",
-      "unity_form_integration": "not_started"
+      "unity_form_integration": "prototype_verified",
+      "unity_scene": "unity/MUSCA-Gate3D/Assets/MUSCA/Scenes/GateLab_FormV03_Playable.unity",
+      "fresh_unity_editmode": "7/7 PASS"
     },
     "runtime": {
-      "status": "unity_function_runtime_verified",
-      "human_approval": null
+      "status": "unity_form_v031_prototype_verified",
+      "human_approval": null,
+      "note": "engineering verification only; runtime/gameplay feel not human-approved by this Form decision"
     }
   }
 }

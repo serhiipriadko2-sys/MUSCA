@@ -1,0 +1,20 @@
+{
+  "schema": "musca.character-art-v031.v1",
+  "status": "PASS",
+  "researcher_objects": 34,
+  "musca_objects": 32,
+  "artifacts": {
+    "GateLab_Form_v0.31.blend": {
+      "bytes": 2217728,
+      "sha256": "65c42ce5c463187d120fe8a739d1aec2cab8ec08d8da60f220813acbd7d655f0"
+    },
+    "Researcher_FormProxy_v0.31.fbx": {
+      "bytes": 273612,
+      "sha256": "527a72a38b4afb59a41b5ce893b63d6b27c233a6c974f42ba6ee0d1d803cff4f"
+    },
+    "MUSCA_FormProxy_v0.31.fbx": {
+      "bytes": 398204,
+      "sha256": "6ece6f4f3e4874c2e063595692963fab3e80a23e589a1426056fb87c078e7be6"
+    }
+  }
+}

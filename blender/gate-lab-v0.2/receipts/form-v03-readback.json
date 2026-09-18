@@ -1,0 +1,59 @@
+{
+  "schema": "musca.blender-form-v03-readback.v1",
+  "status": "PASS",
+  "blender_version": "5.2.0 LTS",
+  "source_function_layout_sha256": "0a7475b76059bc767ff497bb8970944b035b388c122e1b6745d64da047a8075b",
+  "checks": {
+    "room_id": true,
+    "metre_units": true,
+    "gate_leaf_dimensions": true,
+    "gate_leaf_positions": true,
+    "spawn_camera": true,
+    "amber_base": true,
+    "cobalt_base": true,
+    "static_route_clear": true,
+    "runtime_open_volume_clear": true,
+    "dynamic_gate_decor_parented": true,
+    "legacy_static_ring_excluded": true,
+    "exports_exist": true
+  },
+  "route_blockers": [],
+  "open_gate_blockers": [],
+  "dynamic_gate_children": [
+    "V03_DoorRib_L_0.4",
+    "V03_DoorRib_L_3.12",
+    "V03_DoorRib_L_3.52",
+    "V03_DoorRib_R_0.4",
+    "V03_DoorRib_R_3.12",
+    "V03_DoorRib_R_3.52",
+    "V03_GateInnerArc_L",
+    "V03_GateInnerArc_R",
+    "V03_GateOuterArc_L",
+    "V03_GateOuterArc_R"
+  ],
+  "exports": {
+    "environment": "PASS",
+    "musca": "PASS",
+    "researcher": "PASS"
+  },
+  "artifacts": {
+    "GateLab_Form_v0.3.blend": {
+      "bytes": 2187069,
+      "sha256": "2fc23c7491db6690c0791d78f3b27d5e1d81bf619600190776b26d684a02bbc3"
+    },
+    "GateLab_Form_v0.3.fbx": {
+      "bytes": 4900060,
+      "sha256": "196a0769cac68ff3d4cd0df68da46abd47be2ea505a73aba5603d31f026008d8"
+    },
+    "MUSCA_FormProxy_v0.3.fbx": {
+      "bytes": 262348,
+      "sha256": "a01c74828788f02f709b5f952c7d467d64417bb221a5d55991c3d91c81f2081d"
+    },
+    "Researcher_FormProxy_v0.3.fbx": {
+      "bytes": 204268,
+      "sha256": "bfb4dc3d61207b51ae2c067a1dbbb4ff68dbf24c405051de406f95180eae5819"
+    }
+  },
+  "objects_total": 423,
+  "claim_boundary": "Validates Form v0.3 geometry/export against frozen Gate Lab Function only; not human art approval or Unity runtime integration."
+}

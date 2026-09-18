@@ -6,6 +6,7 @@ namespace MUSCA.Gate3D
     public sealed class GateHud : MonoBehaviour
     {
         [SerializeField] private GateRuntime runtime;
+        [SerializeField] private bool compactMode;
 
         private GateSnapshot _snapshot;
         private bool _showLog;
@@ -33,6 +34,11 @@ namespace MUSCA.Gate3D
         public void Configure(GateRuntime value)
         {
             runtime = value;
+        }
+
+        public void SetCompactMode(bool value)
+        {
+            compactMode = value;
         }
 
         private void OnEnable()
@@ -79,9 +85,17 @@ namespace MUSCA.Gate3D
             float width = Screen.width / scale;
             float height = Screen.height / scale;
 
-            DrawObjectives(new Rect(22f, 22f, 370f, 265f));
-            DrawTelemetry(new Rect(width - 300f, 22f, 278f, 175f));
-            DrawHowItWorks(new Rect(22f, height - 199f, 370f, 177f));
+            if (compactMode)
+            {
+                DrawCompactObjective(new Rect(18f, 18f, 310f, 92f));
+                DrawCompactTelemetry(new Rect(width - 218f, 18f, 200f, 92f));
+            }
+            else
+            {
+                DrawObjectives(new Rect(22f, 22f, 370f, 265f));
+                DrawTelemetry(new Rect(width - 300f, 22f, 278f, 175f));
+                DrawHowItWorks(new Rect(22f, height - 199f, 370f, 177f));
+            }
             DrawReticle(width, height);
             DrawPrompt(width, height);
             DrawWorldMessage(width, height);
@@ -97,6 +111,33 @@ namespace MUSCA.Gate3D
             }
 
             GUI.matrix = previous;
+        }
+
+        private void DrawCompactObjective(Rect rect)
+        {
+            DrawPanel(rect);
+            int active = FirstIncompleteObjective();
+            string text = active switch
+            {
+                0 => "Дойти до источника сигнала",
+                1 => "Осмотреть AMBER и COBALT",
+                2 => "Решить: сканировать или рискнуть",
+                3 => "Выбрать нейтральный реагент",
+                4 => "Открыть шлюз",
+                _ => "Экспедиция завершена"
+            };
+            GUI.Label(new Rect(rect.x + 16f, rect.y + 12f, rect.width - 32f, 20f), "ЦЕЛЬ", _small);
+            GUI.Label(new Rect(rect.x + 16f, rect.y + 39f, rect.width - 32f, 38f), text, _strong);
+        }
+
+        private void DrawCompactTelemetry(Rect rect)
+        {
+            DrawPanel(rect);
+            float x = rect.x + 14f;
+            GUI.Label(new Rect(x, rect.y + 12f, rect.width - 28f, 20f), $"СИГНАЛ {runtime.SignalStrength}/10", _small);
+            DrawBar(new Rect(x, rect.y + 37f, rect.width - 28f, 8f), runtime.SignalStrength / 10f, Cyan);
+            GUI.Label(new Rect(x, rect.y + 56f, 90f, 20f), $"ЗАПАС {_snapshot.Cells}/2", _small);
+            for (int i = 0; i < 2; i++) DrawCell(new Rect(rect.x + 121f + i * 27f, rect.y + 59f, 20f, 10f), i < _snapshot.Cells);
         }
 
         private void DrawObjectives(Rect rect)
@@ -159,7 +200,9 @@ namespace MUSCA.Gate3D
                 return;
             }
 
-            Rect rect = new Rect(width / 2f - 285f, height - 150f, 570f, 48f);
+            Rect rect = compactMode
+                ? new Rect(width / 2f - 220f, height - 116f, 440f, 42f)
+                : new Rect(width / 2f - 285f, height - 150f, 570f, 48f);
             Color previous = GUI.color;
             GUI.color = new Color(0.06f, 0.11f, 0.14f, 0.95f);
             GUI.DrawTexture(rect, Texture2D.whiteTexture);
@@ -171,7 +214,9 @@ namespace MUSCA.Gate3D
 
         private void DrawWorldMessage(float width, float height)
         {
-            Rect rect = new Rect(width / 2f - 330f, height - 73f, 660f, 38f);
+            Rect rect = compactMode
+                ? new Rect(width / 2f - 255f, height - 62f, 510f, 32f)
+                : new Rect(width / 2f - 330f, height - 73f, 660f, 38f);
             Color previous = GUI.color;
             GUI.color = new Color(0.01f, 0.05f, 0.08f, 0.86f);
             GUI.DrawTexture(rect, Texture2D.whiteTexture);

@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/MUSCA/Scenes/GateLab.unity
-    guid: 9305eb423798b5f438f6ea86cb20d45d
+    path: Assets/MUSCA/Scenes/GateLab_FormV03_Playable.unity
+    guid: 3cef8ab13d136be4bb16d91fe152eb59
   m_configObjects: {}
