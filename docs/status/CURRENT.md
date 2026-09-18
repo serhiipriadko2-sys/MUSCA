@@ -5,96 +5,102 @@
 
 ## Репозиторий и интеграция
 
-[FACT @ GitHub] `main` = `ab9a8c14b19087f27c2da5b60f984dc359cd1a9d`.
+[FACT @ GitHub] База этой status-only правки: `main@f69be4d09768fffed3b97859031523eac48dc8e5`. После merge точный HEAD проверять fresh read-back.
 
-[FACT @ GitHub] PR #1–#6 merged. В `main` находятся foundation, visual interface,
-Unity Gate3D Function, Blender Form v0.1 candidate, ADR-0012 solo souls-like direction
-и актуализированный integration status.
+[FACT @ GitHub] PR #1–#6 и status PR #9 merged. В `main` находятся foundation,
+visual interface, Unity Gate3D Function, Blender Form v0.1 candidate, ADR-0012
+с single-player souls-like направлением и актуальный integration status.
 
-[FACT @ GitHub] Итоговый `main@ab9a8c1...` прошёл Windows/Python и Browser/Node CI.
+[FACT @ GitHub] `main@f69be4d...` прошёл Windows/Python и Browser/Node CI.
 
 [BOUNDARY] Merge в `main` не означает release, deployment, scientific reproduction,
 human playtest success или Form human approval.
 
 ## Игровое направление
 
-[FACT] Активная продуктовая цель: **single-player third-person action-RPG / souls-like**.
+[FACT] Активная продуктовая цель — **single-player third-person action-RPG / souls-like**.
 `Elden Ring` — ориентир по ощущению исследования, напряжению боя и ритму встреч,
 а не обязательство по размеру мира, контенту или копированию конкретных механик.
-
 [FACT] MMO, co-op, PvP, matchmaking, persistent-online world, server economy и
 live-service infrastructure исключены из активного roadmap. Их возврат требует нового ADR.
 
-[FACT] HUMAN ↔ ISKRA ↔ Bridge ↔ MUSCA остаётся архитектурным ядром. HUMAN принимает
-значимые решения; ISKRA интерпретирует наблюдения и гипотезы; Bridge остаётся typed/testable;
-MUSCA остаётся отдельным perception/sensorimotor участником. ISKRA/LLM не получает
-authoritative frame-level motor control.
+[FACT] HUMAN ↔ ISKRA ↔ Bridge ↔ MUSCA остаётся архитектурным ядром:
+HUMAN принимает значимые решения; ISKRA интерпретирует наблюдения и гипотезы;
+Bridge остаётся typed/testable boundary; MUSCA остаётся отдельным
+perception/sensorimotor участником. ISKRA/LLM не получает authoritative
+frame-level motor control.
 
-## Form v0.3 / v0.31 recovery lane
+## Form v0.3 / v0.31 — PR #7
 
 [FACT @ GitHub] Draft PR #7 `feature/form-v031-unity-gameplay` открыт от `main`;
-head = `abb6f5c2841705d16e70b1ac2693d8222323d1ed`; mergeable = true.
+head = `602dadd2c026d362d57aaf7191371e418345ba5c`; mergeable = true.
 
-[FACT] PR #7 восстанавливает Blender Form v0.3/v0.31 и Unity gameplay/third-person
-candidate из прежнего смешанного локального рабочего дерева. Он не включает Codex runtime
-или GUI-MCP tooling.
+[FACT] PR #7 восстанавливает Blender Form v0.3/v0.31 и Unity
+gameplay/third-person candidate. Codex Runtime и GUI-MCP tooling в него не входят.
 
-[FACT] PR #7 remote CI: Windows/Python SUCCESS и Browser/Node SUCCESS.
+[FACT @ GitHub] Текущий head PR #7 прошёл Windows/Python и Browser/Node CI.
 
-[FACT] Local QA для PR #7: Python 126 tests PASS; Blender static integrity PASS;
-Browser Function 8/8 PASS; Three.js check PASS; lifecycle validator PASS; npm audit
-0 vulnerabilities; diff check PASS.
+[FACT] Local QA PR #7:
+- Python: **126 tests PASS**;
+- Blender static integrity: **PASS**;
+- Browser Function: **8/8 PASS**;
+- Three.js check: **PASS**;
+- lifecycle validator: **PASS**;
+- npm audit: **0 vulnerabilities**;
+- `git diff origin/main..HEAD --check`: **PASS**;
+- v0.3/v0.31 Blender artifact byte/SHA-256 checks: **PASS**.
 
-[FACT] v0.3/v0.31 Blender artifacts совпали со своими receipt byte/SHA-256 значениями.
+[FACT] Fresh clean-worktree Unity 6000.6.1f1 verification: **PASS**.
+Обычный UPM IPC server запустился, package resolution завершился успешно,
+MUSCA runtime/editor/test assemblies скомпилировались, EditMode = **7/7 PASS**,
+failed=0, skipped=0, Unity exit code=0.
 
-[WARN] Fresh Unity batchmode EditMode run на clean PR #7 worktree не завершился:
-Unity Package Manager не открыл local IPC stream за 30 секунд. Нового clean-branch
-EditMode XML нет. Это environment/toolchain block, а не новый Unity test PASS или code FAIL.
+[FACT] Fresh test XML SHA-256:
+`1220e140ec2b833c9154da666f60fb68332f57bda253336e471c617e4ebd57fa`.
 
-[FACT] Более ранние v0.3/v0.31 Unity receipts фиксировали compile errors = 0 и 7/7
-EditMode tests, но остаются historical evidence.
+[FACT] Raw evidence хранится вне Git worktree:
+`E:\MUSCA_RESEARCH\evidence\2026-09-18-pr7-unity-fresh`.
 
+[FACT] Причина прежнего UPM IPC block локализована в process environment
+Remote Desktop Commander: отсутствовал `ProgramData`, из-за чего
+`UnityPackageManager.exe` падал в `getLocalConfigFolder()` с undefined path.
+Process-local `ProgramData=C:\ProgramData` восстановил обычный UPM запуск.
+
+[BOUNDARY] Системные Windows environment variables и project package config
+для этого исправления не менялись.
 [BOUNDARY] Form lifecycle остаётся `ready_for_human_approval`;
-Form `human_approval=null`. PR #7 не должен молча повышать Form до approved.
+Form `human_approval=null`. Engineering/CI PASS не является Form approval.
 
-## GUI tooling lane
+## GUI tooling — PR #8
 
 [FACT @ GitHub] Draft PR #8 `tooling/visible-gui-mcp-connectors` открыт от `main`;
 head = `3201eecb5537d6ab2047c02743effb4f611f07e5`; mergeable = true.
 
-[FACT] PR #8 содержит только ADR-0010 и pinned Unity MCP package/lock changes.
-Remote CI: Windows/Python SUCCESS и Browser/Node SUCCESS.
+[FACT @ GitHub] PR #8 прошёл Windows/Python и Browser/Node CI.
 
-[FACT local] В авторизованном исходном Unity project package cache наблюдался
-`com.coplaydev.unity-mcp` version `10.2.0` и соответствующие runtime/editor assemblies.
-
-[BOUNDARY] PR #8 — authoring/tooling surface; он не является gameplay approval,
-Form approval, remote exposure, deployment или Codex runtime activation.
+[BOUNDARY] PR #8 — отдельная authoring/tooling surface; он не является
+gameplay approval, Form approval, remote exposure, deployment или Codex activation.
 
 ## Workspace hygiene
 
-[FACT local] Основной каталог `C:\github\MUSCA` теперь находится на `main@ab9a8c1...`
-и имеет **0 Source Control changes**.
+[FACT local] Основной каталог `C:\github\MUSCA` находится на
+`main@f69be4d...` и после точечного restore EOL-only drift имеет **0 Git changes**.
 
-[FACT] Прежние 158 dirty entries были до очистки сохранены в external local snapshot:
+[FACT] Прежние 158 dirty entries сохранены до очистки в safety snapshot:
 `E:\MUSCA_RESEARCH\worktree-snapshots\2026-09-18-feature-blender-form-dirty-158`.
 
 [FACT] Snapshot manifest SHA-256:
 `8ba8c693f4db6ccc6e174455179c5d098dbfc25ffaaf4722322073a884a9d993`.
 
-[FACT] Legacy remote/local branch `feature/blender-form-gate-lab-v0.2` удалена только
-после доказательства, что её commit уже является предком `main`, а новая v0.3/v0.31
-линия сохранена в PR #7.
-
-[FACT] Twenty Unity PNG QA screenshots из старого dirty tree имели 0 runtime asset GUID
-references; они не добавлены в PR #7 и сохранены в safety snapshot.
-
+[FACT] Legacy `feature/blender-form-gate-lab-v0.2` удалена только после
+доказательства, что её commit уже является предком `main`.
 ## Local Codex Runtime
 
-[FACT local] Codex Runtime остаётся отдельной незавершённой линией в dedicated worktrees.
-Старые копии Codex-файлов из смешанного game tree не продвигались в PR #7/#8.
+[FACT local] Codex Runtime остаётся отдельной незавершённой линией
+в dedicated worktrees. Старые Codex-файлы из mixed game tree не продвигались в PR #7/#8.
 
-[BOUNDARY] Codex runtime не активирован этим cleanup. P4/P6 gates не считаются закрытыми.
+[BOUNDARY] Codex Runtime этим cleanup/Unity verification не активирован.
+P4/P6 gates не считаются закрытыми.
 
 ## Игровой эксперимент и science
 
@@ -111,8 +117,8 @@ topology advantage UNKNOWN.
 
 | Surface | State |
 | --- | --- |
-| `main` | CLEAN / integrated at `ab9a8c1...` |
-| PR #7 Form v0.3/v0.31 + Unity candidate | DRAFT / CI PASS / fresh Unity engine rerun BLOCKED by UPM IPC |
+| `main` | CLEAN; verified baseline `f69be4d...`; status-only merge may advance HEAD |
+| PR #7 Form v0.3/v0.31 + Unity candidate | DRAFT / remote CI PASS / fresh Unity 7/7 PASS |
 | PR #8 visible GUI MCP tooling | DRAFT / CI PASS |
 | Gate3D Function human approval | APPROVED |
 | Form human approval | PENDING / null |
@@ -124,14 +130,13 @@ topology advantage UNKNOWN.
 
 ## Следующие gates
 
-1. Для PR #7 добиться fresh clean-worktree Unity compile/EditMode verification после
-   устранения UPM IPC block; затем провести явный human Form review.
-2. PR #7 не merge до завершения соответствующего gate; CI alone недостаточно.
+1. Провести явный human Form review v0.3/v0.31: approve либо reject с конкретными правками.
+2. PR #7 не merge до explicit human Form decision; engineering/CI PASS не является Form approval.
 3. PR #8 рассматривать отдельно как tooling decision; не смешивать его с gameplay PR.
 4. Codex Runtime продолжать только в dedicated worktrees и по собственным P4/P6 gates.
 5. GATE-P01 и scientific R00 продолжать как независимые evidence lanes.
 
-∆ — 158 смешанных local changes разобраны на game/Form, GUI-tooling, Codex и snapshot-only evidence.
-D — external snapshot → clean branches → PR #7/#8 → remote CI PASS → primary worktree cleaned to main.
-Ω — высокая для repository hygiene и сохранности bytes; current Unity clean-branch engine verification остаётся неполной.
-Λ — пересмотреть после clean Unity rerun, explicit Form review, PR #7/#8 decisions или Codex P4/P6 evidence.
+∆ — UPM IPC block закрыт без системной мутации; PR #7 получил fresh Unity 7/7 PASS.
+D — root-cause ProgramData → process-local fix → clean import/resolve/compile → EditMode PASS → evidence hash/read-back.
+Ω — высокая для engineering verification PR #7; Form approval всё ещё отсутствует.
+Λ — пересмотреть после explicit Form review, PR #7/#8 decisions или нового runtime/gameplay evidence.
