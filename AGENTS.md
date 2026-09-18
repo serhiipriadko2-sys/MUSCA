@@ -102,13 +102,29 @@ A connectome result does not become a game-design fact.
 
 A fun gameplay result does not become neuroscience evidence.
 
-### I5 · The project is not an MMO yet
+### I5 · Current game target is single-player
 
-The first game milestone is a small vertical slice.
+The current product direction is a single-player third-person action-RPG / souls-like.
 
-No MMO infrastructure, global economy, persistent world, large-scale networking, live-service backend, or adaptive server ecology may be introduced merely because it exists in the long-term vision.
+`Elden Ring` is a reference for combat pressure, exploration feel and encounter cadence; it is not a commitment to copy its content, world size or production scale.
 
-Such expansion requires evidence from the preceding gameplay milestone and an ADR.
+MMO infrastructure, multiplayer networking, matchmaking, global economy, persistent online world, live-service backend and server-scale ecology are outside the active roadmap.
+
+Reintroducing multiplayer or MMO scope requires a new ADR with explicit evidence that the validated single-player game benefits from that cost.
+
+### I6 · Preserve the ISKRA/MUSCA experiential core
+
+Changing the game format from an MMO concept to a solo souls-like must not silently change the project identity.
+
+The following remain invariant unless a separate ADR explicitly changes them:
+
+* HUMAN owns meaningful decisions and may reject ISKRA advice;
+* ISKRA interprets observations, frames hypotheses, risks and intentions;
+* Bridge remains a typed, testable translation boundary;
+* MUSCA remains the fast perception / sensorimotor participant and owns only the immediate control explicitly delegated to its lower controller;
+* ISKRA/LLM does not gain direct authoritative frame-level motor control;
+* perception, uncertainty, contradiction and revision remain visible parts of the player experience;
+* research truth and game-design truth remain separate.
 
 ## 3. Epistemic labels
 
@@ -330,40 +346,45 @@ Any experiment that trains or rewires the connectome must be clearly separated f
 
 ## 12. Game track
 
-The game should prove its distinctive loop before scale.
+The game should prove its distinctive ISKRA/MUSCA loop inside a strong single-player action game before increasing content scale.
 
-Baseline loop:
+Baseline identity loop:
 
 ```text
-EXPLORE
+EXPLORE / FIGHT
 → MUSCA detects
 → ISKRA interprets or proposes a hypothesis
 → HUMAN decides
-→ WORLD responds
+→ WORLD / ENEMY responds
 → evidence updates
 → perception/understanding changes
 ```
 
-The first vertical slice should be able to run with a deterministic mock or scripted MUSCA backend.
+The existing deterministic or scripted MUSCA backend remains valid for isolating the perception/decision loop. A connectome backend is not required to prove combat feel or level design.
 
-The purpose is to test:
+Current product questions include both:
 
 ```text
 Does different machine perception cause the player
 to make meaningfully different decisions?
+
+Does the combat / exploration shell preserve the feeling
+that ISKRA and MUSCA are distinct partners rather than passive UI?
 ```
 
-Do not use MMO scale to hide a weak core loop.
+Do not use content scale, open-world size or visual production to hide a weak combat or perception loop.
 
 Suggested maturity ladder:
 
 ```text
-single-player vertical slice
-→ small co-op experiment
-→ persistent zone
-→ larger multiplayer architecture
-→ MMO candidate
+existing perception / decision slice
+→ single-player combat prototype
+→ compact interconnected souls-like zone
+→ multi-zone solo vertical slice with elite/boss encounter
+→ production-shaped single-player game
 ```
+
+Multiplayer, co-op and MMO are not planned promotion stages. Adding them later requires a new accepted ADR.
 
 Promotion between stages requires explicit acceptance criteria.
 
