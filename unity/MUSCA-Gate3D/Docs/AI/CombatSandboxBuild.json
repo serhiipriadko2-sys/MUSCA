@@ -1,0 +1,11 @@
+{
+    "status": "PASS",
+    "unityVersion": "6000.6.1f1",
+    "scene": "Assets/MUSCA/Scenes/CombatSandbox_v01.unity",
+    "output": "C:\\github\\MUSCA-combat-v01\\unity\\MUSCA-Gate3D\\Builds\\CombatSandbox-v01\\MUSCA-CombatSandbox-v01.exe",
+    "bytes": 173101585,
+    "exeBytes": 667136,
+    "exeSha256": "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
+    "errors": 0,
+    "warnings": 0
+}

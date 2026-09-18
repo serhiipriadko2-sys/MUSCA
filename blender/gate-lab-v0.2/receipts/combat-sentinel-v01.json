@@ -1,0 +1,36 @@
+{
+  "schema": "musca.combat-sentinel-v01.v1",
+  "status": "PASS",
+  "claim_boundary": "Procedural combat proxy only; not final enemy art, rig, animation, AI, or game-feel approval.",
+  "objects": 25,
+  "bounds_min": [
+    -0.42000001668930054,
+    -0.2405000003054738,
+    0.0
+  ],
+  "bounds_max": [
+    0.42000001668930054,
+    0.17000000178813934,
+    1.75
+  ],
+  "checks": {
+    "object_count": true,
+    "height_proxy": true,
+    "feet_near_floor": true,
+    "fbx_exists": true
+  },
+  "artifacts": {
+    "Combat_Sentinel_v0.1.blend": {
+      "bytes": 131034,
+      "sha256": "7c0fa3b2c5e2e0237f8a9c2fd25bb7438359cece0ac666b3ab85eef349db258d"
+    },
+    "Sentinel_FormProxy_v0.1.fbx": {
+      "bytes": 184908,
+      "sha256": "a289190192b8f12f45f1968c1796acaa3c5a83bc9ec5f9d2368bba97fb44cf52"
+    },
+    "sentinel_v01.png": {
+      "bytes": 735286,
+      "sha256": "12a929bc9899ea328bfea06c2758dae12fa262d57fe5cd2ece2ceee3f9d40fdf"
+    }
+  }
+}

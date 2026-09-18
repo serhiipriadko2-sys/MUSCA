@@ -1,0 +1,15 @@
+{
+    "status": "PASS",
+    "unityVersion": "6000.6.1f1",
+    "scene": "Assets/MUSCA/Scenes/CombatSandbox_v01.unity",
+    "missingScripts": 0,
+    "sentinelRenderers": 25,
+    "playerCombat": true,
+    "sentinelHealth": true,
+    "sentinelCollider": true,
+    "companionPresent": true,
+    "formEnvironmentPresent": true,
+    "gateHudDisabled": true,
+    "buildSettingsPreserved": true,
+    "findings": []
+}

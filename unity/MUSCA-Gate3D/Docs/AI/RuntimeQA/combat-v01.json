@@ -1,0 +1,13 @@
+{
+    "view": "combat",
+    "outcome": "Pending",
+    "cells": 2,
+    "signal": 3,
+    "x": 0.0,
+    "y": 0.0,
+    "z": 8.199999809265137,
+    "combatHits": 0,
+    "sentinelHealth": 100.0,
+    "sentinelAlive": true,
+    "screenshot": "C:\\github\\MUSCA-combat-v01\\unity\\runtime-qa\\combat.png"
+}
