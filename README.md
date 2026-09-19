@@ -179,8 +179,19 @@ Execution receipt SHA-256:
 Independent artifact verification also PASS; details are in
 `docs/status/2026-09-19-r01-execution.md`.
 
-This is **not** a Nature-figure reproduction, biological validation, topology-superiority
-result, commercial clearance or game-value result. R02/topology controls remain separate gates.
+This R01 result is **not** a Nature-figure reproduction, biological validation,
+topology-superiority result, commercial clearance or game-value result.
+
+[FACT local] SCI-R02 subsequently **PASSED** its separately preregistered bilateral
+200 Hz MN9-laterality reproduction gate: both 30-trial hemisphere conditions met all
+frozen primary criteria. Execution receipt SHA-256:
+`91016e6339a17ad658f48ba814d47d7e51f9866f7e010537bc0a57b86399668d`.
+Independent verification SHA-256:
+`1437673a23eb0650a39f100108953a79e64cf0e6b418060ac3c57d6180a086fe`.
+See `docs/status/2026-09-19-r02-execution.md`.
+
+R02 PASS is still **not** biological validation or topology-superiority evidence;
+matched-control topology testing remains a separate preregistered gate.
 
 ## SCI-R00 read-only preflight
 

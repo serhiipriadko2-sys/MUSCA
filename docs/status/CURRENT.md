@@ -126,8 +126,19 @@ Independent artifact verification: PASS, SHA-256
 `d932e6b31d4e1519dff37f31677f59bc411358276d44671ab46853e5a774f7bf`.
 
 [BOUNDARY] R01 PASS establishes local executable/structural validity only.
-R02 is NOT RUN; no Nature-figure reproduction, biological validation, topology
-advantage, commercial clearance or game-value claim follows. Topology advantage remains UNKNOWN.
+
+[FACT local] SCI-R02 bilateral 200 Hz MN9 laterality reproduction **PASSED** from the
+frozen preregistration at `0a7489e81bbb91db3438a6522d10ebacd4ebf078` and activation
+commit `713d784d21862180a7700a29b991cb96b1d654b6`. Both 30-trial hemisphere
+conditions satisfied every preregistered primary criterion. Execution receipt SHA-256:
+`91016e6339a17ad658f48ba814d47d7e51f9866f7e010537bc0a57b86399668d`.
+Independent artifact verification: PASS, SHA-256
+`1437673a23eb0650a39f100108953a79e64cf0e6b418060ac3c57d6180a086fe`.
+Details: `docs/status/2026-09-19-r02-execution.md`.
+
+[BOUNDARY] R02 PASS reproduces only the frozen bilateral 200 Hz MN9-laterality
+prediction in this Shiu/FlyWire-v630 model lineage. It does not establish biological
+validity or connectome-topology superiority. Topology advantage remains UNKNOWN.
 
 ## Current gates
 
@@ -143,7 +154,7 @@ advantage, commercial clearance or game-value claim follows. Topology advantage 
 | Final production art | NOT APPROVED |
 | Local Codex Runtime | SEPARATE / NOT ACTIVE |
 | GATE-P01 v0.1 | 1/12, no aggregate verdict |
-| SCI-R00 / R01 | PASS (strict env/data smoke) / PASS (30-trial execution gate only) |
+| SCI-R00 / R01 / R02 | PASS / PASS / PASS (R02 = bilateral 200 Hz MN9 prediction only) |
 | Release/deployment | NOT CLAIMED |
 
 ## Следующие gates
@@ -152,9 +163,9 @@ advantage, commercial clearance or game-value claim follows. Topology advantage 
    prototype и отдельный human runtime/gameplay-feel review.
 2. Не повышать prototype Form approval до production-art approval без нового explicit decision.
 3. Codex Runtime продолжать только в dedicated worktrees по собственным P4/P6 gates.
-4. GATE-P01 продолжать независимо; science после R01 двигать только через новый preregistered R02 либо matched-control topology experiment. R01 PASS не повышать до biological-result claim.
+4. GATE-P01 продолжать независимо; следующий science gate после R02 — только отдельный preregistered matched-control topology experiment. R02 PASS не повышать до topology-advantage или biological-validity claim.
 
-∆ — SCI-R00 и SCI-R01 engineering gates локально PASSED; R02 и topology comparison не запускались.
-D — frozen R01 manifest → 30-trial strict-env run → output/receipt hashes → independent artifact verification.
-Ω — высокая для local executability/provenance R00-R01; topology advantage и biological-result reproduction остаются UNKNOWN.
-Λ — пересмотреть после preregistered R02, matched-control topology experiment, remote CI/PR verification или artifact/hash drift.
+∆ — SCI-R00, SCI-R01 и узкий preregistered SCI-R02 локально PASSED; topology comparison ещё не запускался.
+D — R02 frozen prereg → activation → two 30-trial 200 Hz runs → raw/receipt hashes → independent recomputation PASS.
+Ω — высокая для local executability/provenance и узкой R02 MN9 reproduction; topology advantage и biological validity остаются UNKNOWN.
+Λ — пересмотреть после matched-control topology experiment, remote CI/PR verification, raw/reference/hash drift или выявленной ошибки анализа.
