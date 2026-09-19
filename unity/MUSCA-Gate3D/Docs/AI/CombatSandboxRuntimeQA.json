@@ -1,41 +1,16 @@
 {
   "schema": "musca.combat-sandbox-runtime-qa.v1",
-  "status": "PASS",
-  "unityVersion": "6000.6.1f1",
-  "scene": "Assets/MUSCA/Scenes/CombatSandbox_v01.unity",
-  "build": {
-    "exe": "Builds/CombatSandbox-v01/MUSCA-CombatSandbox-v01.exe",
-    "exeBytes": 667136,
-    "exeSha256": "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
-    "buildBytes": 173101585,
-    "errors": 0,
-    "warnings": 0
-  },
-  "checks": {
+  "status": "STALE_REQUIRES_RERUN",
+  "reason": "Human runtime evidence showed the player falling through the visible floor. The prior QA disabled player movement and therefore could not exercise gravity/collision.",
+  "previousEvidenceCommit": "5e92a1b982584133a28fc758ca2cb2168b0cd4c7",
+  "previousChecksStillHistoricalOnly": {
     "combatViewLaunch": true,
-    "combatTargetAliveAtStart": true,
-    "combatTargetStartHealth": 100.0,
     "combatStrikeHitCount": 1,
-    "combatStrikeTargetHealth": 66.0,
-    "combatStrikeTargetAlive": true
+    "combatStrikeTargetHealth": 66.0
   },
-  "artifacts": {
-    "RuntimeQA/combat-v01.png": {
-      "bytes": 552821,
-      "sha256": "d649919f6b1040337394f36b9dae36c08bc95b2943807ece42b9928c1ae0b159"
-    },
-    "RuntimeQA/combat-v01.json": {
-      "bytes": 297,
-      "sha256": "4a8fe9136cfce9c23522a1dad3af5635af75f3e0353194c8140bcf5109a954a3"
-    },
-    "RuntimeQA/combatstrike-v01.png": {
-      "bytes": 578917,
-      "sha256": "2acf884e69092ac0a45c946b51d595135495a355bc65711dc3740e8550950cd0"
-    },
-    "RuntimeQA/combatstrike-v01.json": {
-      "bytes": 308,
-      "sha256": "132a613f031faab82d091dca6002c4f1aab5b47a38f86b5c29194764d58656d0"
-    }
+  "requiredCurrentChecks": {
+    "grounding": "Spawn player 0.75 m above the combat floor, allow normal controller gravity, require grounded=true and y > -0.1.",
+    "combatStrike": "Reconfirm one melee hit and target health 100 -> 66 on the rebuilt executable."
   },
-  "claimBoundary": "Proves that the final Windows development build launched, rendered the combat sandbox, and a deterministic melee strike registered one Sentinel target and reduced health from 100 to 66. It does not prove enemy AI, dodge/parry, final animation, human game feel, performance quality, or souls-like quality."
+  "claimBoundary": "Previous runtime artifacts document the pre-fix build only and do not validate current collision behavior."
 }
