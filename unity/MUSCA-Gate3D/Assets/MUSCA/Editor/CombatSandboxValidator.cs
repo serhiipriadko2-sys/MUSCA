@@ -25,6 +25,7 @@ namespace MUSCA.Gate3D.Editor
             public bool sentinelCollider;
             public bool companionPresent;
             public bool formEnvironmentPresent;
+            public bool collisionFloorEnabled;
             public bool gateHudDisabled;
             public bool buildSettingsPreserved;
             public string[] findings;
@@ -39,6 +40,7 @@ namespace MUSCA.Gate3D.Editor
             GameObject sandbox = FindRoot(scene, "CombatSandbox_v01", findings);
             GameObject companion = FindRoot(scene, "MUSCA Companion", findings);
             GameObject formEnvironment = FindRoot(scene, "FormV03_Environment", findings);
+            GameObject functionEnvironment = FindRoot(scene, "Function_Environment", findings);
 
             PlayerMeleeCombat combat = player != null ? player.GetComponent<PlayerMeleeCombat>() : null;
             if (combat == null) findings.Add("player melee combat missing");
@@ -55,6 +57,11 @@ namespace MUSCA.Gate3D.Editor
             if (companion == null || companion.GetComponent<MuscaCompanion>() == null)
                 findings.Add("MUSCA companion missing");
             if (formEnvironment == null) findings.Add("Form v0.3 environment missing");
+
+            Transform floor = functionEnvironment != null ? functionEnvironment.transform.Find("Floor") : null;
+            BoxCollider floorCollider = floor != null ? floor.GetComponent<BoxCollider>() : null;
+            bool collisionFloorEnabled = floorCollider != null && floorCollider.enabled;
+            if (!collisionFloorEnabled) findings.Add("authoritative Function floor collider missing or disabled");
 
             GateHud gateHud = UnityEngine.Object.FindAnyObjectByType<GateHud>(FindObjectsInactive.Include);
             bool gateHudDisabled = gateHud != null && !gateHud.enabled;
@@ -87,6 +94,7 @@ namespace MUSCA.Gate3D.Editor
                 sentinelCollider = collider != null,
                 companionPresent = companion != null && companion.GetComponent<MuscaCompanion>() != null,
                 formEnvironmentPresent = formEnvironment != null,
+                collisionFloorEnabled = collisionFloorEnabled,
                 gateHudDisabled = gateHudDisabled,
                 buildSettingsPreserved = buildSettingsPreserved,
                 findings = findings.ToArray()
