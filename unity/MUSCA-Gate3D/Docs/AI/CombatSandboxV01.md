@@ -25,11 +25,15 @@ The sandbox is not a claim that MUSCA already has souls-like combat. Its purpose
 
 ## Automated evidence
 
+Pre-fix evidence at commit `5e92a1b982584133a28fc758ca2cb2168b0cd4c7` showed:
+
 - Blender procedural Sentinel validation: PASS.
-- Unity scene validation: PASS, zero missing scripts, existing project Build Settings preserved.
+- Unity scene validation: PASS, but the validator did not assert floor collision.
 - EditMode tests: 11/11 PASS, including four combat-foundation tests.
 - Windows Development build: PASS, 0 errors, 0 warnings.
-- Runtime QA: PASS. Final build launches; deterministic strike hits exactly one Sentinel and changes health from 100 to 66.
+- Runtime QA confirmed the melee path, but it disabled player movement and therefore did not exercise gravity/collision.
+
+Human playtesting then falsified the implied floor-collision assumption: the player could fall through the visible floor. The collision proxy, validator and runtime grounding QA have been corrected on the feature branch. Current Unity validation, Windows rebuild and grounding runtime QA are **pending rerun**.
 
 See:
 
@@ -39,7 +43,7 @@ See:
 
 ## Claim boundary
 
-This version proves an executable combat foundation only.
+The pre-fix build proved the executable melee foundation but did not prove player grounding. The current collision fix must be rebuilt and revalidated before the updated branch can claim runtime PASS.
 
 It does **not** prove:
 
