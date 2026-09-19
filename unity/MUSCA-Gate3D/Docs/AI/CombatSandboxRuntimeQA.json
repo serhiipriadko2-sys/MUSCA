@@ -1,0 +1,16 @@
+{
+  "schema": "musca.combat-sandbox-runtime-qa.v1",
+  "status": "STALE_REQUIRES_RERUN",
+  "reason": "Human runtime evidence showed the player falling through the visible floor. The prior QA disabled player movement and therefore could not exercise gravity/collision.",
+  "previousEvidenceCommit": "5e92a1b982584133a28fc758ca2cb2168b0cd4c7",
+  "previousChecksStillHistoricalOnly": {
+    "combatViewLaunch": true,
+    "combatStrikeHitCount": 1,
+    "combatStrikeTargetHealth": 66.0
+  },
+  "requiredCurrentChecks": {
+    "grounding": "Spawn player 0.75 m above the combat floor, allow normal controller gravity, require grounded=true and y > -0.1.",
+    "combatStrike": "Reconfirm one melee hit and target health 100 -> 66 on the rebuilt executable."
+  },
+  "claimBoundary": "Previous runtime artifacts document the pre-fix build only and do not validate current collision behavior."
+}

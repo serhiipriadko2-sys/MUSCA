@@ -1,0 +1,7 @@
+{
+  "status": "STALE_REQUIRES_REBUILD",
+  "reason": "The combat floor collision fix changed scene/source after the last Windows build.",
+  "previousEvidenceCommit": "5e92a1b982584133a28fc758ca2cb2168b0cd4c7",
+  "previousExeSha256": "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
+  "claimBoundary": "Do not treat the previous Windows build as evidence for the current collision-fix HEAD. Rebuild and revalidate in Unity."
+}
