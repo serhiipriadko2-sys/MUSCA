@@ -27,6 +27,9 @@ namespace MUSCA.Gate3D.Editor
             }
 
             GameObject player = FindRoot(scene, "Player");
+            GameObject functionEnvironment = FindRoot(scene, "Function_Environment");
+            SetColliders(functionEnvironment, true);
+
             FirstPersonController movement = player.GetComponent<FirstPersonController>();
             Camera camera = player.GetComponentInChildren<Camera>(true);
             if (movement == null || camera == null)
@@ -112,6 +115,14 @@ namespace MUSCA.Gate3D.Editor
                 if (root.name == name) return root;
             }
             throw new InvalidOperationException($"Missing root: {name}");
+        }
+
+        private static void SetColliders(GameObject root, bool enabled)
+        {
+            foreach (Collider collider in root.GetComponentsInChildren<Collider>(true))
+            {
+                collider.enabled = enabled;
+            }
         }
 
         private static GameObject InstantiateModel(string path, string name)
