@@ -34,7 +34,9 @@ namespace MUSCA.Gate3D.Editor
             functionEnvironment.name = "Function_Environment";
 
             SetRenderers(functionEnvironment, false);
-            SetColliders(functionEnvironment, false);
+            // Keep the already-validated Function geometry as the authoritative physics proxy.
+            // Form v0.3 remains the visible shell; imported mesh colliders are supplemental only.
+            SetColliders(functionEnvironment, true);
             SetRenderers(companion, false);
 
             GameObject formEnvironment = InstantiateModel($"{ArtRoot}/GateLab_Form_v0.3.fbx", "FormV03_Environment");
