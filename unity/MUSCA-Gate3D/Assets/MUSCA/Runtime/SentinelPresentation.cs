@@ -8,16 +8,25 @@ namespace MUSCA.Gate3D
         [SerializeField] private Transform visualRoot;
         [SerializeField] private Transform spearRoot;
 
-        private Transform _leftArm;
-        private Transform _rightArm;
-        private Transform _leftThigh;
-        private Transform _rightThigh;
+        private Transform _leftShoulder;
+        private Transform _rightShoulder;
+        private Transform _leftElbow;
+        private Transform _rightElbow;
+        private Transform _leftHip;
+        private Transform _rightHip;
+        private Transform _leftKnee;
+        private Transform _rightKnee;
         private Transform _torso;
         private Transform _head;
-        private Quaternion _leftArmBase;
-        private Quaternion _rightArmBase;
-        private Quaternion _leftThighBase;
-        private Quaternion _rightThighBase;
+
+        private Quaternion _leftShoulderBase;
+        private Quaternion _rightShoulderBase;
+        private Quaternion _leftElbowBase;
+        private Quaternion _rightElbowBase;
+        private Quaternion _leftHipBase;
+        private Quaternion _rightHipBase;
+        private Quaternion _leftKneeBase;
+        private Quaternion _rightKneeBase;
         private Quaternion _torsoBase;
         private Quaternion _headBase;
         private Vector3 _visualBasePosition;
@@ -48,21 +57,55 @@ namespace MUSCA.Gate3D
         private void ResolveParts()
         {
             if (visualRoot == null) return;
-            _leftArm = FindDeep(visualRoot, "SV01_UpperArm_-1");
-            _rightArm = FindDeep(visualRoot, "SV01_UpperArm_1");
-            _leftThigh = FindDeep(visualRoot, "SV01_Thigh_-1");
-            _rightThigh = FindDeep(visualRoot, "SV01_Thigh_1");
-            _torso = FindDeep(visualRoot, "SV01_Torso");
-            _head = FindDeep(visualRoot, "SV01_Head");
+
+            _leftShoulder = Prefer(
+                "SV04_Shoulder_L", "SV01_UpperArm_-1");
+            _rightShoulder = Prefer(
+                "SV04_Shoulder_R", "SV01_UpperArm_1");
+            _leftElbow = FindDeep(visualRoot, "SV04_Elbow_L");
+            _rightElbow = FindDeep(visualRoot, "SV04_Elbow_R");
+            _leftHip = Prefer(
+                "SV04_Hip_L", "SV01_Thigh_-1");
+            _rightHip = Prefer(
+                "SV04_Hip_R", "SV01_Thigh_1");
+            _leftKnee = Prefer(
+                "SV04_Knee_L", "SV01_Shin_-1");
+            _rightKnee = Prefer(
+                "SV04_Knee_R", "SV01_Shin_1");
+            _torso = Prefer(
+                "SV04_TorsoPivot", "SV01_Torso");
+            _head = Prefer(
+                "SV04_HeadPivot", "SV01_Head");
+        }
+
+        private Transform Prefer(string primary, string fallback)
+        {
+            Transform value = FindDeep(visualRoot, primary);
+            return value != null ? value : FindDeep(visualRoot, fallback);
         }
 
         private void CapturePose()
         {
-            if (visualRoot != null) _visualBasePosition = visualRoot.localPosition;
-            if (_leftArm != null) _leftArmBase = _leftArm.localRotation;
-            if (_rightArm != null) _rightArmBase = _rightArm.localRotation;
-            if (_leftThigh != null) _leftThighBase = _leftThigh.localRotation;
-            if (_rightThigh != null) _rightThighBase = _rightThigh.localRotation;
+            if (visualRoot != null)
+            {
+                _visualBasePosition = visualRoot.localPosition;
+            }
+            if (_leftShoulder != null)
+                _leftShoulderBase = _leftShoulder.localRotation;
+            if (_rightShoulder != null)
+                _rightShoulderBase = _rightShoulder.localRotation;
+            if (_leftElbow != null)
+                _leftElbowBase = _leftElbow.localRotation;
+            if (_rightElbow != null)
+                _rightElbowBase = _rightElbow.localRotation;
+            if (_leftHip != null)
+                _leftHipBase = _leftHip.localRotation;
+            if (_rightHip != null)
+                _rightHipBase = _rightHip.localRotation;
+            if (_leftKnee != null)
+                _leftKneeBase = _leftKnee.localRotation;
+            if (_rightKnee != null)
+                _rightKneeBase = _rightKnee.localRotation;
             if (_torso != null) _torsoBase = _torso.localRotation;
             if (_head != null) _headBase = _head.localRotation;
             if (spearRoot != null)
@@ -76,73 +119,171 @@ namespace MUSCA.Gate3D
         {
             if (brain == null || visualRoot == null) return;
 
-            _phase += Time.deltaTime * (brain.State == SentinelCombatState.Approach ? 7f : 2f);
-            float sine = Mathf.Sin(_phase);
-            float blend = 1f - Mathf.Exp(-12f * Time.deltaTime);
+            float stateSpeed = brain.State == SentinelCombatState.Approach
+                ? 6.3f
+                : 2.2f;
+            _phase += Time.deltaTime * stateSpeed;
+            float cycle = Mathf.Sin(_phase);
+            float blend = 1f - Mathf.Exp(-16f * Time.deltaTime);
 
-            float leftArmX = 0f;
-            float rightArmX = 0f;
-            float leftThighX = 0f;
-            float rightThighX = 0f;
-            float torsoX = 0f;
-            float torsoZ = 0f;
-            float headY = sine * 2f;
-            float bob = Mathf.Abs(sine) * 0.008f;
+            float leftShoulderX = 0f;
+            float rightShoulderX = 0f;
+            float leftElbowX = 10f;
+            float rightElbowX = 10f;
+            float leftHipX = 0f;
+            float rightHipX = 0f;
+            float leftKneeX = 0f;
+            float rightKneeX = 0f;
+            Vector3 torsoEuler = Vector3.zero;
+            Vector3 headEuler = new Vector3(0f, cycle * 1.5f, 0f);
+            float bob = 0f;
             Vector3 spearOffset = Vector3.zero;
             Vector3 spearEuler = Vector3.zero;
 
             switch (brain.State)
             {
                 case SentinelCombatState.Approach:
-                    float walk = sine * 24f;
-                    leftArmX = walk;
-                    rightArmX = -walk;
-                    leftThighX = -walk * 0.72f;
-                    rightThighX = walk * 0.72f;
-                    torsoZ = sine * 2.5f;
-                    bob = Mathf.Abs(sine) * 0.025f;
+                {
+                    float stride = cycle;
+                    leftShoulderX = stride * 22f;
+                    rightShoulderX = -stride * 22f;
+                    leftElbowX = 12f + Mathf.Max(0f, -stride) * 16f;
+                    rightElbowX = 12f + Mathf.Max(0f, stride) * 16f;
+                    leftHipX = -stride * 28f;
+                    rightHipX = stride * 28f;
+                    leftKneeX = Mathf.Max(0f, stride) * 34f;
+                    rightKneeX = Mathf.Max(0f, -stride) * 34f;
+                    torsoEuler = new Vector3(
+                        2.5f, -stride * 5f, stride * 3f);
+                    bob = Mathf.Abs(stride) * 0.035f;
                     break;
+                }
 
                 case SentinelCombatState.Telegraph:
-                    rightArmX = -68f;
-                    leftArmX = 18f;
-                    leftThighX = 10f;
-                    rightThighX = -6f;
-                    torsoX = -10f;
-                    spearOffset = new Vector3(0f, 0.10f, -0.08f);
-                    spearEuler = new Vector3(-58f, 0f, 0f);
-                    headY = 0f;
+                {
+                    float t = Smooth01(brain.StateProgress);
+                    float settle = Mathf.Sin(t * Mathf.PI);
+                    rightShoulderX = Mathf.Lerp(0f, -102f, t);
+                    rightElbowX = Mathf.Lerp(10f, 52f, t);
+                    leftShoulderX = Mathf.Lerp(0f, 28f, t);
+                    leftElbowX = Mathf.Lerp(10f, 30f, t);
+                    leftHipX = Mathf.Lerp(0f, 18f, t);
+                    rightHipX = Mathf.Lerp(0f, -12f, t);
+                    leftKneeX = Mathf.Lerp(0f, 18f, t);
+                    rightKneeX = Mathf.Lerp(0f, 28f, t);
+                    torsoEuler = new Vector3(
+                        Mathf.Lerp(0f, -14f, t),
+                        Mathf.Lerp(0f, -24f, t),
+                        Mathf.Lerp(0f, 8f, t));
+                    headEuler = new Vector3(
+                        Mathf.Lerp(0f, 4f, t),
+                        Mathf.Lerp(0f, 12f, t),
+                        0f);
+                    bob = -0.045f * settle;
+                    spearOffset = new Vector3(
+                        0.03f * t, 0.18f * t, -0.16f * t);
+                    spearEuler = new Vector3(
+                        Mathf.Lerp(0f, -72f, t),
+                        Mathf.Lerp(0f, -14f, t),
+                        Mathf.Lerp(0f, 8f, t));
                     break;
+                }
 
                 case SentinelCombatState.Recovery:
-                    rightArmX = 48f;
-                    leftArmX = -12f;
-                    leftThighX = -8f;
-                    rightThighX = 12f;
-                    torsoX = 12f;
-                    spearOffset = new Vector3(0f, -0.05f, 0.16f);
-                    spearEuler = new Vector3(52f, 0f, 0f);
-                    headY = 0f;
+                {
+                    float t = Smooth01(brain.StateProgress);
+                    float inverse = 1f - t;
+                    rightShoulderX = 72f * inverse;
+                    rightElbowX = 36f * inverse + 10f;
+                    leftShoulderX = -18f * inverse;
+                    leftElbowX = 22f * inverse + 10f;
+                    leftHipX = -12f * inverse;
+                    rightHipX = 14f * inverse;
+                    leftKneeX = 12f * inverse;
+                    rightKneeX = 8f * inverse;
+                    torsoEuler = new Vector3(
+                        16f * inverse,
+                        22f * inverse,
+                        -8f * inverse);
+                    headEuler = new Vector3(
+                        -4f * inverse,
+                        -8f * inverse,
+                        0f);
+                    spearOffset = new Vector3(
+                        0f, -0.08f * inverse, 0.22f * inverse);
+                    spearEuler = new Vector3(
+                        58f * inverse,
+                        10f * inverse,
+                        -6f * inverse);
                     break;
+                }
             }
 
             visualRoot.localPosition = Vector3.Lerp(
-                visualRoot.localPosition, _visualBasePosition + Vector3.up * bob, blend);
-            Apply(_leftArm, _leftArmBase, new Vector3(leftArmX, 0f, 0f), blend);
-            Apply(_rightArm, _rightArmBase, new Vector3(rightArmX, 0f, 0f), blend);
-            Apply(_leftThigh, _leftThighBase, new Vector3(leftThighX, 0f, 0f), blend);
-            Apply(_rightThigh, _rightThighBase, new Vector3(rightThighX, 0f, 0f), blend);
-            Apply(_torso, _torsoBase, new Vector3(torsoX, 0f, torsoZ), blend);
-            Apply(_head, _headBase, new Vector3(0f, headY, 0f), blend);
+                visualRoot.localPosition,
+                _visualBasePosition + Vector3.up * bob,
+                blend);
+
+            Apply(
+                _leftShoulder,
+                _leftShoulderBase,
+                new Vector3(leftShoulderX, 0f, 0f),
+                blend);
+            Apply(
+                _rightShoulder,
+                _rightShoulderBase,
+                new Vector3(rightShoulderX, 0f, 0f),
+                blend);
+            Apply(
+                _leftElbow,
+                _leftElbowBase,
+                new Vector3(leftElbowX, 0f, 0f),
+                blend);
+            Apply(
+                _rightElbow,
+                _rightElbowBase,
+                new Vector3(rightElbowX, 0f, 0f),
+                blend);
+            Apply(
+                _leftHip,
+                _leftHipBase,
+                new Vector3(leftHipX, 0f, 0f),
+                blend);
+            Apply(
+                _rightHip,
+                _rightHipBase,
+                new Vector3(rightHipX, 0f, 0f),
+                blend);
+            Apply(
+                _leftKnee,
+                _leftKneeBase,
+                new Vector3(leftKneeX, 0f, 0f),
+                blend);
+            Apply(
+                _rightKnee,
+                _rightKneeBase,
+                new Vector3(rightKneeX, 0f, 0f),
+                blend);
+            Apply(_torso, _torsoBase, torsoEuler, blend);
+            Apply(_head, _headBase, headEuler, blend);
 
             if (spearRoot != null)
             {
                 spearRoot.localPosition = Vector3.Lerp(
-                    spearRoot.localPosition, _spearBasePosition + spearOffset, blend);
-                Quaternion desired = _spearBaseRotation * Quaternion.Euler(spearEuler);
+                    spearRoot.localPosition,
+                    _spearBasePosition + spearOffset,
+                    blend);
+                Quaternion desired =
+                    _spearBaseRotation * Quaternion.Euler(spearEuler);
                 spearRoot.localRotation = Quaternion.Slerp(
                     spearRoot.localRotation, desired, blend);
             }
+        }
+
+        private static float Smooth01(float value)
+        {
+            float t = Mathf.Clamp01(value);
+            return t * t * (3f - 2f * t);
         }
 
         private static void Apply(
@@ -150,13 +291,15 @@ namespace MUSCA.Gate3D
         {
             if (target == null) return;
             Quaternion desired = basis * Quaternion.Euler(euler);
-            target.localRotation = Quaternion.Slerp(target.localRotation, desired, blend);
+            target.localRotation = Quaternion.Slerp(
+                target.localRotation, desired, blend);
         }
 
         private static Transform FindDeep(Transform root, string name)
         {
             if (root == null) return null;
-            foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+            foreach (Transform child in
+                     root.GetComponentsInChildren<Transform>(true))
             {
                 if (child.name == name) return child;
             }

@@ -28,12 +28,15 @@ namespace MUSCA.Gate3D.Editor
             public bool dodgeBindingCorrect;
             public bool lockBindingCorrect;
             public bool lockMiddleMouseEnabled;
+            public bool playerProxyRigPresent;
             public bool sentinelHealth;
             public bool sentinelBrain;
             public bool sentinelPresentation;
             public bool kaelPrediction;
             public bool crownPresentation;
             public bool telegraphPresent;
+            public bool predictionTelegraphPresent;
+            public bool sentinelProxyRigPresent;
             public bool sentinelCollider;
             public bool sentinelColliderWorldSizeValid;
             public bool sentinelOverlapsPlayer;
@@ -86,6 +89,25 @@ namespace MUSCA.Gate3D.Editor
             if (!lockBindingCorrect) findings.Add("lock-on keyboard binding is not Q");
             if (!lockMiddleMouseEnabled) findings.Add("lock-on middle mouse binding is disabled");
 
+            Transform playerVisual = player != null
+                ? FindDeep(player.transform, "FormV03_Researcher_Visual")
+                : null;
+            Transform playerRig = playerVisual != null
+                ? FindDeep(playerVisual, "P04_ProxyRig")
+                : null;
+            bool playerProxyRigPresent =
+                playerRig != null &&
+                FindDeep(playerRig, "P04_Shoulder_L") != null &&
+                FindDeep(playerRig, "P04_Shoulder_R") != null &&
+                FindDeep(playerRig, "P04_Elbow_L") != null &&
+                FindDeep(playerRig, "P04_Elbow_R") != null &&
+                FindDeep(playerRig, "P04_Hip_L") != null &&
+                FindDeep(playerRig, "P04_Hip_R") != null &&
+                FindDeep(playerRig, "P04_Knee_L") != null &&
+                FindDeep(playerRig, "P04_Knee_R") != null;
+            if (!playerProxyRigPresent)
+                findings.Add("player proxy pivot rig incomplete");
+
             Transform sentinelTransform = sandbox != null ? sandbox.transform.Find("Sentinel_v01") : null;
             Transform sentinelVisual = sentinelTransform != null ? sentinelTransform.Find("SentinelVisual") : null;
             CombatDamageReceiver health = sentinelTransform != null ? sentinelTransform.GetComponent<CombatDamageReceiver>() : null;
@@ -94,7 +116,25 @@ namespace MUSCA.Gate3D.Editor
             KaelPredictionProbe prediction = sentinelTransform != null ? sentinelTransform.GetComponent<KaelPredictionProbe>() : null;
             KaelCrownPresentation crownPresentation = sentinelTransform != null ?
                 sentinelTransform.GetComponentInChildren<KaelCrownPresentation>(true) : null;
-            Transform telegraph = sandbox != null ? sandbox.transform.Find("SentinelTelegraph") : null;
+            Transform telegraph = sandbox != null
+                ? sandbox.transform.Find("SentinelTelegraph")
+                : null;
+            Transform predictionTelegraph = sandbox != null
+                ? sandbox.transform.Find("KaelPredictionTelegraph")
+                : null;
+            Transform sentinelRig = sentinelVisual != null
+                ? FindDeep(sentinelVisual, "SV04_ProxyRig")
+                : null;
+            bool sentinelProxyRigPresent =
+                sentinelRig != null &&
+                FindDeep(sentinelRig, "SV04_Shoulder_L") != null &&
+                FindDeep(sentinelRig, "SV04_Shoulder_R") != null &&
+                FindDeep(sentinelRig, "SV04_Elbow_L") != null &&
+                FindDeep(sentinelRig, "SV04_Elbow_R") != null &&
+                FindDeep(sentinelRig, "SV04_Hip_L") != null &&
+                FindDeep(sentinelRig, "SV04_Hip_R") != null &&
+                FindDeep(sentinelRig, "SV04_Knee_L") != null &&
+                FindDeep(sentinelRig, "SV04_Knee_R") != null;
             CapsuleCollider collider = sentinelTransform != null ? sentinelTransform.GetComponent<CapsuleCollider>() : null;
             int rendererCount = sentinelTransform != null ?
                 sentinelTransform.GetComponentsInChildren<Renderer>(true).Length : 0;
@@ -107,14 +147,18 @@ namespace MUSCA.Gate3D.Editor
             if (prediction == null) findings.Add("Kael prediction probe missing");
             if (crownPresentation == null) findings.Add("Kael crown presentation missing");
             if (telegraph == null) findings.Add("sentinel telegraph marker missing");
+            if (predictionTelegraph == null)
+                findings.Add("Kael prediction telegraph marker missing");
+            if (!sentinelProxyRigPresent)
+                findings.Add("sentinel proxy pivot rig incomplete");
             if (collider == null) findings.Add("sentinel collider missing");
             if (rendererCount == 0) findings.Add("sentinel renderers missing");
 
             Vector3 sentinelColliderWorldSize = collider != null ? collider.bounds.size : Vector3.zero;
             bool sentinelColliderWorldSizeValid = collider != null &&
-                sentinelColliderWorldSize.x >= 0.80f && sentinelColliderWorldSize.x <= 1.15f &&
-                sentinelColliderWorldSize.y >= 1.90f && sentinelColliderWorldSize.y <= 2.20f &&
-                sentinelColliderWorldSize.z >= 0.80f && sentinelColliderWorldSize.z <= 1.15f;
+                sentinelColliderWorldSize.x >= 1.00f && sentinelColliderWorldSize.x <= 1.30f &&
+                sentinelColliderWorldSize.y >= 2.50f && sentinelColliderWorldSize.y <= 2.82f &&
+                sentinelColliderWorldSize.z >= 1.00f && sentinelColliderWorldSize.z <= 1.30f;
             if (!sentinelColliderWorldSizeValid)
                 findings.Add($"sentinel collider world size invalid: {sentinelColliderWorldSize}");
 
@@ -125,9 +169,9 @@ namespace MUSCA.Gate3D.Editor
 
             Vector3 sentinelVisualWorldSize = ComputeRendererSize(sentinelVisual);
             bool sentinelVisualUpright =
-                sentinelVisualWorldSize.y >= 1.95f &&
-                sentinelVisualWorldSize.y > sentinelVisualWorldSize.x * 1.6f &&
-                sentinelVisualWorldSize.y > sentinelVisualWorldSize.z * 1.6f;
+                sentinelVisualWorldSize.y >= 2.45f &&
+                sentinelVisualWorldSize.y > sentinelVisualWorldSize.x * 1.45f &&
+                sentinelVisualWorldSize.y > sentinelVisualWorldSize.z * 1.45f;
             if (!sentinelVisualUpright)
                 findings.Add($"sentinel visual is not upright: {sentinelVisualWorldSize}");
 
@@ -196,12 +240,15 @@ namespace MUSCA.Gate3D.Editor
                 dodgeBindingCorrect = dodgeBindingCorrect,
                 lockBindingCorrect = lockBindingCorrect,
                 lockMiddleMouseEnabled = lockMiddleMouseEnabled,
+                playerProxyRigPresent = playerProxyRigPresent,
                 sentinelHealth = health != null,
                 sentinelBrain = brain != null,
                 sentinelPresentation = presentation != null,
                 kaelPrediction = prediction != null,
                 crownPresentation = crownPresentation != null,
                 telegraphPresent = telegraph != null,
+                predictionTelegraphPresent = predictionTelegraph != null,
+                sentinelProxyRigPresent = sentinelProxyRigPresent,
                 sentinelCollider = collider != null,
                 sentinelColliderWorldSizeValid = sentinelColliderWorldSizeValid,
                 sentinelOverlapsPlayer = sentinelOverlapsPlayer,
@@ -246,6 +293,16 @@ namespace MUSCA.Gate3D.Editor
             SerializedObject serialized = new SerializedObject(target);
             SerializedProperty property = serialized.FindProperty(fieldName);
             return property != null && property.boolValue == expected;
+        }
+
+        private static Transform FindDeep(Transform root, string name)
+        {
+            if (root == null) return null;
+            foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+            {
+                if (child.name == name) return child;
+            }
+            return null;
         }
 
         private static Vector3 ComputeRendererSize(Transform root)

@@ -59,7 +59,7 @@ namespace MUSCA.Gate3D
             EnsureStyles();
             Rect panel = new Rect(24f, 24f, 460f, 252f);
             GUI.Box(panel, GUIContent.none);
-            GUI.Label(new Rect(40f, 36f, 410f, 28f), "MUSCA // FIRST THRESHOLD v0.3", _title);
+            GUI.Label(new Rect(40f, 36f, 410f, 28f), "MUSCA // FIRST THRESHOLD v0.4", _title);
             GUI.Label(new Rect(40f, 68f, 410f, 22f), "WASD + mouse — movement / view", _body);
             GUI.Label(new Rect(40f, 90f, 410f, 22f), "SPACE — jump · SHIFT — dodge · LMB — strike", _body);
             GUI.Label(new Rect(40f, 112f, 410f, 22f), "Q / MMB — lock target · ESC — cursor", _body);
@@ -101,10 +101,21 @@ namespace MUSCA.Gate3D
             if (prediction != null && prediction.PrototypeActive)
             {
                 KaelPredictionSnapshot snapshot = prediction.Snapshot;
+                string mode = snapshot.Locked
+                    ? prediction.PredictionFresh ? "LOCK" : "STALE"
+                    : "learning";
                 predictionText = snapshot.SampleCount == 0
                     ? "PRED: learning — no dodge history"
-                    : $"PRED: {snapshot.Direction}  {snapshot.SampleCount} samples  {snapshot.Confidence * 100f:0}%  {(snapshot.Locked ? "LOCK" : "learning")}";
-                if (snapshot.Locked) predictionStyle = _warn;
+                    : $"PRED: {snapshot.Direction}  {snapshot.SampleCount} samples  {snapshot.Confidence * 100f:0}%  {mode}";
+                if (snapshot.Locked && prediction.PredictionFresh)
+                {
+                    predictionStyle = _warn;
+                }
+
+                if (brain != null && brain.PredictionAppliedThisTelegraph)
+                {
+                    predictionText += "  // FORECAST ZONE";
+                }
             }
             GUI.Label(new Rect(40f, 230f, 410f, 22f), predictionText, predictionStyle);
         }

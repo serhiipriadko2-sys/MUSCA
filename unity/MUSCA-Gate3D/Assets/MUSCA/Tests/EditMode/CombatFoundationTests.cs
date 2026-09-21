@@ -194,6 +194,22 @@ namespace MUSCA.Gate3D.Tests
         }
 
         [Test]
+        public void DodgeProgressIsFastStartEaseOutAndPreservesEndpoints()
+        {
+            float start = FirstPersonController.ComputeDodgeProgress(0f);
+            float quarter = FirstPersonController.ComputeDodgeProgress(0.25f);
+            float half = FirstPersonController.ComputeDodgeProgress(0.5f);
+            float end = FirstPersonController.ComputeDodgeProgress(1f);
+
+            Assert.That(start, Is.EqualTo(0f).Within(0.0001f));
+            Assert.That(end, Is.EqualTo(1f).Within(0.0001f));
+            Assert.That(quarter, Is.GreaterThan(0.5f));
+            Assert.That(half, Is.EqualTo(0.875f).Within(0.0001f));
+            Assert.That(quarter, Is.LessThan(half));
+            Assert.That(half, Is.LessThan(end));
+        }
+
+        [Test]
         public void JumpVelocityUsesHeightAndDownwardGravity()
         {
             float velocity = FirstPersonController.ComputeJumpVelocity(1.15f, -24f);

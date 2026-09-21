@@ -16,9 +16,9 @@ namespace MUSCA.Gate3D.Editor
 
         private static readonly Vector3 PlayerSpawn = new Vector3(0f, 0f, 18f);
         private static readonly Vector3 SentinelSpawn = new Vector3(0f, 0f, 34f);
-        private const float BossVisualScale = 1.18f;
+        private const float BossVisualScale = 1.52f;
 
-        [MenuItem("MUSCA/Combat/Build First Threshold v0.3")]
+        [MenuItem("MUSCA/Combat/Build First Threshold v0.4")]
         public static void Build()
         {
             RequireAsset(SourceScene);
@@ -58,7 +58,11 @@ namespace MUSCA.Gate3D.Editor
             if (sandbox == null) sandbox = new GameObject("CombatSandbox_v01");
 
             Dictionary<string, Material> materials = LoadMaterialMap();
+            BuildResearcherProxyRig(player.transform);
             BuildFirstThresholdArena(sandbox.transform, materials);
+
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0.012f, 0.020f, 0.035f);
 
             if (functionEnvironment != null) functionEnvironment.SetActive(false);
             if (formEnvironment != null) formEnvironment.SetActive(false);
@@ -80,12 +84,14 @@ namespace MUSCA.Gate3D.Editor
             Transform sentinelVisual = sentinel.transform.Find("SentinelVisual");
 
             CapsuleCollider capsule = sentinel.AddComponent<CapsuleCollider>();
-            ConfigureWorldCapsule(capsule, 2.06f, 0.48f, 1.03f);
+            ConfigureWorldCapsule(capsule, 2.66f, 0.56f, 1.33f);
 
             CombatDamageReceiver receiver = sentinel.AddComponent<CombatDamageReceiver>();
             receiver.Configure(130f, 2.15f);
 
             GameObject telegraph = EnsureTelegraphMarker(
+                sandbox.transform, sentinel.transform.position);
+            GameObject predictionTelegraph = EnsurePredictionTelegraphMarker(
                 sandbox.transform, sentinel.transform.position);
 
             KaelPredictionProbe prediction = sentinel.AddComponent<KaelPredictionProbe>();
@@ -93,7 +99,11 @@ namespace MUSCA.Gate3D.Editor
             prediction.SetPrototypeActive(false, true);
 
             SentinelCombatBrain brain = sentinel.AddComponent<SentinelCombatBrain>();
-            brain.Configure(vitals, telegraph.transform, prediction);
+            brain.Configure(
+                vitals,
+                telegraph.transform,
+                predictionTelegraph.transform,
+                prediction);
 
             Transform spear = BuildKaelSpear(sentinel.transform, materials);
             Transform crown = BuildPredictionCrown(sentinel.transform, materials);
@@ -178,6 +188,310 @@ namespace MUSCA.Gate3D.Editor
             return source;
         }
 
+        private static void BuildResearcherProxyRig(Transform player)
+        {
+            Transform visual = FindDeepOptional(player, "FormV03_Researcher_Visual");
+            if (visual == null)
+            {
+                throw new InvalidOperationException(
+                    "Combat sandbox requires FormV03_Researcher_Visual.");
+            }
+
+            UnpackPrefabIfNeeded(visual.gameObject);
+
+            string[] movableParts =
+            {
+                "P03_Torso", "P03_ChestArmor", "P03_Pelvis", "P03_Head",
+                "P03_HairCap", "P03_Bun", "P03_UpperArm_-1", "P03_UpperArm_1",
+                "P03_Shoulder_-1", "P03_Shoulder_1", "P03_Forearm_-1",
+                "P03_Forearm_1", "P03_Thigh_-1", "P03_Thigh_1",
+                "P03_Shin_-1", "P03_Shin_1", "P03_Boot_-1", "P03_Boot_1",
+                "P03_Backpack", "P03_PackCore", "P03_Harness_-1",
+                "P03_Harness_1", "P03_BeltAccent", "P03_WristDisplay",
+                "P03_Detail_Collar", "P03_Detail_ChestLink",
+                "P03_Detail_PackSide_L", "P03_Detail_PackSide_R",
+                "P03_Detail_PackAmber", "P03_Detail_WristFrame",
+                "P03_Detail_Knee_L", "P03_Detail_Knee_R",
+                "P03_Detail_EarLink", "P03_Detail_HairTie"
+            };
+            RestorePartsToRoot(visual, movableParts);
+            DestroyChildIfPresent(visual, "P04_ProxyRig");
+
+            Transform torsoMesh = RequireDeep(visual, "P03_Torso");
+            Transform pelvisMesh = RequireDeep(visual, "P03_Pelvis");
+            Transform headMesh = RequireDeep(visual, "P03_Head");
+            Transform leftUpperArm = RequireDeep(visual, "P03_UpperArm_-1");
+            Transform rightUpperArm = RequireDeep(visual, "P03_UpperArm_1");
+            Transform leftForearm = RequireDeep(visual, "P03_Forearm_-1");
+            Transform rightForearm = RequireDeep(visual, "P03_Forearm_1");
+            Transform leftThigh = RequireDeep(visual, "P03_Thigh_-1");
+            Transform rightThigh = RequireDeep(visual, "P03_Thigh_1");
+            Transform leftShin = RequireDeep(visual, "P03_Shin_-1");
+            Transform rightShin = RequireDeep(visual, "P03_Shin_1");
+
+            Transform rig = CreateRigPivot(
+                visual, "P04_ProxyRig", visual.position, visual.rotation);
+            Transform torso = CreateRigPivot(
+                rig, "P04_TorsoPivot",
+                JointAtY(torsoMesh, RendererBounds(pelvisMesh).max.y),
+                visual.rotation);
+            Transform head = CreateRigPivot(
+                torso, "P04_HeadPivot",
+                JointAtY(headMesh, RendererBounds(headMesh).min.y),
+                visual.rotation);
+
+            Transform shoulderLeft = CreateRigPivot(
+                torso, "P04_Shoulder_L",
+                JointAtY(leftUpperArm, RendererBounds(leftUpperArm).max.y),
+                visual.rotation);
+            Transform shoulderRight = CreateRigPivot(
+                torso, "P04_Shoulder_R",
+                JointAtY(rightUpperArm, RendererBounds(rightUpperArm).max.y),
+                visual.rotation);
+            Transform elbowLeft = CreateRigPivot(
+                shoulderLeft, "P04_Elbow_L",
+                JointBetween(leftUpperArm, leftForearm),
+                visual.rotation);
+            Transform elbowRight = CreateRigPivot(
+                shoulderRight, "P04_Elbow_R",
+                JointBetween(rightUpperArm, rightForearm),
+                visual.rotation);
+
+            Transform hipLeft = CreateRigPivot(
+                rig, "P04_Hip_L",
+                JointAtY(leftThigh, RendererBounds(leftThigh).max.y),
+                visual.rotation);
+            Transform hipRight = CreateRigPivot(
+                rig, "P04_Hip_R",
+                JointAtY(rightThigh, RendererBounds(rightThigh).max.y),
+                visual.rotation);
+            Transform kneeLeft = CreateRigPivot(
+                hipLeft, "P04_Knee_L",
+                JointBetween(leftThigh, leftShin),
+                visual.rotation);
+            Transform kneeRight = CreateRigPivot(
+                hipRight, "P04_Knee_R",
+                JointBetween(rightThigh, rightShin),
+                visual.rotation);
+
+            ParentParts(visual, torso,
+                "P03_Torso", "P03_ChestArmor", "P03_Backpack", "P03_PackCore",
+                "P03_Harness_-1", "P03_Harness_1", "P03_Detail_Collar",
+                "P03_Detail_ChestLink", "P03_Detail_PackSide_L",
+                "P03_Detail_PackSide_R", "P03_Detail_PackAmber");
+            ParentParts(visual, head,
+                "P03_Head", "P03_HairCap", "P03_Bun",
+                "P03_Detail_EarLink", "P03_Detail_HairTie");
+            ParentParts(visual, shoulderLeft,
+                "P03_UpperArm_-1", "P03_Shoulder_-1");
+            ParentParts(visual, shoulderRight,
+                "P03_UpperArm_1", "P03_Shoulder_1");
+            ParentParts(visual, elbowLeft,
+                "P03_Forearm_-1", "P03_WristDisplay", "P03_Detail_WristFrame");
+            ParentParts(visual, elbowRight, "P03_Forearm_1");
+            ParentParts(visual, hipLeft, "P03_Thigh_-1");
+            ParentParts(visual, hipRight, "P03_Thigh_1");
+            ParentParts(visual, kneeLeft,
+                "P03_Shin_-1", "P03_Boot_-1", "P03_Detail_Knee_L");
+            ParentParts(visual, kneeRight,
+                "P03_Shin_1", "P03_Boot_1", "P03_Detail_Knee_R");
+        }
+
+        private static void BuildSentinelProxyRig(Transform visual)
+        {
+            if (visual == null)
+            {
+                throw new InvalidOperationException("Sentinel visual missing.");
+            }
+
+            UnpackPrefabIfNeeded(visual.gameObject);
+            string[] movableParts =
+            {
+                "SV01_Torso", "SV01_ChestPlate", "SV01_Pelvis", "SV01_Head",
+                "SV01_OpticHousing", "SV01_Optic", "SV01_Core",
+                "SV01_Shoulder_-1", "SV01_Shoulder_1",
+                "SV01_UpperArm_-1", "SV01_UpperArm_1",
+                "SV01_Forearm_-1", "SV01_Forearm_1",
+                "SV01_Hand_-1", "SV01_Hand_1",
+                "SV01_Thigh_-1", "SV01_Thigh_1",
+                "SV01_Knee_-1", "SV01_Knee_1",
+                "SV01_Shin_-1", "SV01_Shin_1",
+                "SV01_Foot_-1", "SV01_Foot_1",
+                "SV01_Telegraph_-1", "SV01_Telegraph_1"
+            };
+            RestorePartsToRoot(visual, movableParts);
+            DestroyChildIfPresent(visual, "SV04_ProxyRig");
+
+            Transform torsoMesh = RequireDeep(visual, "SV01_Torso");
+            Transform pelvisMesh = RequireDeep(visual, "SV01_Pelvis");
+            Transform headMesh = RequireDeep(visual, "SV01_Head");
+            Transform leftUpperArm = RequireDeep(visual, "SV01_UpperArm_-1");
+            Transform rightUpperArm = RequireDeep(visual, "SV01_UpperArm_1");
+            Transform leftForearm = RequireDeep(visual, "SV01_Forearm_-1");
+            Transform rightForearm = RequireDeep(visual, "SV01_Forearm_1");
+            Transform leftThigh = RequireDeep(visual, "SV01_Thigh_-1");
+            Transform rightThigh = RequireDeep(visual, "SV01_Thigh_1");
+            Transform leftShin = RequireDeep(visual, "SV01_Shin_-1");
+            Transform rightShin = RequireDeep(visual, "SV01_Shin_1");
+
+            Transform rig = CreateRigPivot(
+                visual, "SV04_ProxyRig", visual.position, visual.rotation);
+            Transform torso = CreateRigPivot(
+                rig, "SV04_TorsoPivot",
+                JointAtY(torsoMesh, RendererBounds(pelvisMesh).max.y),
+                visual.rotation);
+            Transform head = CreateRigPivot(
+                torso, "SV04_HeadPivot",
+                JointAtY(headMesh, RendererBounds(headMesh).min.y),
+                visual.rotation);
+            Transform shoulderLeft = CreateRigPivot(
+                torso, "SV04_Shoulder_L",
+                JointAtY(leftUpperArm, RendererBounds(leftUpperArm).max.y),
+                visual.rotation);
+            Transform shoulderRight = CreateRigPivot(
+                torso, "SV04_Shoulder_R",
+                JointAtY(rightUpperArm, RendererBounds(rightUpperArm).max.y),
+                visual.rotation);
+            Transform elbowLeft = CreateRigPivot(
+                shoulderLeft, "SV04_Elbow_L",
+                JointBetween(leftUpperArm, leftForearm),
+                visual.rotation);
+            Transform elbowRight = CreateRigPivot(
+                shoulderRight, "SV04_Elbow_R",
+                JointBetween(rightUpperArm, rightForearm),
+                visual.rotation);
+            Transform hipLeft = CreateRigPivot(
+                rig, "SV04_Hip_L",
+                JointAtY(leftThigh, RendererBounds(leftThigh).max.y),
+                visual.rotation);
+            Transform hipRight = CreateRigPivot(
+                rig, "SV04_Hip_R",
+                JointAtY(rightThigh, RendererBounds(rightThigh).max.y),
+                visual.rotation);
+            Transform kneeLeft = CreateRigPivot(
+                hipLeft, "SV04_Knee_L",
+                JointBetween(leftThigh, leftShin),
+                visual.rotation);
+            Transform kneeRight = CreateRigPivot(
+                hipRight, "SV04_Knee_R",
+                JointBetween(rightThigh, rightShin),
+                visual.rotation);
+
+            ParentParts(visual, torso,
+                "SV01_Torso", "SV01_ChestPlate", "SV01_Core");
+            ParentParts(visual, head,
+                "SV01_Head", "SV01_OpticHousing", "SV01_Optic");
+            ParentParts(visual, shoulderLeft,
+                "SV01_Shoulder_-1", "SV01_UpperArm_-1");
+            ParentParts(visual, shoulderRight,
+                "SV01_Shoulder_1", "SV01_UpperArm_1");
+            ParentParts(visual, elbowLeft,
+                "SV01_Forearm_-1", "SV01_Hand_-1", "SV01_Telegraph_-1");
+            ParentParts(visual, elbowRight,
+                "SV01_Forearm_1", "SV01_Hand_1", "SV01_Telegraph_1");
+            ParentParts(visual, hipLeft, "SV01_Thigh_-1");
+            ParentParts(visual, hipRight, "SV01_Thigh_1");
+            ParentParts(visual, kneeLeft,
+                "SV01_Knee_-1", "SV01_Shin_-1", "SV01_Foot_-1");
+            ParentParts(visual, kneeRight,
+                "SV01_Knee_1", "SV01_Shin_1", "SV01_Foot_1");
+        }
+
+        private static void UnpackPrefabIfNeeded(GameObject instance)
+        {
+            GameObject root = PrefabUtility.GetOutermostPrefabInstanceRoot(instance);
+            if (root != null)
+            {
+                PrefabUtility.UnpackPrefabInstance(
+                    root,
+                    PrefabUnpackMode.Completely,
+                    InteractionMode.AutomatedAction);
+            }
+        }
+
+        private static void RestorePartsToRoot(Transform visual, IEnumerable<string> names)
+        {
+            foreach (string name in names)
+            {
+                Transform part = FindDeepOptional(visual, name);
+                if (part != null && part.parent != visual)
+                {
+                    part.SetParent(visual, true);
+                }
+            }
+        }
+
+        private static Transform CreateRigPivot(
+            Transform parent, string name, Vector3 worldPosition, Quaternion worldRotation)
+        {
+            GameObject pivot = new GameObject(name);
+            pivot.transform.SetParent(parent, true);
+            pivot.transform.SetPositionAndRotation(worldPosition, worldRotation);
+            return pivot.transform;
+        }
+
+        private static void ParentParts(
+            Transform searchRoot, Transform parent, params string[] names)
+        {
+            foreach (string name in names)
+            {
+                Transform part = FindDeepOptional(searchRoot, name);
+                if (part != null)
+                {
+                    part.SetParent(parent, true);
+                }
+            }
+        }
+
+        private static Vector3 JointAtY(Transform part, float worldY)
+        {
+            Bounds bounds = RendererBounds(part);
+            return new Vector3(bounds.center.x, worldY, bounds.center.z);
+        }
+
+        private static Vector3 JointBetween(Transform upper, Transform lower)
+        {
+            Bounds upperBounds = RendererBounds(upper);
+            Bounds lowerBounds = RendererBounds(lower);
+            return new Vector3(
+                (upperBounds.center.x + lowerBounds.center.x) * 0.5f,
+                (upperBounds.min.y + lowerBounds.max.y) * 0.5f,
+                (upperBounds.center.z + lowerBounds.center.z) * 0.5f);
+        }
+
+        private static Bounds RendererBounds(Transform part)
+        {
+            Renderer renderer = part != null
+                ? part.GetComponentInChildren<Renderer>(true)
+                : null;
+            if (renderer == null)
+            {
+                throw new InvalidOperationException(
+                    $"Rig part has no renderer: {part?.name ?? "<null>"}");
+            }
+            return renderer.bounds;
+        }
+
+        private static Transform RequireDeep(Transform root, string name)
+        {
+            Transform found = FindDeepOptional(root, name);
+            if (found == null)
+            {
+                throw new InvalidOperationException($"Missing rig part: {name}");
+            }
+            return found;
+        }
+
+        private static Transform FindDeepOptional(Transform root, string name)
+        {
+            if (root == null) return null;
+            foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+            {
+                if (child.name == name) return child;
+            }
+            return null;
+        }
+
         private static GameObject RebuildSentinel(
             Transform sandbox, Dictionary<string, Material> materials)
         {
@@ -201,6 +515,7 @@ namespace MUSCA.Gate3D.Editor
             visual.transform.localScale = asset.transform.localScale * BossVisualScale;
             RemapMaterials(visual, materials);
             AlignFeetToWorld(visual, SentinelSpawn.y);
+            BuildSentinelProxyRig(visual.transform);
 
             return sentinel;
         }
@@ -227,15 +542,38 @@ namespace MUSCA.Gate3D.Editor
             CreateArenaCube(
                 arena.transform, "ArenaFloor",
                 new Vector3(0f, -0.12f, 34f),
-                new Vector3(20f, 0.24f, 40f), dark, true);
+                new Vector3(22f, 0.24f, 42f), dark, true);
+
             CreateArenaCube(
-                arena.transform, "ShallowWater",
-                new Vector3(0f, 0.015f, 34f),
-                new Vector3(19.5f, 0.018f, 39.5f), water, false);
+                arena.transform, "WaterBasin_L",
+                new Vector3(-6.8f, 0.005f, 35f),
+                new Vector3(7.0f, 0.012f, 36f), water, false);
+            CreateArenaCube(
+                arena.transform, "WaterBasin_R",
+                new Vector3(6.8f, 0.005f, 35f),
+                new Vector3(7.0f, 0.012f, 36f), water, false);
+
             CreateArenaCube(
                 arena.transform, "ThresholdCauseway",
-                new Vector3(0f, 0.035f, 36f),
-                new Vector3(3.4f, 0.04f, 34f), ceramic, false);
+                new Vector3(0f, 0.035f, 35f),
+                new Vector3(5.8f, 0.07f, 36f), dark, false);
+            CreateArenaCube(
+                arena.transform, "CausewayEdge_L",
+                new Vector3(-2.7f, 0.075f, 35f),
+                new Vector3(0.16f, 0.05f, 36f), ceramic, false);
+            CreateArenaCube(
+                arena.transform, "CausewayEdge_R",
+                new Vector3(2.7f, 0.075f, 35f),
+                new Vector3(0.16f, 0.05f, 36f), ceramic, false);
+
+            CreateArenaCube(
+                arena.transform, "BossDais",
+                new Vector3(0f, 0.08f, 34f),
+                new Vector3(7.4f, 0.16f, 7.0f), ceramic, false);
+            CreateArenaCube(
+                arena.transform, "BossDaisTop",
+                new Vector3(0f, 0.14f, 34f),
+                new Vector3(5.8f, 0.07f, 5.4f), dark, false);
 
             float[] zPositions = { 22f, 30f, 38f, 46f };
             float[] heightsLeft = { 5.2f, 3.4f, 6.1f, 4.2f };
@@ -251,6 +589,31 @@ namespace MUSCA.Gate3D.Editor
                     new Vector3(7.8f, heightsRight[i] * 0.5f, zPositions[i] + 1.1f),
                     new Vector3(0.9f, heightsRight[i], 0.9f), ceramic, true);
             }
+
+            GameObject slabA = CreateArenaCube(
+                arena.transform, "BrokenSlab_L",
+                new Vector3(-5.2f, 0.55f, 28.5f),
+                new Vector3(4.8f, 0.32f, 1.25f), ceramic, false);
+            slabA.transform.rotation = Quaternion.Euler(8f, 21f, -12f);
+            GameObject slabB = CreateArenaCube(
+                arena.transform, "BrokenSlab_R",
+                new Vector3(5.6f, 0.42f, 42.8f),
+                new Vector3(4.2f, 0.28f, 1.15f), dark, false);
+            slabB.transform.rotation = Quaternion.Euler(-5f, -27f, 9f);
+            GameObject fallenPillar = CreateArenaCube(
+                arena.transform, "FallenPillar",
+                new Vector3(-6.2f, 0.62f, 43.5f),
+                new Vector3(0.85f, 5.5f, 0.85f), ceramic, false);
+            fallenPillar.transform.rotation = Quaternion.Euler(72f, 0f, 24f);
+
+            CreateArenaCube(
+                arena.transform, "DistantMonolith_L",
+                new Vector3(-11.5f, 5.5f, 56f),
+                new Vector3(2.0f, 11f, 2.0f), dark, false);
+            CreateArenaCube(
+                arena.transform, "DistantMonolith_R",
+                new Vector3(11.2f, 6.5f, 58f),
+                new Vector3(2.4f, 13f, 2.4f), dark, false);
 
             CreateArenaCube(
                 arena.transform, "ThresholdFrame_L",
@@ -287,6 +650,21 @@ namespace MUSCA.Gate3D.Editor
             CreateArenaLight(
                 arena.transform, "ArenaLight_Amber",
                 new Vector3(5f, 2.6f, 38f), new Color(1f, 0.28f, 0.06f), 12f, 2.4f);
+            CreateArenaDirectionalLight(
+                arena.transform,
+                "ThresholdSun",
+                Quaternion.Euler(38f, -32f, 0f),
+                new Color(1f, 0.67f, 0.42f),
+                1.15f);
+
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = new Color(0.07f, 0.11f, 0.16f);
+            RenderSettings.ambientEquatorColor = new Color(0.025f, 0.045f, 0.065f);
+            RenderSettings.ambientGroundColor = new Color(0.008f, 0.012f, 0.018f);
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.ExponentialSquared;
+            RenderSettings.fogColor = new Color(0.018f, 0.035f, 0.055f);
+            RenderSettings.fogDensity = 0.012f;
 
             CreateMarkerTransform(arena.transform, "CombatPlayerSpawn", PlayerSpawn);
             CreateMarkerTransform(arena.transform, "CombatBossSpawn", SentinelSpawn);
@@ -297,7 +675,7 @@ namespace MUSCA.Gate3D.Editor
         {
             GameObject root = new GameObject("KaelSpear");
             root.transform.SetParent(sentinel, false);
-            root.transform.localPosition = new Vector3(0.58f, 1.30f, 0.04f);
+            root.transform.localPosition = new Vector3(0.76f, 1.68f, 0.04f);
 
             Material dark = AssetDatabase.LoadAssetAtPath<Material>(
                 $"{MaterialRoot}/DarkMetal.mat");
@@ -307,15 +685,15 @@ namespace MUSCA.Gate3D.Editor
             GameObject shaft = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             shaft.name = "SpearShaft";
             shaft.transform.SetParent(root.transform, false);
-            shaft.transform.localScale = new Vector3(0.045f, 1.55f, 0.045f);
+            shaft.transform.localScale = new Vector3(0.055f, 1.82f, 0.055f);
             RemoveCollider(shaft);
             SetMaterial(shaft, dark);
 
             GameObject blade = GameObject.CreatePrimitive(PrimitiveType.Cube);
             blade.name = "SpearBlade";
             blade.transform.SetParent(root.transform, false);
-            blade.transform.localPosition = new Vector3(0f, 1.72f, 0f);
-            blade.transform.localScale = new Vector3(0.12f, 0.38f, 0.055f);
+            blade.transform.localPosition = new Vector3(0f, 2.02f, 0f);
+            blade.transform.localScale = new Vector3(0.16f, 0.48f, 0.07f);
             blade.transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
             RemoveCollider(blade);
             SetMaterial(blade, cyan);
@@ -328,23 +706,23 @@ namespace MUSCA.Gate3D.Editor
         {
             GameObject crown = new GameObject("PredictionCrown");
             crown.transform.SetParent(sentinel, false);
-            crown.transform.localPosition = new Vector3(0f, 2.20f, 0f);
+            crown.transform.localPosition = new Vector3(0f, 2.92f, 0f);
 
             Material cyan = AssetDatabase.LoadAssetAtPath<Material>(
                 $"{MaterialRoot}/CyanSoft.mat");
             CreateLineRing(
                 crown.transform, "CrownRing_A", Vector3.zero,
-                0.42f, 0.026f, cyan, Quaternion.Euler(90f, 0f, 0f));
+                0.54f, 0.030f, cyan, Quaternion.Euler(90f, 0f, 0f));
             CreateLineRing(
                 crown.transform, "CrownRing_B", Vector3.zero,
-                0.50f, 0.022f, cyan, Quaternion.Euler(55f, 20f, 0f));
+                0.64f, 0.026f, cyan, Quaternion.Euler(55f, 20f, 0f));
             CreateLineRing(
                 crown.transform, "CrownRing_C", Vector3.zero,
-                0.58f, 0.018f, cyan, Quaternion.Euler(-48f, -22f, 0f));
+                0.75f, 0.022f, cyan, Quaternion.Euler(-48f, -22f, 0f));
             return crown.transform;
         }
 
-        private static void CreateArenaCube(
+        private static GameObject CreateArenaCube(
             Transform parent, string name, Vector3 position, Vector3 scale,
             Material material, bool keepCollider)
         {
@@ -355,6 +733,7 @@ namespace MUSCA.Gate3D.Editor
             item.transform.localScale = scale;
             if (!keepCollider) RemoveCollider(item);
             SetMaterial(item, material);
+            return item;
         }
 
         private static void CreateLineRing(
@@ -395,6 +774,23 @@ namespace MUSCA.Gate3D.Editor
             light.type = LightType.Point;
             light.color = color;
             light.range = range;
+            light.intensity = intensity;
+            light.shadows = LightShadows.Soft;
+        }
+
+        private static void CreateArenaDirectionalLight(
+            Transform parent,
+            string name,
+            Quaternion rotation,
+            Color color,
+            float intensity)
+        {
+            GameObject item = new GameObject(name);
+            item.transform.SetParent(parent, false);
+            item.transform.rotation = rotation;
+            Light light = item.AddComponent<Light>();
+            light.type = LightType.Directional;
+            light.color = color;
             light.intensity = intensity;
             light.shadows = LightShadows.Soft;
         }
@@ -450,7 +846,23 @@ namespace MUSCA.Gate3D.Editor
             GameObject marker = EnsurePrimitive(
                 parent, "SentinelTelegraph", PrimitiveType.Cylinder);
             marker.transform.position = new Vector3(position.x, 0.04f, position.z);
-            marker.transform.localScale = new Vector3(1.15f, 0.015f, 1.15f);
+            marker.transform.localScale = new Vector3(0.92f, 0.015f, 0.92f);
+            RemoveCollider(marker);
+            Renderer renderer = marker.GetComponent<Renderer>();
+            if (renderer != null && material != null) renderer.sharedMaterial = material;
+            marker.SetActive(false);
+            return marker;
+        }
+
+        private static GameObject EnsurePredictionTelegraphMarker(
+            Transform parent, Vector3 position)
+        {
+            Material material = AssetDatabase.LoadAssetAtPath<Material>(
+                $"{MaterialRoot}/Cyan.mat");
+            GameObject marker = EnsurePrimitive(
+                parent, "KaelPredictionTelegraph", PrimitiveType.Cylinder);
+            marker.transform.position = new Vector3(position.x, 0.045f, position.z);
+            marker.transform.localScale = new Vector3(0.82f, 0.009f, 0.82f);
             RemoveCollider(marker);
             Renderer renderer = marker.GetComponent<Renderer>();
             if (renderer != null && material != null) renderer.sharedMaterial = material;

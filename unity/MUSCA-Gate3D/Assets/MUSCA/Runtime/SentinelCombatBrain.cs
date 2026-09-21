@@ -15,6 +15,7 @@ namespace MUSCA.Gate3D
     {
         [SerializeField] private PlayerCombatVitals target;
         [SerializeField] private Transform telegraphIndicator;
+        [SerializeField] private Transform predictionIndicator;
         [SerializeField] private float aggroRange = 8.5f;
         [SerializeField] private float approachSpeed = 1.65f;
         [SerializeField] private float stopDistance = 1.35f;
@@ -24,18 +25,26 @@ namespace MUSCA.Gate3D
         [SerializeField] private float turnSpeedDegrees = 540f;
         [SerializeField] private KaelPredictionProbe prediction;
         [SerializeField] private float predictedDodgeDistance = 2.38f;
-        [SerializeField] private float strikeRadius = 0.95f;
+        [SerializeField] private float strikeRadius = 0.78f;
+        [SerializeField] private float predictionStrikeRadius = 0.86f;
 
         private CombatDamageReceiver _self;
         private SentinelCombatState _state = SentinelCombatState.Idle;
+        private float _stateStartedAt;
+        private float _stateDuration;
         private float _stateEndsAt;
         private Vector3 _strikePoint;
+        private Vector3 _predictionStrikePoint;
         private bool _predictionApplied;
 
         public SentinelCombatState State => _state;
         public bool TelegraphVisible => telegraphIndicator != null && telegraphIndicator.gameObject.activeSelf;
         public Vector3 CurrentStrikePoint => _strikePoint;
+        public Vector3 CurrentPredictionStrikePoint => _predictionStrikePoint;
         public bool PredictionAppliedThisTelegraph => _predictionApplied;
+        public float StateProgress => _stateDuration > 0.0001f
+            ? Mathf.Clamp01((Time.time - _stateStartedAt) / _stateDuration)
+            : 0f;
         public int TelegraphCount { get; private set; }
         public int AttackCount { get; private set; }
         public bool LastAttackHit { get; private set; }
@@ -44,21 +53,27 @@ namespace MUSCA.Gate3D
         {
             _self = GetComponent<CombatDamageReceiver>();
             SetTelegraphVisible(false);
+            SetPredictionVisible(false);
         }
 
         public void Configure(
             PlayerCombatVitals targetValue,
             Transform telegraphValue,
+            Transform predictionIndicatorValue,
             KaelPredictionProbe predictionValue = null,
             float predictionDistance = 2.38f,
-            float committedStrikeRadius = 0.95f)
+            float committedStrikeRadius = 0.78f,
+            float predictedStrikeRadius = 0.86f)
         {
             target = targetValue;
             telegraphIndicator = telegraphValue;
+            predictionIndicator = predictionIndicatorValue;
             prediction = predictionValue;
             predictedDodgeDistance = Mathf.Max(0f, predictionDistance);
             strikeRadius = Mathf.Max(0.05f, committedStrikeRadius);
+            predictionStrikeRadius = Mathf.Max(0.05f, predictedStrikeRadius);
             SetTelegraphVisible(false);
+            SetPredictionVisible(false);
         }
 
         private void Update()
@@ -124,44 +139,66 @@ namespace MUSCA.Gate3D
         private void EnterIdle()
         {
             _state = SentinelCombatState.Idle;
+            _stateStartedAt = Time.time;
+            _stateDuration = 0f;
             _predictionApplied = false;
             SetTelegraphVisible(false);
+            SetPredictionVisible(false);
         }
 
         private void EnterApproach()
         {
             _state = SentinelCombatState.Approach;
+            _stateStartedAt = Time.time;
+            _stateDuration = 0f;
             _predictionApplied = false;
             SetTelegraphVisible(false);
+            SetPredictionVisible(false);
         }
 
         private void EnterTelegraph()
         {
             _state = SentinelCombatState.Telegraph;
+            _stateStartedAt = Time.time;
+            _stateDuration = telegraphSeconds;
             _stateEndsAt = Time.time + telegraphSeconds;
             TelegraphCount++;
-            _strikePoint = target != null ? target.transform.position : transform.position;
+
+            _strikePoint = target != null
+                ? target.transform.position
+                : transform.position;
+            _predictionStrikePoint = _strikePoint;
             _predictionApplied = prediction != null &&
-                prediction.TryGetPredictedStrikePoint(predictedDodgeDistance, out _strikePoint);
+                prediction.TryGetPredictedStrikePoint(
+                    predictedDodgeDistance, out _predictionStrikePoint);
+
             SetTelegraphVisible(true);
+            SetPredictionVisible(_predictionApplied);
             UpdateTelegraphPosition();
         }
 
         private void EnterRecovery()
         {
             _state = SentinelCombatState.Recovery;
+            _stateStartedAt = Time.time;
+            _stateDuration = recoverySeconds;
             _stateEndsAt = Time.time + recoverySeconds;
             SetTelegraphVisible(false);
+            SetPredictionVisible(false);
         }
 
         private void Strike()
         {
             AttackCount++;
             Vector3 point = target.transform.position;
-            // The telegraph commits the hit point. Ordinary attacks commit to the
-            // player's observed position; prediction shifts that committed point.
-            // In both cases the visible marker and the damaging area are identical.
-            LastAttackHit = IsPointInsideStrike(point, _strikePoint, strikeRadius);
+
+            bool baseHit = IsPointInsideStrike(
+                point, _strikePoint, strikeRadius);
+            bool predictionHit = _predictionApplied &&
+                IsPointInsideStrike(
+                    point, _predictionStrikePoint, predictionStrikeRadius);
+
+            LastAttackHit = baseHit || predictionHit;
             if (LastAttackHit)
             {
                 target.ApplyDamage(attackDamage);
@@ -170,17 +207,36 @@ namespace MUSCA.Gate3D
 
         private void UpdateTelegraphPosition()
         {
-            if (telegraphIndicator == null) return;
-            Vector3 position = _strikePoint;
-            position.y = 0.04f;
-            telegraphIndicator.position = position;
+            if (telegraphIndicator != null)
+            {
+                Vector3 position = _strikePoint;
+                position.y = 0.04f;
+                telegraphIndicator.position = position;
+            }
+
+            if (predictionIndicator != null)
+            {
+                Vector3 predictionPosition = _predictionStrikePoint;
+                predictionPosition.y = 0.045f;
+                predictionIndicator.position = predictionPosition;
+            }
         }
 
         private void SetTelegraphVisible(bool value)
         {
-            if (telegraphIndicator != null && telegraphIndicator.gameObject.activeSelf != value)
+            if (telegraphIndicator != null &&
+                telegraphIndicator.gameObject.activeSelf != value)
             {
                 telegraphIndicator.gameObject.SetActive(value);
+            }
+        }
+
+        private void SetPredictionVisible(bool value)
+        {
+            if (predictionIndicator != null &&
+                predictionIndicator.gameObject.activeSelf != value)
+            {
+                predictionIndicator.gameObject.SetActive(value);
             }
         }
 

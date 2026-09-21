@@ -52,8 +52,11 @@ namespace MUSCA.Gate3D
             public float kaelConfidence;
             public bool kaelLocked;
             public bool kaelPredictionApplied;
-            public float kaelStrikeX;
-            public float kaelStrikeZ;
+            public bool kaelPredictionFresh;
+            public float kaelBaseStrikeX;
+            public float kaelBaseStrikeZ;
+            public float kaelPredictionStrikeX;
+            public float kaelPredictionStrikeZ;
             public string screenshot;
         }
 
@@ -417,8 +420,13 @@ namespace MUSCA.Gate3D
                 kaelConfidence = prediction != null ? prediction.Snapshot.Confidence : 0f,
                 kaelLocked = prediction != null && prediction.Snapshot.Locked,
                 kaelPredictionApplied = brain != null && brain.PredictionAppliedThisTelegraph,
-                kaelStrikeX = brain != null ? brain.CurrentStrikePoint.x : 0f,
-                kaelStrikeZ = brain != null ? brain.CurrentStrikePoint.z : 0f,
+                kaelPredictionFresh = prediction != null && prediction.PredictionFresh,
+                kaelBaseStrikeX = brain != null ? brain.CurrentStrikePoint.x : 0f,
+                kaelBaseStrikeZ = brain != null ? brain.CurrentStrikePoint.z : 0f,
+                kaelPredictionStrikeX = brain != null
+                    ? brain.CurrentPredictionStrikePoint.x : 0f,
+                kaelPredictionStrikeZ = brain != null
+                    ? brain.CurrentPredictionStrikePoint.z : 0f,
                 screenshot = fullOutput
             };
 
@@ -501,8 +509,14 @@ namespace MUSCA.Gate3D
                            snapshot.Direction == DodgeDirection.Right &&
                            snapshot.SampleCount == 5 &&
                            snapshot.Confidence >= 0.99f &&
+                           prediction.PredictionFresh &&
                            brain.PredictionAppliedThisTelegraph &&
-                           PlanarDistance(vitals.transform.position, brain.CurrentStrikePoint) >= 1.0f;
+                           PlanarDistance(
+                               vitals.transform.position,
+                               brain.CurrentStrikePoint) <= 0.25f &&
+                           PlanarDistance(
+                               brain.CurrentStrikePoint,
+                               brain.CurrentPredictionStrikePoint) >= 1.0f;
                 default:
                     return true;
             }

@@ -12,25 +12,28 @@
     "dodgeBindingCorrect": true,
     "lockBindingCorrect": true,
     "lockMiddleMouseEnabled": true,
+    "playerProxyRigPresent": true,
     "sentinelHealth": true,
     "sentinelBrain": true,
     "sentinelPresentation": true,
     "kaelPrediction": true,
     "crownPresentation": true,
     "telegraphPresent": true,
+    "predictionTelegraphPresent": true,
+    "sentinelProxyRigPresent": true,
     "sentinelCollider": true,
     "sentinelColliderWorldSizeValid": true,
     "sentinelOverlapsPlayer": false,
     "sentinelColliderWorldSize": {
-        "x": 0.9600000977516174,
-        "y": 2.059999942779541,
-        "z": 0.9599990844726563
+        "x": 1.1200002431869507,
+        "y": 2.6600003242492676,
+        "z": 1.1200027465820313
     },
     "sentinelVisualUpright": true,
     "sentinelVisualWorldSize": {
-        "x": 0.9911999702453613,
-        "y": 2.06499981880188,
-        "z": 0.4843902587890625
+        "x": 1.2768000364303589,
+        "y": 2.659998893737793,
+        "z": 0.62396240234375
     },
     "companionPresent": true,
     "arenaPresent": true,

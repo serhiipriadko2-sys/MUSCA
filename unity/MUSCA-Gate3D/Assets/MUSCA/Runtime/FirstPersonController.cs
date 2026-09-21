@@ -14,7 +14,10 @@ namespace MUSCA.Gate3D
         [SerializeField] private float jumpHeight = 1.15f;
         [SerializeField] private float gravity = -24f;
         [SerializeField] private float groundedStickVelocity = -2f;
-        [SerializeField] private float lockTurnSpeedDegrees = 720f;
+        [SerializeField] private float lockTurnSpeedDegrees = 480f;
+        [SerializeField] private float lockCameraYawSmoothTime = 0.12f;
+        [SerializeField] private float lockCameraMaxYawSpeed = 540f;
+        [SerializeField] private float lockCameraPositionSmoothTime = 0.08f;
         [SerializeField] private Vector3 cameraLocalPosition = new Vector3(0f, 1.68f, 0f);
         [SerializeField] private bool cameraCollisionEnabled;
         [SerializeField] private float cameraCollisionRadius = 0.22f;
@@ -26,10 +29,17 @@ namespace MUSCA.Gate3D
         private CollisionFlags _lastMoveCollisionFlags;
         private Vector3 _planarVelocity;
         private float _verticalVelocity;
-        private Vector3 _dodgeVelocity;
+        private Vector3 _dodgeDirectionWorld;
+        private float _dodgeDistance;
+        private float _dodgeDurationSeconds;
+        private float _dodgeElapsedSeconds;
         private float _dodgeRemainingSeconds;
         private float _dodgeInvulnerableUntil = -1f;
         private Transform _lockOnTarget;
+        private float _cameraYaw;
+        private float _cameraYawVelocity;
+        private Vector3 _cameraPositionVelocity;
+        private bool _cameraYawInitialized;
         private readonly RaycastHit[] _cameraHits = new RaycastHit[16];
 
         public bool InputEnabled { get; set; } = true;
@@ -44,6 +54,10 @@ namespace MUSCA.Gate3D
         public float PlanarSpeed => _planarVelocity.magnitude;
         public Vector3 PlanarVelocity => _planarVelocity;
         public float VerticalVelocity => _verticalVelocity;
+        public float DodgeNormalizedTime => IsDodging && _dodgeDurationSeconds > 0.0001f
+            ? Mathf.Clamp01(_dodgeElapsedSeconds / _dodgeDurationSeconds)
+            : 0f;
+        public Vector3 DodgeDirectionWorld => _dodgeDirectionWorld;
         public bool IsGrounded => _controller != null &&
                                   (_controller.isGrounded || LastMoveGrounded);
         public bool CanJump => InputEnabled && !IsDodging && IsGrounded;
@@ -57,6 +71,7 @@ namespace MUSCA.Gate3D
                 playerCamera = GetComponentInChildren<Camera>();
             }
             ApplyCameraPosition();
+            SyncCameraYaw();
         }
 
         private void Start()
@@ -85,20 +100,38 @@ namespace MUSCA.Gate3D
                 float dodgeFrameSeconds = Mathf.Max(0f, Time.deltaTime);
                 float committedSeconds = ComputeCommittedStepSeconds(
                     _dodgeRemainingSeconds, dodgeFrameSeconds);
-                Vector3 dodgeDisplacement = _dodgeVelocity * committedSeconds;
+                float previousNormalized = _dodgeDurationSeconds > 0.0001f
+                    ? Mathf.Clamp01(_dodgeElapsedSeconds / _dodgeDurationSeconds)
+                    : 1f;
+                float nextElapsed = Mathf.Min(
+                    _dodgeDurationSeconds, _dodgeElapsedSeconds + committedSeconds);
+                float nextNormalized = _dodgeDurationSeconds > 0.0001f
+                    ? Mathf.Clamp01(nextElapsed / _dodgeDurationSeconds)
+                    : 1f;
+                float distanceStep = _dodgeDistance *
+                    (ComputeDodgeProgress(nextNormalized) -
+                     ComputeDodgeProgress(previousNormalized));
+                Vector3 dodgeDisplacement =
+                    _dodgeDirectionWorld * Mathf.Max(0f, distanceStep);
+
                 if (IsGrounded && _verticalVelocity < 0f)
                 {
                     _verticalVelocity = groundedStickVelocity;
                 }
 
                 dodgeDisplacement.y = ComputeVerticalDisplacement(
-                    _verticalVelocity, gravity, dodgeFrameSeconds);
+                    _verticalVelocity, gravity, committedSeconds);
                 _verticalVelocity = ComputeVerticalVelocity(
-                    _verticalVelocity, gravity, dodgeFrameSeconds);
+                    _verticalVelocity, gravity, committedSeconds);
                 _lastMoveCollisionFlags = _controller.Move(dodgeDisplacement);
+                _dodgeElapsedSeconds = nextElapsed;
                 _dodgeRemainingSeconds = Mathf.Max(
                     0f, _dodgeRemainingSeconds - committedSeconds);
-                if (!IsDodging) _dodgeVelocity = Vector3.zero;
+                if (!IsDodging)
+                {
+                    _dodgeDirectionWorld = Vector3.zero;
+                    _dodgeDistance = 0f;
+                }
                 return;
             }
 
@@ -148,6 +181,7 @@ namespace MUSCA.Gate3D
 
         private void LateUpdate()
         {
+            UpdateCameraPose();
             UpdateCameraCollision();
         }
 
@@ -155,6 +189,7 @@ namespace MUSCA.Gate3D
         {
             float mouseX = Input.GetAxisRaw("Mouse X") * mouseSensitivity;
             float mouseY = Input.GetAxisRaw("Mouse Y") * mouseSensitivity;
+            EnsureCameraYawInitialized();
 
             if (_lockOnTarget != null)
             {
@@ -162,20 +197,54 @@ namespace MUSCA.Gate3D
                 toTarget.y = 0f;
                 if (toTarget.sqrMagnitude > 0.0001f)
                 {
-                    Quaternion desired = Quaternion.LookRotation(toTarget.normalized, Vector3.up);
+                    Quaternion desired = Quaternion.LookRotation(
+                        toTarget.normalized, Vector3.up);
                     transform.rotation = Quaternion.RotateTowards(
-                        transform.rotation, desired, lockTurnSpeedDegrees * Time.deltaTime);
+                        transform.rotation, desired,
+                        lockTurnSpeedDegrees * Time.deltaTime);
                 }
             }
             else
             {
                 transform.Rotate(Vector3.up, mouseX, Space.World);
+                _cameraYaw = transform.eulerAngles.y;
+                _cameraYawVelocity = 0f;
             }
 
             _pitch = Mathf.Clamp(_pitch - mouseY, -80f, 80f);
+        }
+
+        private void UpdateCameraPose()
+        {
+            EnsureCameraYawInitialized();
+
+            if (_lockOnTarget != null)
+            {
+                Vector3 toTarget = _lockOnTarget.position - transform.position;
+                toTarget.y = 0f;
+                if (toTarget.sqrMagnitude > 0.0001f)
+                {
+                    float desiredCameraYaw = Mathf.Atan2(
+                        toTarget.x, toTarget.z) * Mathf.Rad2Deg;
+                    _cameraYaw = Mathf.SmoothDampAngle(
+                        _cameraYaw,
+                        desiredCameraYaw,
+                        ref _cameraYawVelocity,
+                        Mathf.Max(0.0001f, lockCameraYawSmoothTime),
+                        Mathf.Max(1f, lockCameraMaxYawSpeed),
+                        Time.deltaTime);
+                }
+            }
+            else
+            {
+                _cameraYaw = transform.eulerAngles.y;
+                _cameraYawVelocity = 0f;
+            }
+
             if (playerCamera != null)
             {
-                playerCamera.transform.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
+                playerCamera.transform.rotation =
+                    Quaternion.Euler(_pitch, _cameraYaw, 0f);
             }
         }
 
@@ -198,9 +267,13 @@ namespace MUSCA.Gate3D
             }
 
             _planarVelocity = Vector3.zero;
-            _dodgeVelocity = worldDirection.normalized * speed;
+            _dodgeDirectionWorld = worldDirection.normalized;
+            _dodgeDistance = speed * durationSeconds;
+            _dodgeDurationSeconds = durationSeconds;
+            _dodgeElapsedSeconds = 0f;
             _dodgeRemainingSeconds = durationSeconds;
-            _dodgeInvulnerableUntil = Time.time + Mathf.Clamp(invulnerableSeconds, 0f, durationSeconds);
+            _dodgeInvulnerableUntil = Time.time +
+                Mathf.Clamp(invulnerableSeconds, 0f, durationSeconds);
             return true;
         }
 
@@ -208,7 +281,17 @@ namespace MUSCA.Gate3D
         {
             _dodgeRemainingSeconds = 0f;
             _dodgeInvulnerableUntil = -1f;
-            _dodgeVelocity = Vector3.zero;
+            _dodgeDirectionWorld = Vector3.zero;
+            _dodgeDistance = 0f;
+            _dodgeDurationSeconds = 0f;
+            _dodgeElapsedSeconds = 0f;
+        }
+
+        public static float ComputeDodgeProgress(float normalizedTime)
+        {
+            float t = Mathf.Clamp01(normalizedTime);
+            float inverse = 1f - t;
+            return 1f - inverse * inverse * inverse;
         }
 
         public static float ComputeCommittedStepSeconds(float remainingSeconds, float deltaTime)
@@ -244,6 +327,12 @@ namespace MUSCA.Gate3D
 
         public void SetLockOnTarget(Transform target)
         {
+            EnsureCameraYawInitialized();
+            if (_lockOnTarget != null && target == null)
+            {
+                transform.rotation = Quaternion.Euler(0f, _cameraYaw, 0f);
+                _cameraYawVelocity = 0f;
+            }
             _lockOnTarget = target;
         }
 
@@ -255,6 +344,7 @@ namespace MUSCA.Gate3D
             {
                 playerCamera.fieldOfView = fieldOfView;
                 ApplyCameraPosition();
+                SyncCameraYaw();
             }
         }
 
@@ -275,7 +365,12 @@ namespace MUSCA.Gate3D
             _verticalVelocity = groundedStickVelocity;
             CancelDodge();
             ApplyCameraPosition();
-            if (playerCamera != null) playerCamera.transform.localRotation = Quaternion.identity;
+            SyncCameraYaw();
+            if (playerCamera != null)
+            {
+                playerCamera.transform.rotation =
+                    Quaternion.Euler(_pitch, _cameraYaw, 0f);
+            }
             _controller.enabled = true;
         }
 
@@ -284,6 +379,29 @@ namespace MUSCA.Gate3D
             if (playerCamera != null)
             {
                 playerCamera.transform.localPosition = cameraLocalPosition;
+                _cameraPositionVelocity = Vector3.zero;
+            }
+        }
+
+        private void SyncCameraYaw()
+        {
+            if (playerCamera == null)
+            {
+                _cameraYaw = transform.eulerAngles.y;
+            }
+            else
+            {
+                _cameraYaw = playerCamera.transform.eulerAngles.y;
+            }
+            _cameraYawVelocity = 0f;
+            _cameraYawInitialized = true;
+        }
+
+        private void EnsureCameraYawInitialized()
+        {
+            if (!_cameraYawInitialized)
+            {
+                SyncCameraYaw();
             }
         }
 
@@ -321,7 +439,23 @@ namespace MUSCA.Gate3D
                     Mathf.Max(0f, _cameraHits[i].distance - cameraCollisionPadding));
             }
 
-            playerCamera.transform.position = pivotWorld + direction * allowedDistance;
+            Vector3 targetPosition =
+                pivotWorld + direction * allowedDistance;
+            if (_lockOnTarget != null)
+            {
+                playerCamera.transform.position = Vector3.SmoothDamp(
+                    playerCamera.transform.position,
+                    targetPosition,
+                    ref _cameraPositionVelocity,
+                    Mathf.Max(0.0001f, lockCameraPositionSmoothTime),
+                    Mathf.Infinity,
+                    Time.deltaTime);
+            }
+            else
+            {
+                playerCamera.transform.position = targetPosition;
+                _cameraPositionVelocity = Vector3.zero;
+            }
         }
 
         public static void LockCursor()

@@ -11,12 +11,19 @@ namespace MUSCA.Gate3D
         [SerializeField] private int historyWindow = 7;
         [SerializeField] private int minimumSamples = 4;
         [SerializeField] private float lockConfidence = 0.6f;
+        [SerializeField] private float maxPredictionAgeSeconds = 3.2f;
 
         private KaelPredictionModel _model;
         private bool _subscribed;
+        private float _lastDodgeRecordedAt = float.NegativeInfinity;
 
         public bool PrototypeActive => prototypeActive;
         public KaelPredictionSnapshot Snapshot => Model.Snapshot();
+        public float LastDodgeAgeSeconds => float.IsNegativeInfinity(_lastDodgeRecordedAt)
+            ? float.PositiveInfinity
+            : Mathf.Max(0f, Time.time - _lastDodgeRecordedAt);
+        public bool PredictionFresh =>
+            LastDodgeAgeSeconds <= Mathf.Max(0.1f, maxPredictionAgeSeconds);
 
         private KaelPredictionModel Model
         {
@@ -74,12 +81,20 @@ namespace MUSCA.Gate3D
         public void SetPrototypeActive(bool active, bool resetHistory)
         {
             prototypeActive = active;
-            if (resetHistory) Model.Clear();
+            if (resetHistory)
+            {
+                Model.Clear();
+                _lastDodgeRecordedAt = float.NegativeInfinity;
+            }
         }
 
         public void RecordDodgeForQa(DodgeDirection direction)
         {
             Model.Record(direction);
+            if (direction != DodgeDirection.None)
+            {
+                _lastDodgeRecordedAt = Time.time;
+            }
         }
 
         public bool TryGetPredictedStrikePoint(float projectedDodgeDistance, out Vector3 point)
@@ -91,7 +106,9 @@ namespace MUSCA.Gate3D
             }
 
             KaelPredictionSnapshot snapshot = Snapshot;
-            if (!snapshot.Locked || snapshot.Direction == DodgeDirection.None)
+            if (!PredictionFresh ||
+                !snapshot.Locked ||
+                snapshot.Direction == DodgeDirection.None)
             {
                 return false;
             }
@@ -121,6 +138,10 @@ namespace MUSCA.Gate3D
             if (prototypeActive)
             {
                 Model.Record(direction);
+                if (direction != DodgeDirection.None)
+                {
+                    _lastDodgeRecordedAt = Time.time;
+                }
             }
         }
     }
