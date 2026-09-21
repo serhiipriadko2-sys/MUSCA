@@ -16,11 +16,14 @@ namespace MUSCA.Gate3D
 
         private CharacterController _controller;
         private float _pitch;
+        private CollisionFlags _lastMoveCollisionFlags;
         private readonly RaycastHit[] _cameraHits = new RaycastHit[16];
 
         public bool InputEnabled { get; set; } = true;
         public Camera PlayerCamera => playerCamera;
         public Vector3 CameraLocalPosition => cameraLocalPosition;
+        public CollisionFlags LastMoveCollisionFlags => _lastMoveCollisionFlags;
+        public bool LastMoveGrounded => (_lastMoveCollisionFlags & CollisionFlags.Below) != 0;
 
         private void Awake()
         {
@@ -62,11 +65,11 @@ namespace MUSCA.Gate3D
             Vector3 input = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
             input = Vector3.ClampMagnitude(input, 1f);
             Vector3 velocity = transform.TransformDirection(input) * moveSpeed;
-            if (!_controller.isGrounded)
-            {
-                velocity.y = -2f;
-            }
-            _controller.Move(velocity * Time.deltaTime);
+            // Keep a small downward bias every frame so CharacterController
+            // maintains stable contact with the floor instead of flapping
+            // between grounded/not-grounded when planar input is idle.
+            velocity.y = -2f;
+            _lastMoveCollisionFlags = _controller.Move(velocity * Time.deltaTime);
         }
 
         private void LateUpdate()

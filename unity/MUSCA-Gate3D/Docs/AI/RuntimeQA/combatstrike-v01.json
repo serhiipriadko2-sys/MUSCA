@@ -1,0 +1,19 @@
+{
+    "view": "combatstrike",
+    "outcome": "Pending",
+    "cells": 2,
+    "signal": 4,
+    "x": 0.0,
+    "y": 0.0,
+    "z": 6.400000095367432,
+    "combatHits": 1,
+    "sentinelHealth": 66.0,
+    "sentinelAlive": true,
+    "grounded": false,
+    "collisionSafe": true,
+    "groundProbeHit": false,
+    "groundProbeCollider": "",
+    "groundProbePointY": 0.0,
+    "groundProbeDistance": 0.0,
+    "screenshot": "C:\\github\\MUSCA-combat-v01\\unity\\runtime-qa-current\\combatstrike.png"
+}

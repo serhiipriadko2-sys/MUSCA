@@ -260,10 +260,9 @@ namespace MUSCA.Gate3D
             }
         }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        public void PrepareQaOpenedState()
+        internal void PrepareQaOpenedState()
         {
-            if (_domain == null)
+            if ((!Application.isEditor && !Debug.isDebugBuild) || _domain == null)
             {
                 return;
             }
@@ -277,7 +276,6 @@ namespace MUSCA.Gate3D
             player.InputEnabled = false;
             NotifyChanged();
         }
-#endif
 
         public GateSnapshot Snapshot()
         {

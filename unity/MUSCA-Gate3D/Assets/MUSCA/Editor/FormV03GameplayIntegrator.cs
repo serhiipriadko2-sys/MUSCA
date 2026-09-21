@@ -34,7 +34,9 @@ namespace MUSCA.Gate3D.Editor
             functionEnvironment.name = "Function_Environment";
 
             SetRenderers(functionEnvironment, false);
-            SetColliders(functionEnvironment, false);
+            // Keep the already-validated Function geometry as the authoritative physics proxy.
+            // Form v0.3 remains the visible shell; imported mesh colliders are supplemental only.
+            SetColliders(functionEnvironment, true);
             SetRenderers(companion, false);
 
             GameObject formEnvironment = InstantiateModel($"{ArtRoot}/GateLab_Form_v0.3.fbx", "FormV03_Environment");
@@ -59,7 +61,7 @@ namespace MUSCA.Gate3D.Editor
                 throw new InvalidOperationException("Player controller/camera missing.");
             playerController.ConfigureCamera(playerCamera, new Vector3(0.20f, 1.62f, -2.60f), 64f);
             playerController.SetCameraCollision(true, 0.22f, 0.08f);
-            GateHud hud = UnityEngine.Object.FindFirstObjectByType<GateHud>();
+            GateHud hud = UnityEngine.Object.FindAnyObjectByType<GateHud>();
             if (hud != null) hud.SetCompactMode(true);
 
             GameObject researcherVisual = InstantiateModel($"{ArtRoot}/Researcher_FormProxy_v0.31.fbx", "FormV03_Researcher_Visual");
@@ -87,7 +89,7 @@ namespace MUSCA.Gate3D.Editor
                 companionMotion.ConfigureVisualWings(
                     FindDeep(muscaVisual.transform, "M03_WingUpper_-1"), FindDeep(muscaVisual.transform, "M03_WingUpper_1"),
                     FindDeep(muscaVisual.transform, "M03_WingLower_-1"), FindDeep(muscaVisual.transform, "M03_WingLower_1"));
-                GateRuntime gateRuntime = UnityEngine.Object.FindFirstObjectByType<GateRuntime>();
+                GateRuntime gateRuntime = UnityEngine.Object.FindAnyObjectByType<GateRuntime>();
                 MuscaBehaviorDriver behaviorDriver = companion.GetComponent<MuscaBehaviorDriver>();
                 if (behaviorDriver == null) behaviorDriver = companion.AddComponent<MuscaBehaviorDriver>();
                 behaviorDriver.Configure(gateRuntime, companionMotion);

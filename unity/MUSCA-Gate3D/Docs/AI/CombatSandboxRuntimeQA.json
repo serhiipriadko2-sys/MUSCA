@@ -1,0 +1,83 @@
+{
+  "schema": "musca.combat-sandbox-runtime-qa.v3",
+  "status": "PASS",
+  "verifiedAt": "2026-09-21",
+  "unityVersion": "6000.6.1f1",
+  "scene": "Assets/MUSCA/Scenes/CombatSandbox_v01.unity",
+  "regression": {
+    "humanObservedFailure": "player fell below the visible combat floor",
+    "decisiveRuntimeFault": "Sentinel CapsuleCollider was authored on an imported FBX root with lossyScale 100, producing an approximately 84 x 176 x 84 metre world collider that overlapped the player spawn and drove CharacterController depenetration.",
+    "secondaryCollisionDefect": "The hidden Function floor BoxCollider had been disabled under the Form v0.3 visual layer.",
+    "postFixSentinelColliderWorldSize": {
+      "x": 0.8400000929832458,
+      "y": 1.7599999904632568,
+      "z": 0.8400001525878906
+    },
+    "postFixSentinelOverlapsPlayer": false,
+    "functionFloorColliderEnabled": true
+  },
+  "build": {
+    "exe": "Builds/CombatSandbox-v01/MUSCA-CombatSandbox-v01.exe",
+    "buildBytes": 173103801,
+    "exeBytes": 667136,
+    "exeSha256": "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
+    "runtimeDll": "Builds/CombatSandbox-v01/MUSCA-CombatSandbox-v01_Data/Managed/MUSCA.Gate3D.Runtime.dll",
+    "runtimeDllBytes": 43520,
+    "runtimeDllSha256": "50effb82a14504b033556f3bd9355ef517cc5c8aecd89aeda096907485629c21",
+    "errors": 0,
+    "warnings": 0
+  },
+  "checks": {
+    "sceneValidation": "PASS",
+    "editModeTests": "11/11 PASS",
+    "grounding": {
+      "finalY": 0.07999974489212036,
+      "grounded": true,
+      "collisionSafe": true,
+      "groundProbeHit": true,
+      "groundProbeCollider": "Function_Environment/Floor",
+      "groundProbePointY": 0.0,
+      "groundProbeDistance": 3.0
+    },
+    "combatStrike": {
+      "hitCount": 1,
+      "targetHealthBefore": 100.0,
+      "targetHealthAfter": 66.0,
+      "targetAlive": true
+    }
+  },
+  "humanConfirmation": {
+    "status": "PASS",
+    "date": "2026-09-21",
+    "source": "explicit_user_chat_confirmation",
+    "scope": "free-movement collision regression only",
+    "confirmed": "The rebuilt combat sandbox no longer reproduces the reported player fall-through during human free movement.",
+    "doesNotApprove": [
+      "overall combat feel",
+      "enemy AI",
+      "dodge/stamina",
+      "lock-on",
+      "production art",
+      "souls-like quality"
+    ]
+  },
+  "artifacts": {
+    "RuntimeQA/grounding-v01.png": {
+      "bytes": 504414,
+      "sha256": "1613d36042b98ee7c88ebe76170a269234a4d06332a3bbfd1af7b77f028cb8e0"
+    },
+    "RuntimeQA/grounding-v01.json": {
+      "bytes": 523,
+      "sha256": "bfb727a5b01bf2fa4be825cc18e25d032524309800f85120ab307d98865eef68"
+    },
+    "RuntimeQA/combatstrike-v01.png": {
+      "bytes": 532123,
+      "sha256": "d491434e0076ac085e57d2c1f834d04f77027511ab69341c76e8331ac1138889"
+    },
+    "RuntimeQA/combatstrike-v01.json": {
+      "bytes": 488,
+      "sha256": "3bd312fbd68155219c9c920a6ab9d0b29c390e14c2a0f223a0d25a10c9ccb03c"
+    }
+  },
+  "claimBoundary": "Automated grounding and melee regressions pass, and the owner explicitly confirmed the original fall-through no longer reproduces in human free movement. This confirmation is scoped to the collision regression and is not overall gameplay-feel approval."
+}
