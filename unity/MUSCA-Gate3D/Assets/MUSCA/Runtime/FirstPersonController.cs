@@ -14,9 +14,10 @@ namespace MUSCA.Gate3D
         [SerializeField] private float jumpHeight = 1.15f;
         [SerializeField] private float gravity = -24f;
         [SerializeField] private float groundedStickVelocity = -2f;
-        [SerializeField] private float lockTurnSpeedDegrees = 480f;
-        [SerializeField] private float lockCameraYawSmoothTime = 0.12f;
-        [SerializeField] private float lockCameraMaxYawSpeed = 540f;
+        [SerializeField] private float lockTurnSpeedDegrees = 420f;
+        [SerializeField] private float lockCameraYawSmoothTime = 0.10f;
+        [SerializeField] private float lockCameraMaxYawSpeed = 420f;
+        [SerializeField] private float lockYawDeadZoneDegrees = 0.12f;
         [SerializeField] private float lockCameraPositionSmoothTime = 0.08f;
         [SerializeField] private Vector3 cameraLocalPosition = new Vector3(0f, 1.68f, 0f);
         [SerializeField] private bool cameraCollisionEnabled;
@@ -197,11 +198,20 @@ namespace MUSCA.Gate3D
                 toTarget.y = 0f;
                 if (toTarget.sqrMagnitude > 0.0001f)
                 {
-                    Quaternion desired = Quaternion.LookRotation(
-                        toTarget.normalized, Vector3.up);
-                    transform.rotation = Quaternion.RotateTowards(
-                        transform.rotation, desired,
-                        lockTurnSpeedDegrees * Time.deltaTime);
+                    float desiredYaw = Mathf.Atan2(
+                        toTarget.x, toTarget.z) * Mathf.Rad2Deg;
+                    _cameraYaw = ComputeLockYawStep(
+                        _cameraYaw,
+                        desiredYaw,
+                        ref _cameraYawVelocity,
+                        lockCameraYawSmoothTime,
+                        Mathf.Min(
+                            Mathf.Max(1f, lockTurnSpeedDegrees),
+                            Mathf.Max(1f, lockCameraMaxYawSpeed)),
+                        lockYawDeadZoneDegrees,
+                        Time.deltaTime);
+                    transform.rotation =
+                        Quaternion.Euler(0f, _cameraYaw, 0f);
                 }
             }
             else
@@ -218,24 +228,11 @@ namespace MUSCA.Gate3D
         {
             EnsureCameraYawInitialized();
 
-            if (_lockOnTarget != null)
-            {
-                Vector3 toTarget = _lockOnTarget.position - transform.position;
-                toTarget.y = 0f;
-                if (toTarget.sqrMagnitude > 0.0001f)
-                {
-                    float desiredCameraYaw = Mathf.Atan2(
-                        toTarget.x, toTarget.z) * Mathf.Rad2Deg;
-                    _cameraYaw = Mathf.SmoothDampAngle(
-                        _cameraYaw,
-                        desiredCameraYaw,
-                        ref _cameraYawVelocity,
-                        Mathf.Max(0.0001f, lockCameraYawSmoothTime),
-                        Mathf.Max(1f, lockCameraMaxYawSpeed),
-                        Time.deltaTime);
-                }
-            }
-            else
+            // Lock yaw is solved exactly once in UpdateView, before movement.
+            // LateUpdate only applies that frozen frame solution to the camera.
+            // This avoids body yaw and camera yaw chasing the same moving target
+            // through two different smoothing laws inside one rendered frame.
+            if (_lockOnTarget == null)
             {
                 _cameraYaw = transform.eulerAngles.y;
                 _cameraYawVelocity = 0f;
@@ -292,6 +289,31 @@ namespace MUSCA.Gate3D
             float t = Mathf.Clamp01(normalizedTime);
             float inverse = 1f - t;
             return 1f - inverse * inverse * inverse;
+        }
+
+        public static float ComputeLockYawStep(
+            float currentYaw,
+            float desiredYaw,
+            ref float yawVelocity,
+            float smoothTime,
+            float maxSpeed,
+            float deadZoneDegrees,
+            float deltaTime)
+        {
+            float delta = Mathf.DeltaAngle(currentYaw, desiredYaw);
+            if (Mathf.Abs(delta) <= Mathf.Max(0f, deadZoneDegrees))
+            {
+                yawVelocity = 0f;
+                return currentYaw;
+            }
+
+            return Mathf.SmoothDampAngle(
+                currentYaw,
+                desiredYaw,
+                ref yawVelocity,
+                Mathf.Max(0.0001f, smoothTime),
+                Mathf.Max(1f, maxSpeed),
+                Mathf.Max(0f, deltaTime));
         }
 
         public static float ComputeCommittedStepSeconds(float remainingSeconds, float deltaTime)

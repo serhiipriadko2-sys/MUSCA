@@ -59,7 +59,7 @@ namespace MUSCA.Gate3D
             EnsureStyles();
             Rect panel = new Rect(24f, 24f, 460f, 252f);
             GUI.Box(panel, GUIContent.none);
-            GUI.Label(new Rect(40f, 36f, 410f, 28f), "MUSCA // FIRST THRESHOLD v0.4", _title);
+            GUI.Label(new Rect(40f, 36f, 410f, 28f), "MUSCA // FIRST THRESHOLD v0.5", _title);
             GUI.Label(new Rect(40f, 68f, 410f, 22f), "WASD + mouse — movement / view", _body);
             GUI.Label(new Rect(40f, 90f, 410f, 22f), "SPACE — jump · SHIFT — dodge · LMB — strike", _body);
             GUI.Label(new Rect(40f, 112f, 410f, 22f), "Q / MMB — lock target · ESC — cursor", _body);

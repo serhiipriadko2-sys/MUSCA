@@ -210,6 +210,32 @@ namespace MUSCA.Gate3D.Tests
         }
 
         [Test]
+        public void LockYawDeadZoneSuppressesMicroCorrection()
+        {
+            float velocity = 2f;
+            float yaw = FirstPersonController.ComputeLockYawStep(
+                10f, 10.05f, ref velocity, 0.10f, 420f, 0.12f, 1f / 60f);
+
+            Assert.That(yaw, Is.EqualTo(10f).Within(0.0001f));
+            Assert.That(velocity, Is.EqualTo(0f).Within(0.0001f));
+        }
+
+        [Test]
+        public void LockYawDampedStepMovesTowardTargetWithoutSnap()
+        {
+            float velocity = 0f;
+            float first = FirstPersonController.ComputeLockYawStep(
+                0f, 90f, ref velocity, 0.10f, 420f, 0.12f, 1f / 60f);
+            float second = FirstPersonController.ComputeLockYawStep(
+                first, 90f, ref velocity, 0.10f, 420f, 0.12f, 1f / 60f);
+
+            Assert.That(first, Is.GreaterThan(0f));
+            Assert.That(first, Is.LessThan(90f));
+            Assert.That(second, Is.GreaterThan(first));
+            Assert.That(second, Is.LessThan(90f));
+        }
+
+        [Test]
         public void JumpVelocityUsesHeightAndDownwardGravity()
         {
             float velocity = FirstPersonController.ComputeJumpVelocity(1.15f, -24f);

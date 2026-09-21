@@ -28,6 +28,7 @@ namespace MUSCA.Gate3D.Editor
             public bool dodgeBindingCorrect;
             public bool lockBindingCorrect;
             public bool lockMiddleMouseEnabled;
+            public bool lockCameraTuningCorrect;
             public bool playerProxyRigPresent;
             public bool sentinelHealth;
             public bool sentinelBrain;
@@ -84,10 +85,16 @@ namespace MUSCA.Gate3D.Editor
                 lockOn, "keyboardToggle", KeyCode.Q);
             bool lockMiddleMouseEnabled = BoolBindingMatches(
                 lockOn, "middleMouseToggle", true);
+            bool lockCameraTuningCorrect =
+                FloatBindingMatches(movement, "lockTurnSpeedDegrees", 420f, 0.01f) &&
+                FloatBindingMatches(movement, "lockCameraYawSmoothTime", 0.10f, 0.001f) &&
+                FloatBindingMatches(movement, "lockCameraMaxYawSpeed", 420f, 0.01f) &&
+                FloatBindingMatches(movement, "lockYawDeadZoneDegrees", 0.12f, 0.001f);
             if (!jumpBindingCorrect) findings.Add("jump binding is not SPACE");
             if (!dodgeBindingCorrect) findings.Add("dodge binding is not LEFT SHIFT");
             if (!lockBindingCorrect) findings.Add("lock-on keyboard binding is not Q");
             if (!lockMiddleMouseEnabled) findings.Add("lock-on middle mouse binding is disabled");
+            if (!lockCameraTuningCorrect) findings.Add("lock-on camera tuning drifted");
 
             Transform playerVisual = player != null
                 ? FindDeep(player.transform, "FormV03_Researcher_Visual")
@@ -104,7 +111,10 @@ namespace MUSCA.Gate3D.Editor
                 FindDeep(playerRig, "P04_Hip_L") != null &&
                 FindDeep(playerRig, "P04_Hip_R") != null &&
                 FindDeep(playerRig, "P04_Knee_L") != null &&
-                FindDeep(playerRig, "P04_Knee_R") != null;
+                FindDeep(playerRig, "P04_Knee_R") != null &&
+                FindDeep(playerRig, "P04_PelvisPivot") != null &&
+                FindDeep(playerRig, "P04_Ankle_L") != null &&
+                FindDeep(playerRig, "P04_Ankle_R") != null;
             if (!playerProxyRigPresent)
                 findings.Add("player proxy pivot rig incomplete");
 
@@ -134,7 +144,10 @@ namespace MUSCA.Gate3D.Editor
                 FindDeep(sentinelRig, "SV04_Hip_L") != null &&
                 FindDeep(sentinelRig, "SV04_Hip_R") != null &&
                 FindDeep(sentinelRig, "SV04_Knee_L") != null &&
-                FindDeep(sentinelRig, "SV04_Knee_R") != null;
+                FindDeep(sentinelRig, "SV04_Knee_R") != null &&
+                FindDeep(sentinelRig, "SV04_PelvisPivot") != null &&
+                FindDeep(sentinelRig, "SV04_Ankle_L") != null &&
+                FindDeep(sentinelRig, "SV04_Ankle_R") != null;
             CapsuleCollider collider = sentinelTransform != null ? sentinelTransform.GetComponent<CapsuleCollider>() : null;
             int rendererCount = sentinelTransform != null ?
                 sentinelTransform.GetComponentsInChildren<Renderer>(true).Length : 0;
@@ -156,9 +169,9 @@ namespace MUSCA.Gate3D.Editor
 
             Vector3 sentinelColliderWorldSize = collider != null ? collider.bounds.size : Vector3.zero;
             bool sentinelColliderWorldSizeValid = collider != null &&
-                sentinelColliderWorldSize.x >= 1.00f && sentinelColliderWorldSize.x <= 1.30f &&
-                sentinelColliderWorldSize.y >= 2.50f && sentinelColliderWorldSize.y <= 2.82f &&
-                sentinelColliderWorldSize.z >= 1.00f && sentinelColliderWorldSize.z <= 1.30f;
+                sentinelColliderWorldSize.x >= 1.38f && sentinelColliderWorldSize.x <= 1.54f &&
+                sentinelColliderWorldSize.y >= 3.34f && sentinelColliderWorldSize.y <= 3.58f &&
+                sentinelColliderWorldSize.z >= 1.38f && sentinelColliderWorldSize.z <= 1.54f;
             if (!sentinelColliderWorldSizeValid)
                 findings.Add($"sentinel collider world size invalid: {sentinelColliderWorldSize}");
 
@@ -169,7 +182,7 @@ namespace MUSCA.Gate3D.Editor
 
             Vector3 sentinelVisualWorldSize = ComputeRendererSize(sentinelVisual);
             bool sentinelVisualUpright =
-                sentinelVisualWorldSize.y >= 2.45f &&
+                sentinelVisualWorldSize.y >= 3.20f &&
                 sentinelVisualWorldSize.y > sentinelVisualWorldSize.x * 1.45f &&
                 sentinelVisualWorldSize.y > sentinelVisualWorldSize.z * 1.45f;
             if (!sentinelVisualUpright)
@@ -240,6 +253,7 @@ namespace MUSCA.Gate3D.Editor
                 dodgeBindingCorrect = dodgeBindingCorrect,
                 lockBindingCorrect = lockBindingCorrect,
                 lockMiddleMouseEnabled = lockMiddleMouseEnabled,
+                lockCameraTuningCorrect = lockCameraTuningCorrect,
                 playerProxyRigPresent = playerProxyRigPresent,
                 sentinelHealth = health != null,
                 sentinelBrain = brain != null,
@@ -293,6 +307,19 @@ namespace MUSCA.Gate3D.Editor
             SerializedObject serialized = new SerializedObject(target);
             SerializedProperty property = serialized.FindProperty(fieldName);
             return property != null && property.boolValue == expected;
+        }
+
+        private static bool FloatBindingMatches(
+            UnityEngine.Object target,
+            string fieldName,
+            float expected,
+            float tolerance)
+        {
+            if (target == null) return false;
+            SerializedObject serialized = new SerializedObject(target);
+            SerializedProperty property = serialized.FindProperty(fieldName);
+            return property != null &&
+                Mathf.Abs(property.floatValue - expected) <= tolerance;
         }
 
         private static Transform FindDeep(Transform root, string name)

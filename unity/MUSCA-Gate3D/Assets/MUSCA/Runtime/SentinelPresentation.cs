@@ -16,6 +16,9 @@ namespace MUSCA.Gate3D
         private Transform _rightHip;
         private Transform _leftKnee;
         private Transform _rightKnee;
+        private Transform _pelvis;
+        private Transform _leftAnkle;
+        private Transform _rightAnkle;
         private Transform _torso;
         private Transform _head;
 
@@ -27,11 +30,16 @@ namespace MUSCA.Gate3D
         private Quaternion _rightHipBase;
         private Quaternion _leftKneeBase;
         private Quaternion _rightKneeBase;
+        private Quaternion _pelvisBase;
+        private Quaternion _leftAnkleBase;
+        private Quaternion _rightAnkleBase;
         private Quaternion _torsoBase;
         private Quaternion _headBase;
         private Vector3 _visualBasePosition;
         private Vector3 _spearBasePosition;
         private Quaternion _spearBaseRotation;
+        private Vector3 _lastWorldPosition;
+        private bool _positionInitialized;
         private float _phase;
 
         public void Configure(
@@ -72,6 +80,9 @@ namespace MUSCA.Gate3D
                 "SV04_Knee_L", "SV01_Shin_-1");
             _rightKnee = Prefer(
                 "SV04_Knee_R", "SV01_Shin_1");
+            _pelvis = FindDeep(visualRoot, "SV04_PelvisPivot");
+            _leftAnkle = FindDeep(visualRoot, "SV04_Ankle_L");
+            _rightAnkle = FindDeep(visualRoot, "SV04_Ankle_R");
             _torso = Prefer(
                 "SV04_TorsoPivot", "SV01_Torso");
             _head = Prefer(
@@ -106,6 +117,9 @@ namespace MUSCA.Gate3D
                 _leftKneeBase = _leftKnee.localRotation;
             if (_rightKnee != null)
                 _rightKneeBase = _rightKnee.localRotation;
+            if (_pelvis != null) _pelvisBase = _pelvis.localRotation;
+            if (_leftAnkle != null) _leftAnkleBase = _leftAnkle.localRotation;
+            if (_rightAnkle != null) _rightAnkleBase = _rightAnkle.localRotation;
             if (_torso != null) _torsoBase = _torso.localRotation;
             if (_head != null) _headBase = _head.localRotation;
             if (spearRoot != null)
@@ -113,18 +127,33 @@ namespace MUSCA.Gate3D
                 _spearBasePosition = spearRoot.localPosition;
                 _spearBaseRotation = spearRoot.localRotation;
             }
+            _lastWorldPosition = transform.position;
+            _positionInitialized = true;
         }
 
         private void LateUpdate()
         {
             if (brain == null || visualRoot == null) return;
 
-            float stateSpeed = brain.State == SentinelCombatState.Approach
-                ? 6.3f
-                : 2.2f;
-            _phase += Time.deltaTime * stateSpeed;
+            Vector3 worldDelta = _positionInitialized
+                ? transform.position - _lastWorldPosition
+                : Vector3.zero;
+            worldDelta.y = 0f;
+            float traveled = worldDelta.magnitude;
+            _lastWorldPosition = transform.position;
+            _positionInitialized = true;
+
+            if (brain.State == SentinelCombatState.Approach)
+            {
+                _phase += traveled * 3.55f;
+            }
+            else
+            {
+                _phase += Time.deltaTime * 1.15f;
+            }
+
             float cycle = Mathf.Sin(_phase);
-            float blend = 1f - Mathf.Exp(-16f * Time.deltaTime);
+            float blend = 1f - Mathf.Exp(-18f * Time.deltaTime);
 
             float leftShoulderX = 0f;
             float rightShoulderX = 0f;
@@ -134,8 +163,11 @@ namespace MUSCA.Gate3D
             float rightHipX = 0f;
             float leftKneeX = 0f;
             float rightKneeX = 0f;
+            Vector3 pelvisEuler = Vector3.zero;
+            Vector3 leftAnkleEuler = Vector3.zero;
+            Vector3 rightAnkleEuler = Vector3.zero;
             Vector3 torsoEuler = Vector3.zero;
-            Vector3 headEuler = new Vector3(0f, cycle * 1.5f, 0f);
+            Vector3 headEuler = new Vector3(0f, cycle * 1.2f, 0f);
             float bob = 0f;
             Vector3 spearOffset = Vector3.zero;
             Vector3 spearEuler = Vector3.zero;
@@ -145,47 +177,67 @@ namespace MUSCA.Gate3D
                 case SentinelCombatState.Approach:
                 {
                     float stride = cycle;
-                    leftShoulderX = stride * 22f;
-                    rightShoulderX = -stride * 22f;
-                    leftElbowX = 12f + Mathf.Max(0f, -stride) * 16f;
-                    rightElbowX = 12f + Mathf.Max(0f, stride) * 16f;
-                    leftHipX = -stride * 28f;
-                    rightHipX = stride * 28f;
-                    leftKneeX = Mathf.Max(0f, stride) * 34f;
-                    rightKneeX = Mathf.Max(0f, -stride) * 34f;
+                    leftShoulderX = stride * 26f;
+                    rightShoulderX = -stride * 26f;
+                    leftElbowX = 12f + Mathf.Max(0f, -stride) * 20f;
+                    rightElbowX = 12f + Mathf.Max(0f, stride) * 20f;
+                    leftHipX = -stride * 33f;
+                    rightHipX = stride * 33f;
+                    leftKneeX = Mathf.Max(0f, stride) * 40f;
+                    rightKneeX = Mathf.Max(0f, -stride) * 40f;
+                    pelvisEuler = new Vector3(
+                        0f, stride * 4.5f, stride * 2.5f);
+                    leftAnkleEuler = new Vector3(
+                        -stride * 11f, 0f, 0f);
+                    rightAnkleEuler = new Vector3(
+                        stride * 11f, 0f, 0f);
                     torsoEuler = new Vector3(
-                        2.5f, -stride * 5f, stride * 3f);
-                    bob = Mathf.Abs(stride) * 0.035f;
+                        3.5f, -stride * 7f, -stride * 3.5f);
+                    headEuler = new Vector3(
+                        -1.5f, stride * 2.5f, 0f);
+                    bob = Mathf.Abs(stride) * 0.045f;
                     break;
                 }
 
                 case SentinelCombatState.Telegraph:
                 {
-                    float t = Smooth01(brain.StateProgress);
-                    float settle = Mathf.Sin(t * Mathf.PI);
-                    rightShoulderX = Mathf.Lerp(0f, -102f, t);
-                    rightElbowX = Mathf.Lerp(10f, 52f, t);
-                    leftShoulderX = Mathf.Lerp(0f, 28f, t);
-                    leftElbowX = Mathf.Lerp(10f, 30f, t);
-                    leftHipX = Mathf.Lerp(0f, 18f, t);
-                    rightHipX = Mathf.Lerp(0f, -12f, t);
-                    leftKneeX = Mathf.Lerp(0f, 18f, t);
-                    rightKneeX = Mathf.Lerp(0f, 28f, t);
+                    // Reach the committed wind-up early, then hold it long enough
+                    // for the player to read the body rather than only the floor.
+                    float t = Smooth01(Mathf.Clamp01(
+                        brain.StateProgress / 0.72f));
+                    float compression = Mathf.Sin(t * Mathf.PI * 0.5f);
+
+                    rightShoulderX = Mathf.Lerp(0f, -116f, t);
+                    rightElbowX = Mathf.Lerp(10f, 62f, t);
+                    leftShoulderX = Mathf.Lerp(0f, 34f, t);
+                    leftElbowX = Mathf.Lerp(10f, 36f, t);
+                    leftHipX = Mathf.Lerp(0f, 24f, t);
+                    rightHipX = Mathf.Lerp(0f, -18f, t);
+                    leftKneeX = Mathf.Lerp(0f, 24f, t);
+                    rightKneeX = Mathf.Lerp(0f, 36f, t);
+                    pelvisEuler = new Vector3(
+                        Mathf.Lerp(0f, -8f, t),
+                        Mathf.Lerp(0f, 20f, t),
+                        Mathf.Lerp(0f, -9f, t));
+                    leftAnkleEuler = new Vector3(
+                        Mathf.Lerp(0f, -8f, t), 0f, 5f * t);
+                    rightAnkleEuler = new Vector3(
+                        Mathf.Lerp(0f, 10f, t), 0f, -7f * t);
                     torsoEuler = new Vector3(
-                        Mathf.Lerp(0f, -14f, t),
-                        Mathf.Lerp(0f, -24f, t),
-                        Mathf.Lerp(0f, 8f, t));
+                        Mathf.Lerp(0f, -20f, t),
+                        Mathf.Lerp(0f, -34f, t),
+                        Mathf.Lerp(0f, 12f, t));
                     headEuler = new Vector3(
-                        Mathf.Lerp(0f, 4f, t),
-                        Mathf.Lerp(0f, 12f, t),
-                        0f);
-                    bob = -0.045f * settle;
+                        Mathf.Lerp(0f, 6f, t),
+                        Mathf.Lerp(0f, 17f, t),
+                        Mathf.Lerp(0f, -4f, t));
+                    bob = -0.075f * compression;
                     spearOffset = new Vector3(
-                        0.03f * t, 0.18f * t, -0.16f * t);
+                        0.05f * t, 0.24f * t, -0.23f * t);
                     spearEuler = new Vector3(
-                        Mathf.Lerp(0f, -72f, t),
-                        Mathf.Lerp(0f, -14f, t),
-                        Mathf.Lerp(0f, 8f, t));
+                        Mathf.Lerp(0f, -84f, t),
+                        Mathf.Lerp(0f, -19f, t),
+                        Mathf.Lerp(0f, 11f, t));
                     break;
                 }
 
@@ -193,28 +245,36 @@ namespace MUSCA.Gate3D
                 {
                     float t = Smooth01(brain.StateProgress);
                     float inverse = 1f - t;
-                    rightShoulderX = 72f * inverse;
-                    rightElbowX = 36f * inverse + 10f;
-                    leftShoulderX = -18f * inverse;
-                    leftElbowX = 22f * inverse + 10f;
-                    leftHipX = -12f * inverse;
-                    rightHipX = 14f * inverse;
-                    leftKneeX = 12f * inverse;
-                    rightKneeX = 8f * inverse;
+                    rightShoulderX = 82f * inverse;
+                    rightElbowX = 44f * inverse + 10f;
+                    leftShoulderX = -24f * inverse;
+                    leftElbowX = 28f * inverse + 10f;
+                    leftHipX = -16f * inverse;
+                    rightHipX = 18f * inverse;
+                    leftKneeX = 16f * inverse;
+                    rightKneeX = 12f * inverse;
+                    pelvisEuler = new Vector3(
+                        7f * inverse,
+                        -17f * inverse,
+                        7f * inverse);
+                    leftAnkleEuler = new Vector3(
+                        7f * inverse, 0f, -4f * inverse);
+                    rightAnkleEuler = new Vector3(
+                        -9f * inverse, 0f, 5f * inverse);
                     torsoEuler = new Vector3(
-                        16f * inverse,
-                        22f * inverse,
-                        -8f * inverse);
+                        21f * inverse,
+                        29f * inverse,
+                        -11f * inverse);
                     headEuler = new Vector3(
-                        -4f * inverse,
-                        -8f * inverse,
+                        -6f * inverse,
+                        -11f * inverse,
                         0f);
                     spearOffset = new Vector3(
-                        0f, -0.08f * inverse, 0.22f * inverse);
+                        0f, -0.11f * inverse, 0.28f * inverse);
                     spearEuler = new Vector3(
-                        58f * inverse,
-                        10f * inverse,
-                        -6f * inverse);
+                        68f * inverse,
+                        14f * inverse,
+                        -8f * inverse);
                     break;
                 }
             }
@@ -264,6 +324,9 @@ namespace MUSCA.Gate3D
                 _rightKneeBase,
                 new Vector3(rightKneeX, 0f, 0f),
                 blend);
+            Apply(_pelvis, _pelvisBase, pelvisEuler, blend);
+            Apply(_leftAnkle, _leftAnkleBase, leftAnkleEuler, blend);
+            Apply(_rightAnkle, _rightAnkleBase, rightAnkleEuler, blend);
             Apply(_torso, _torsoBase, torsoEuler, blend);
             Apply(_head, _headBase, headEuler, blend);
 

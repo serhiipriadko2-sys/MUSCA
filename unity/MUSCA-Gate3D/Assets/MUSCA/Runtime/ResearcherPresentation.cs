@@ -16,6 +16,9 @@ namespace MUSCA.Gate3D
 
         private Transform _leftElbow;
         private Transform _rightElbow;
+        private Transform _pelvis;
+        private Transform _leftAnkle;
+        private Transform _rightAnkle;
         private Transform _head;
         private FirstPersonController _movement;
 
@@ -29,6 +32,9 @@ namespace MUSCA.Gate3D
         private Quaternion _rightShinBase;
         private Quaternion _leftElbowBase;
         private Quaternion _rightElbowBase;
+        private Quaternion _pelvisBase;
+        private Quaternion _leftAnkleBase;
+        private Quaternion _rightAnkleBase;
         private Quaternion _torsoBase;
         private Quaternion _headBase;
 
@@ -75,6 +81,9 @@ namespace MUSCA.Gate3D
 
             _leftElbow = FindDeep(visualRoot, "P04_Elbow_L");
             _rightElbow = FindDeep(visualRoot, "P04_Elbow_R");
+            _pelvis = FindDeep(visualRoot, "P04_PelvisPivot");
+            _leftAnkle = FindDeep(visualRoot, "P04_Ankle_L");
+            _rightAnkle = FindDeep(visualRoot, "P04_Ankle_R");
             _head = FindDeep(visualRoot, "P04_HeadPivot");
 
             leftShin ??= FindDeep(visualRoot, "P03_Shin_-1");
@@ -103,6 +112,9 @@ namespace MUSCA.Gate3D
             if (rightShin != null) _rightShinBase = rightShin.localRotation;
             if (_leftElbow != null) _leftElbowBase = _leftElbow.localRotation;
             if (_rightElbow != null) _rightElbowBase = _rightElbow.localRotation;
+            if (_pelvis != null) _pelvisBase = _pelvis.localRotation;
+            if (_leftAnkle != null) _leftAnkleBase = _leftAnkle.localRotation;
+            if (_rightAnkle != null) _rightAnkleBase = _rightAnkle.localRotation;
             if (torso != null) _torsoBase = torso.localRotation;
             if (_head != null) _headBase = _head.localRotation;
         }
@@ -131,45 +143,69 @@ namespace MUSCA.Gate3D
                 ? _movement.VerticalVelocity
                 : controller.velocity.y;
 
-            _phase += Time.deltaTime * Mathf.Lerp(4.2f, 8.6f, movement);
+            // Gait phase is distance-driven, not clock-driven. A foot cycle now
+            // advances only when the controller really travels through the world,
+            // which reduces the treadmill / puppet impression during acceleration.
+            _phase += speed * Time.deltaTime * 1.92f;
             float cycle = Mathf.Sin(_phase);
-            float oppositeCycle = -cycle;
-            float bob = Mathf.Abs(cycle) * 0.035f * movement;
+            float forwardWeight = Mathf.Clamp01(Mathf.Abs(forward) * 1.25f);
+            float strafeWeight = Mathf.Clamp01(Mathf.Abs(strafe) * 1.35f);
+            float gaitDirection = forward < -0.08f ? -1f : 1f;
+            float stride = cycle * gaitDirection;
+            float sagittalWeight = Mathf.Lerp(0.42f, 1f, forwardWeight);
+            float bob = Mathf.Abs(cycle) * 0.028f * movement;
+            float lateralSway = cycle * 0.018f * movement;
 
-            float leftShoulderX = cycle * 30f * movement;
-            float rightShoulderX = oppositeCycle * 30f * movement;
-            float leftHipX = oppositeCycle * 34f * movement;
-            float rightHipX = cycle * 34f * movement;
-            float leftKneeX = Mathf.Max(0f, cycle) * 42f * movement;
-            float rightKneeX = Mathf.Max(0f, -cycle) * 42f * movement;
-            float leftElbowX = 12f + Mathf.Max(0f, -cycle) * 18f * movement;
-            float rightElbowX = 12f + Mathf.Max(0f, cycle) * 18f * movement;
+            float leftShoulderX = stride * 34f * movement * sagittalWeight;
+            float rightShoulderX = -stride * 34f * movement * sagittalWeight;
+            float leftHipX = -stride * 39f * movement * sagittalWeight;
+            float rightHipX = stride * 39f * movement * sagittalWeight;
+            float leftKneeX = Mathf.Max(0f, stride) * 48f * movement;
+            float rightKneeX = Mathf.Max(0f, -stride) * 48f * movement;
+            float leftElbowX = 10f + Mathf.Max(0f, -stride) * 24f * movement;
+            float rightElbowX = 10f + Mathf.Max(0f, stride) * 24f * movement;
 
-            float rootPitch = Mathf.Abs(forward) * 2.5f;
-            float rootRoll = -strafe * 5.5f;
-            float rootYaw = 0f;
+            float rootPitch = Mathf.Abs(forward) * 3.2f;
+            float rootRoll = -strafe * 7.5f;
+            float rootYaw = -strafe * 2.5f;
             float rootDrop = 0f;
 
+            Vector3 pelvisEuler = new Vector3(
+                0f,
+                stride * 5.5f * movement * sagittalWeight,
+                -strafe * 5f + cycle * 2.5f * movement);
+            Vector3 leftAnkleEuler = new Vector3(
+                Mathf.Clamp(-stride * 14f, -12f, 14f) * movement,
+                0f,
+                -strafe * 5f * strafeWeight);
+            Vector3 rightAnkleEuler = new Vector3(
+                Mathf.Clamp(stride * 14f, -12f, 14f) * movement,
+                0f,
+                -strafe * 5f * strafeWeight);
+
             Vector3 torsoEuler = new Vector3(
-                Mathf.Abs(forward) * 2f,
-                -cycle * 4.5f * movement,
-                -strafe * 4f);
+                Mathf.Abs(forward) * 2.8f,
+                -stride * 6.5f * movement * sagittalWeight,
+                -strafe * 5.5f - cycle * 2f * movement);
             Vector3 headEuler = new Vector3(
                 0f,
-                cycle * 1.8f * movement,
-                strafe * 1.2f);
+                stride * 2.2f * movement,
+                strafe * 1.5f);
 
             if (!grounded)
             {
                 float tuck = Mathf.Clamp01(Mathf.Abs(vertical) / 8f);
-                leftHipX = -18f - tuck * 16f;
-                rightHipX = -18f - tuck * 16f;
-                leftKneeX = 38f + tuck * 18f;
-                rightKneeX = 38f + tuck * 18f;
+                leftHipX = -18f - tuck * 18f;
+                rightHipX = -18f - tuck * 18f;
+                leftKneeX = 38f + tuck * 20f;
+                rightKneeX = 38f + tuck * 20f;
                 leftShoulderX = 18f;
                 rightShoulderX = 18f;
-                leftElbowX = 28f;
-                rightElbowX = 28f;
+                leftElbowX = 30f;
+                rightElbowX = 30f;
+                pelvisEuler = new Vector3(-4f * tuck, 0f, 0f);
+                leftAnkleEuler = new Vector3(-12f * tuck, 0f, 0f);
+                rightAnkleEuler = new Vector3(-12f * tuck, 0f, 0f);
                 rootPitch += Mathf.Clamp(vertical * -0.55f, -6f, 10f);
                 rootDrop = 0.035f;
             }
@@ -177,7 +213,11 @@ namespace MUSCA.Gate3D
             if (dodging && _movement != null)
             {
                 float t = _movement.DodgeNormalizedTime;
-                float pulse = Mathf.Sin(Mathf.PI * t);
+                float engage = Smooth01(Mathf.Clamp01(t / 0.18f));
+                float release = 1f - Smooth01(
+                    Mathf.Clamp01((t - 0.68f) / 0.32f));
+                float brace = engage * release;
+
                 Vector3 dodgeLocal = transform.InverseTransformDirection(
                     _movement.DodgeDirectionWorld);
                 dodgeLocal.y = 0f;
@@ -186,35 +226,54 @@ namespace MUSCA.Gate3D
                     dodgeLocal.Normalize();
                 }
 
-                rootDrop = Mathf.Max(rootDrop, 0.17f * pulse);
-                rootPitch += dodgeLocal.z * 18f * pulse;
-                rootRoll += -dodgeLocal.x * 24f * pulse;
-                rootYaw += dodgeLocal.x * 9f * pulse;
+                rootDrop = Mathf.Max(rootDrop, 0.22f * brace);
+                rootPitch += dodgeLocal.z * 22f * brace;
+                rootRoll += -dodgeLocal.x * 31f * brace;
+                rootYaw += dodgeLocal.x * 12f * brace;
 
+                pelvisEuler = new Vector3(
+                    -6f * brace,
+                    dodgeLocal.x * 10f * brace,
+                    -dodgeLocal.x * 13f * brace);
                 torsoEuler = new Vector3(
-                    dodgeLocal.z * 14f * pulse,
-                    -dodgeLocal.x * 14f * pulse,
-                    -dodgeLocal.x * 18f * pulse);
+                    dodgeLocal.z * 18f * brace,
+                    -dodgeLocal.x * 18f * brace,
+                    -dodgeLocal.x * 23f * brace);
 
                 float side = dodgeLocal.x;
-                leftHipX = -14f + side * 12f * pulse;
-                rightHipX = -14f - side * 12f * pulse;
-                leftKneeX = 34f + Mathf.Max(0f, side) * 18f * pulse;
-                rightKneeX = 34f + Mathf.Max(0f, -side) * 18f * pulse;
-                leftShoulderX = 26f - side * 10f * pulse;
-                rightShoulderX = 26f + side * 10f * pulse;
-                leftElbowX = 54f;
-                rightElbowX = 54f;
+                float forwardDodge = dodgeLocal.z;
+                leftHipX = -18f + side * 14f * brace -
+                    forwardDodge * 9f * brace;
+                rightHipX = -18f - side * 14f * brace -
+                    forwardDodge * 9f * brace;
+                leftKneeX = 38f + Mathf.Max(0f, side) * 24f * brace;
+                rightKneeX = 38f + Mathf.Max(0f, -side) * 24f * brace;
+                leftShoulderX = 30f - side * 14f * brace;
+                rightShoulderX = 30f + side * 14f * brace;
+                leftElbowX = 58f;
+                rightElbowX = 58f;
+
+                leftAnkleEuler = new Vector3(
+                    -10f * brace,
+                    0f,
+                    -side * 15f * brace);
+                rightAnkleEuler = new Vector3(
+                    -10f * brace,
+                    0f,
+                    -side * 15f * brace);
                 headEuler = new Vector3(
-                    -4f * pulse,
-                    dodgeLocal.x * 6f * pulse,
-                    dodgeLocal.x * 8f * pulse);
+                    -5f * brace,
+                    dodgeLocal.x * 7f * brace,
+                    dodgeLocal.x * 10f * brace);
             }
 
             Quaternion rootTarget = _rootBaseRotation *
                 Quaternion.Euler(rootPitch, rootYaw, rootRoll);
             Vector3 rootTargetPosition = _rootBasePosition +
-                Vector3.up * (bob - rootDrop);
+                new Vector3(
+                    lateralSway - strafe * 0.012f * movement,
+                    bob - rootDrop,
+                    0f);
 
             float poseBlend = 1f - Mathf.Exp(-20f * Time.deltaTime);
             visualRoot.localPosition = Vector3.Lerp(
@@ -238,8 +297,17 @@ namespace MUSCA.Gate3D
                 new Vector3(leftKneeX, 0f, 0f), poseBlend);
             ApplyPose(rightShin, _rightShinBase,
                 new Vector3(rightKneeX, 0f, 0f), poseBlend);
+            ApplyPose(_pelvis, _pelvisBase, pelvisEuler, poseBlend);
+            ApplyPose(_leftAnkle, _leftAnkleBase, leftAnkleEuler, poseBlend);
+            ApplyPose(_rightAnkle, _rightAnkleBase, rightAnkleEuler, poseBlend);
             ApplyPose(torso, _torsoBase, torsoEuler, poseBlend);
             ApplyPose(_head, _headBase, headEuler, poseBlend);
+        }
+
+        private static float Smooth01(float value)
+        {
+            float t = Mathf.Clamp01(value);
+            return t * t * (3f - 2f * t);
         }
 
         private static void ApplyPose(

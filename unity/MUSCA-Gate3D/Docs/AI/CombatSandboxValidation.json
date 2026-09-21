@@ -12,6 +12,7 @@
     "dodgeBindingCorrect": true,
     "lockBindingCorrect": true,
     "lockMiddleMouseEnabled": true,
+    "lockCameraTuningCorrect": true,
     "playerProxyRigPresent": true,
     "sentinelHealth": true,
     "sentinelBrain": true,
@@ -25,15 +26,15 @@
     "sentinelColliderWorldSizeValid": true,
     "sentinelOverlapsPlayer": false,
     "sentinelColliderWorldSize": {
-        "x": 1.1200002431869507,
-        "y": 2.6600003242492676,
-        "z": 1.1200027465820313
+        "x": 1.4600002765655518,
+        "y": 3.4600000381469727,
+        "z": 1.4599990844726563
     },
     "sentinelVisualUpright": true,
     "sentinelVisualWorldSize": {
-        "x": 1.2768000364303589,
-        "y": 2.659998893737793,
-        "z": 0.62396240234375
+        "x": 1.6598398685455322,
+        "y": 3.4579997062683105,
+        "z": 0.8111495971679688
     },
     "companionPresent": true,
     "arenaPresent": true,

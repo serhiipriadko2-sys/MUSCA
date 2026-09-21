@@ -16,9 +16,10 @@ namespace MUSCA.Gate3D.Editor
 
         private static readonly Vector3 PlayerSpawn = new Vector3(0f, 0f, 18f);
         private static readonly Vector3 SentinelSpawn = new Vector3(0f, 0f, 34f);
-        private const float BossVisualScale = 1.52f;
+        private const float BossVisualScale = 1.976f;
+        private const float BossAccessoryScale = 1.30f;
 
-        [MenuItem("MUSCA/Combat/Build First Threshold v0.4")]
+        [MenuItem("MUSCA/Combat/Build First Threshold v0.5")]
         public static void Build()
         {
             RequireAsset(SourceScene);
@@ -53,6 +54,7 @@ namespace MUSCA.Gate3D.Editor
             if (lockOn == null) lockOn = player.AddComponent<PlayerLockOn>();
 
             ApplyCombatInputBindings(movement, dodge, lockOn);
+            ApplyCombatCameraTuning(movement);
 
             GameObject sandbox = FindRootOptional(scene, "CombatSandbox_v01");
             if (sandbox == null) sandbox = new GameObject("CombatSandbox_v01");
@@ -84,7 +86,7 @@ namespace MUSCA.Gate3D.Editor
             Transform sentinelVisual = sentinel.transform.Find("SentinelVisual");
 
             CapsuleCollider capsule = sentinel.AddComponent<CapsuleCollider>();
-            ConfigureWorldCapsule(capsule, 2.66f, 0.56f, 1.33f);
+            ConfigureWorldCapsule(capsule, 3.46f, 0.73f, 1.73f);
 
             CombatDamageReceiver receiver = sentinel.AddComponent<CombatDamageReceiver>();
             receiver.Configure(130f, 2.15f);
@@ -154,6 +156,30 @@ namespace MUSCA.Gate3D.Editor
             }
             middleMouse.boolValue = true;
             lockSerialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void ApplyCombatCameraTuning(
+            FirstPersonController movement)
+        {
+            SetFloat(movement, "lockTurnSpeedDegrees", 420f);
+            SetFloat(movement, "lockCameraYawSmoothTime", 0.10f);
+            SetFloat(movement, "lockCameraMaxYawSpeed", 420f);
+            SetFloat(movement, "lockYawDeadZoneDegrees", 0.12f);
+        }
+
+        private static void SetFloat(
+            UnityEngine.Object target, string fieldName, float value)
+        {
+            SerializedObject serialized = new SerializedObject(target);
+            SerializedProperty property = serialized.FindProperty(fieldName);
+            if (property == null)
+            {
+                throw new InvalidOperationException(
+                    $"{target.GetType().Name}.{fieldName} serialized field missing.");
+            }
+
+            property.floatValue = value;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void SetKeyCode(
@@ -228,11 +254,17 @@ namespace MUSCA.Gate3D.Editor
             Transform rightThigh = RequireDeep(visual, "P03_Thigh_1");
             Transform leftShin = RequireDeep(visual, "P03_Shin_-1");
             Transform rightShin = RequireDeep(visual, "P03_Shin_1");
+            Transform leftBoot = RequireDeep(visual, "P03_Boot_-1");
+            Transform rightBoot = RequireDeep(visual, "P03_Boot_1");
 
             Transform rig = CreateRigPivot(
                 visual, "P04_ProxyRig", visual.position, visual.rotation);
+            Transform pelvis = CreateRigPivot(
+                rig, "P04_PelvisPivot",
+                RendererBounds(pelvisMesh).center,
+                visual.rotation);
             Transform torso = CreateRigPivot(
-                rig, "P04_TorsoPivot",
+                pelvis, "P04_TorsoPivot",
                 JointAtY(torsoMesh, RendererBounds(pelvisMesh).max.y),
                 visual.rotation);
             Transform head = CreateRigPivot(
@@ -258,11 +290,11 @@ namespace MUSCA.Gate3D.Editor
                 visual.rotation);
 
             Transform hipLeft = CreateRigPivot(
-                rig, "P04_Hip_L",
+                pelvis, "P04_Hip_L",
                 JointAtY(leftThigh, RendererBounds(leftThigh).max.y),
                 visual.rotation);
             Transform hipRight = CreateRigPivot(
-                rig, "P04_Hip_R",
+                pelvis, "P04_Hip_R",
                 JointAtY(rightThigh, RendererBounds(rightThigh).max.y),
                 visual.rotation);
             Transform kneeLeft = CreateRigPivot(
@@ -273,7 +305,17 @@ namespace MUSCA.Gate3D.Editor
                 hipRight, "P04_Knee_R",
                 JointBetween(rightThigh, rightShin),
                 visual.rotation);
+            Transform ankleLeft = CreateRigPivot(
+                kneeLeft, "P04_Ankle_L",
+                JointBetween(leftShin, leftBoot),
+                visual.rotation);
+            Transform ankleRight = CreateRigPivot(
+                kneeRight, "P04_Ankle_R",
+                JointBetween(rightShin, rightBoot),
+                visual.rotation);
 
+            ParentParts(visual, pelvis,
+                "P03_Pelvis", "P03_BeltAccent");
             ParentParts(visual, torso,
                 "P03_Torso", "P03_ChestArmor", "P03_Backpack", "P03_PackCore",
                 "P03_Harness_-1", "P03_Harness_1", "P03_Detail_Collar",
@@ -292,9 +334,11 @@ namespace MUSCA.Gate3D.Editor
             ParentParts(visual, hipLeft, "P03_Thigh_-1");
             ParentParts(visual, hipRight, "P03_Thigh_1");
             ParentParts(visual, kneeLeft,
-                "P03_Shin_-1", "P03_Boot_-1", "P03_Detail_Knee_L");
+                "P03_Shin_-1", "P03_Detail_Knee_L");
             ParentParts(visual, kneeRight,
-                "P03_Shin_1", "P03_Boot_1", "P03_Detail_Knee_R");
+                "P03_Shin_1", "P03_Detail_Knee_R");
+            ParentParts(visual, ankleLeft, "P03_Boot_-1");
+            ParentParts(visual, ankleRight, "P03_Boot_1");
         }
 
         private static void BuildSentinelProxyRig(Transform visual)
@@ -333,11 +377,17 @@ namespace MUSCA.Gate3D.Editor
             Transform rightThigh = RequireDeep(visual, "SV01_Thigh_1");
             Transform leftShin = RequireDeep(visual, "SV01_Shin_-1");
             Transform rightShin = RequireDeep(visual, "SV01_Shin_1");
+            Transform leftFoot = RequireDeep(visual, "SV01_Foot_-1");
+            Transform rightFoot = RequireDeep(visual, "SV01_Foot_1");
 
             Transform rig = CreateRigPivot(
                 visual, "SV04_ProxyRig", visual.position, visual.rotation);
+            Transform pelvis = CreateRigPivot(
+                rig, "SV04_PelvisPivot",
+                RendererBounds(pelvisMesh).center,
+                visual.rotation);
             Transform torso = CreateRigPivot(
-                rig, "SV04_TorsoPivot",
+                pelvis, "SV04_TorsoPivot",
                 JointAtY(torsoMesh, RendererBounds(pelvisMesh).max.y),
                 visual.rotation);
             Transform head = CreateRigPivot(
@@ -361,11 +411,11 @@ namespace MUSCA.Gate3D.Editor
                 JointBetween(rightUpperArm, rightForearm),
                 visual.rotation);
             Transform hipLeft = CreateRigPivot(
-                rig, "SV04_Hip_L",
+                pelvis, "SV04_Hip_L",
                 JointAtY(leftThigh, RendererBounds(leftThigh).max.y),
                 visual.rotation);
             Transform hipRight = CreateRigPivot(
-                rig, "SV04_Hip_R",
+                pelvis, "SV04_Hip_R",
                 JointAtY(rightThigh, RendererBounds(rightThigh).max.y),
                 visual.rotation);
             Transform kneeLeft = CreateRigPivot(
@@ -376,7 +426,16 @@ namespace MUSCA.Gate3D.Editor
                 hipRight, "SV04_Knee_R",
                 JointBetween(rightThigh, rightShin),
                 visual.rotation);
+            Transform ankleLeft = CreateRigPivot(
+                kneeLeft, "SV04_Ankle_L",
+                JointBetween(leftShin, leftFoot),
+                visual.rotation);
+            Transform ankleRight = CreateRigPivot(
+                kneeRight, "SV04_Ankle_R",
+                JointBetween(rightShin, rightFoot),
+                visual.rotation);
 
+            ParentParts(visual, pelvis, "SV01_Pelvis");
             ParentParts(visual, torso,
                 "SV01_Torso", "SV01_ChestPlate", "SV01_Core");
             ParentParts(visual, head,
@@ -392,9 +451,11 @@ namespace MUSCA.Gate3D.Editor
             ParentParts(visual, hipLeft, "SV01_Thigh_-1");
             ParentParts(visual, hipRight, "SV01_Thigh_1");
             ParentParts(visual, kneeLeft,
-                "SV01_Knee_-1", "SV01_Shin_-1", "SV01_Foot_-1");
+                "SV01_Knee_-1", "SV01_Shin_-1");
             ParentParts(visual, kneeRight,
-                "SV01_Knee_1", "SV01_Shin_1", "SV01_Foot_1");
+                "SV01_Knee_1", "SV01_Shin_1");
+            ParentParts(visual, ankleLeft, "SV01_Foot_-1");
+            ParentParts(visual, ankleRight, "SV01_Foot_1");
         }
 
         private static void UnpackPrefabIfNeeded(GameObject instance)
@@ -675,7 +736,10 @@ namespace MUSCA.Gate3D.Editor
         {
             GameObject root = new GameObject("KaelSpear");
             root.transform.SetParent(sentinel, false);
-            root.transform.localPosition = new Vector3(0.76f, 1.68f, 0.04f);
+            root.transform.localPosition =
+                new Vector3(0.76f, 1.68f, 0.04f) * BossAccessoryScale;
+            root.transform.localScale =
+                Vector3.one * BossAccessoryScale;
 
             Material dark = AssetDatabase.LoadAssetAtPath<Material>(
                 $"{MaterialRoot}/DarkMetal.mat");
@@ -706,7 +770,10 @@ namespace MUSCA.Gate3D.Editor
         {
             GameObject crown = new GameObject("PredictionCrown");
             crown.transform.SetParent(sentinel, false);
-            crown.transform.localPosition = new Vector3(0f, 2.92f, 0f);
+            crown.transform.localPosition =
+                new Vector3(0f, 2.92f, 0f) * BossAccessoryScale;
+            crown.transform.localScale =
+                Vector3.one * BossAccessoryScale;
 
             Material cyan = AssetDatabase.LoadAssetAtPath<Material>(
                 $"{MaterialRoot}/CyanSoft.mat");
