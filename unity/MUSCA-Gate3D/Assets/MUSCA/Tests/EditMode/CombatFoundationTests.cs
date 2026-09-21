@@ -226,6 +226,35 @@ namespace MUSCA.Gate3D.Tests
         }
 
         [Test]
+        public void ExternalForwardInputUsesPivotYaw()
+        {
+            GameObject bodyObject = new GameObject("qa-body");
+            Vector3 forward = FirstPersonController.ResolveMovementDirection(
+                Vector3.forward,
+                bodyObject.transform,
+                0f,
+                true);
+
+            Assert.That(forward.x, Is.EqualTo(0f).Within(0.001f));
+            Assert.That(forward.z, Is.EqualTo(1f).Within(0.001f));
+            Object.DestroyImmediate(bodyObject);
+        }
+
+        [Test]
+        public void BodyFacingYawMatchesDesiredTravelDirection()
+        {
+            Assert.That(
+                FirstPersonController.ComputeFacingYaw(Vector3.forward, 180f),
+                Is.EqualTo(0f).Within(0.001f));
+            Assert.That(
+                FirstPersonController.ComputeFacingYaw(Vector3.back, 0f),
+                Is.EqualTo(180f).Within(0.001f));
+            Assert.That(
+                FirstPersonController.ComputeFacingYaw(Vector3.zero, 37f),
+                Is.EqualTo(37f).Within(0.001f));
+        }
+
+        [Test]
         public void PredictionBreakRequiresAppliedMiss()
         {
             Assert.That(SentinelCombatBrain.WasPredictionBroken(true, false), Is.True);

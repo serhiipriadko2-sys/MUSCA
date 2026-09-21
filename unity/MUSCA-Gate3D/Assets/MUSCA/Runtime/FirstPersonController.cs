@@ -46,6 +46,7 @@ namespace MUSCA.Gate3D
         private bool _lockAimInitialized;
         private bool _cameraYawInitialized;
         private bool _externalCameraDriverActive;
+        private MuscaCinemachineController _cinemachineController;
         private readonly RaycastHit[] _cameraHits = new RaycastHit[16];
 
         public bool InputEnabled { get; set; } = true;
@@ -72,6 +73,7 @@ namespace MUSCA.Gate3D
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
+            _cinemachineController = GetComponent<MuscaCinemachineController>();
             if (playerCamera == null)
             {
                 playerCamera = GetComponentInChildren<Camera>();
@@ -142,26 +144,32 @@ namespace MUSCA.Gate3D
             }
 
             bool gameplayInputActive = Cursor.lockState == CursorLockMode.Locked;
-            if (gameplayInputActive)
+            if (gameplayInputActive && !_externalCameraDriverActive)
             {
-                if (_externalCameraDriverActive)
-                {
-                    UpdateExternalBodyFacing();
-                }
-                else
-                {
-                    UpdateView();
-                }
+                UpdateView();
             }
 
             Vector3 input = gameplayInputActive
                 ? new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"))
                 : Vector3.zero;
             input = Vector3.ClampMagnitude(input, 1f);
+
+            float externalYaw = _cinemachineController != null
+                ? _cinemachineController.MovementYaw
+                : (playerCamera != null
+                    ? playerCamera.transform.eulerAngles.y
+                    : transform.eulerAngles.y);
+
             Vector3 desiredDirection = _externalCameraDriverActive
-                ? ResolveCameraRelativeMovement(input, playerCamera, transform)
+                ? ResolveMovementDirection(input, transform, externalYaw, true)
                 : ResolveMovementDirection(
                     input, transform, _cameraYaw, _lockOnTarget != null);
+
+            if (gameplayInputActive && _externalCameraDriverActive)
+            {
+                UpdateExternalBodyFacing(desiredDirection);
+            }
+
             Vector3 desiredVelocity = desiredDirection * moveSpeed;
             desiredVelocity.y = 0f;
 
@@ -208,9 +216,11 @@ namespace MUSCA.Gate3D
             UpdateCameraCollision();
         }
 
-        private void UpdateExternalBodyFacing()
+        private void UpdateExternalBodyFacing(Vector3 desiredDirection)
         {
             float targetYaw = transform.eulerAngles.y;
+            bool hasFacingTarget = false;
+
             if (_lockOnTarget != null)
             {
                 Vector3 toTarget = _lockOnTarget.position - transform.position;
@@ -218,12 +228,24 @@ namespace MUSCA.Gate3D
                 if (toTarget.sqrMagnitude > 0.0001f)
                 {
                     targetYaw = Mathf.Atan2(toTarget.x, toTarget.z) * Mathf.Rad2Deg;
+                    hasFacingTarget = true;
                 }
             }
-            else if (playerCamera != null)
+            else
             {
-                targetYaw = playerCamera.transform.eulerAngles.y;
+                Vector3 planarDirection = desiredDirection;
+                planarDirection.y = 0f;
+                if (planarDirection.sqrMagnitude > 0.0001f)
+                {
+                    targetYaw = ComputeFacingYaw(
+                        planarDirection,
+                        transform.eulerAngles.y);
+                    hasFacingTarget = true;
+                }
             }
+
+            if (!hasFacingTarget)
+                return;
 
             float bodyYaw = Mathf.MoveTowardsAngle(
                 transform.eulerAngles.y,
@@ -392,6 +414,22 @@ namespace MUSCA.Gate3D
             return world.sqrMagnitude > 0.0001f
                 ? world.normalized
                 : Vector3.zero;
+        }
+
+        public static float ComputeFacingYaw(
+            Vector3 desiredDirection,
+            float fallbackYaw)
+        {
+            desiredDirection.y = 0f;
+            if (desiredDirection.sqrMagnitude < 0.0001f)
+            {
+                return fallbackYaw;
+            }
+
+            desiredDirection.Normalize();
+            return Mathf.Atan2(
+                desiredDirection.x,
+                desiredDirection.z) * Mathf.Rad2Deg;
         }
 
         public static float ComputeDodgeProgress(float normalizedTime)

@@ -3,12 +3,12 @@
     "unityVersion": "6000.6.1f1",
     "scene": "Assets/MUSCA/Scenes/CombatSandbox_v01.unity",
     "output": "C:\\github\\MUSCA-combat-v02\\unity\\MUSCA-Gate3D\\Builds\\CombatSandbox-v01\\MUSCA-CombatSandbox-v01.exe",
-    "bytes": 174077327,
+    "bytes": 174079271,
     "exeBytes": 667136,
     "exeSha256": "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
     "runtimeDll": "C:\\github\\MUSCA-combat-v02\\unity\\MUSCA-Gate3D\\Builds\\CombatSandbox-v01\\MUSCA-CombatSandbox-v01_Data\\Managed\\MUSCA.Gate3D.Runtime.dll",
-    "runtimeDllBytes": 84480,
-    "runtimeDllSha256": "b3ab9255516976cb7a58946c1063e2a5aa8aa5f7054b51eb3d69edd0759b6feb",
+    "runtimeDllBytes": 86016,
+    "runtimeDllSha256": "a70c14683110ba7093c9b9057e9297486e93737ffa468cdb8421c6f0d3844dfc",
     "errors": 0,
     "warnings": 0
 }

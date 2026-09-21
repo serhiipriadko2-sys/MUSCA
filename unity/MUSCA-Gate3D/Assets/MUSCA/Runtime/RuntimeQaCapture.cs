@@ -45,6 +45,8 @@ namespace MUSCA.Gate3D
             public bool cinemachineBrainPresent;
             public bool cinemachineLockActive;
             public string cinemachineActiveCamera;
+            public bool cameraIdleStable;
+            public float cameraYawDriftDegrees;
             public bool telegraphObserved;
             public string sentinelState;
             public int sentinelTelegraphs;
@@ -98,6 +100,8 @@ namespace MUSCA.Gate3D
             string lockOnTarget = string.Empty;
             bool cinemachineLockActive = false;
             string cinemachineActiveCamera = string.Empty;
+            bool cameraIdleStable = false;
+            float cameraYawDriftDegrees = 0f;
             bool telegraphObserved = false;
             bool skipStandardWait = false;
             bool groundingWasGrounded = false;
@@ -185,6 +189,10 @@ namespace MUSCA.Gate3D
                     break;
                 case "lockon":
                     ResetCombatPlayer(vitals, lockPlayerPosition, 0f);
+                    player.InputEnabled = false;
+                    break;
+                case "cameraidle":
+                    ResetCombatPlayer(vitals, authoredPlayerSpawn, 0f);
                     player.InputEnabled = false;
                     break;
                 case "telegraph":
@@ -279,6 +287,26 @@ namespace MUSCA.Gate3D
                 cinemachineLockActive =
                     cinemachineController != null &&
                     cinemachineController.IsUsingLockCamera;
+                cinemachineActiveCamera =
+                    cameraBrain != null && cameraBrain.ActiveVirtualCamera != null
+                        ? cameraBrain.ActiveVirtualCamera.Name
+                        : string.Empty;
+                skipStandardWait = true;
+            }
+
+            if (view == "cameraidle")
+            {
+                yield return new WaitForSeconds(0.45f);
+                float startYaw = player.PlayerCamera != null
+                    ? player.PlayerCamera.transform.eulerAngles.y
+                    : 0f;
+                yield return new WaitForSeconds(1.0f);
+                float endYaw = player.PlayerCamera != null
+                    ? player.PlayerCamera.transform.eulerAngles.y
+                    : startYaw;
+                cameraYawDriftDegrees = Mathf.Abs(
+                    Mathf.DeltaAngle(startYaw, endYaw));
+                cameraIdleStable = cameraYawDriftDegrees <= 0.75f;
                 cinemachineActiveCamera =
                     cameraBrain != null && cameraBrain.ActiveVirtualCamera != null
                         ? cameraBrain.ActiveVirtualCamera.Name
@@ -395,6 +423,7 @@ namespace MUSCA.Gate3D
                 lockOnAcquired,
                 lockOnTarget,
                 cinemachineLockActive,
+                cameraIdleStable,
                 telegraphObserved,
                 brain,
                 vitals,
@@ -433,6 +462,8 @@ namespace MUSCA.Gate3D
                 cinemachineBrainPresent = cameraBrain != null,
                 cinemachineLockActive = cinemachineLockActive,
                 cinemachineActiveCamera = cinemachineActiveCamera,
+                cameraIdleStable = cameraIdleStable,
+                cameraYawDriftDegrees = cameraYawDriftDegrees,
                 telegraphObserved = telegraphObserved,
                 sentinelState = brain != null ? brain.State.ToString() : string.Empty,
                 sentinelTelegraphs = brain != null ? brain.TelegraphCount : 0,
@@ -477,6 +508,7 @@ namespace MUSCA.Gate3D
                    view == "dodge" ||
                    view == "jump" ||
                    view == "lockon" ||
+                   view == "cameraidle" ||
                    view == "telegraph" ||
                    view == "enemyai" ||
                    view == "kaelprediction";
@@ -496,6 +528,7 @@ namespace MUSCA.Gate3D
             bool lockOnAcquired,
             string lockOnTarget,
             bool cinemachineLockActive,
+            bool cameraIdleStable,
             bool telegraphObserved,
             SentinelCombatBrain brain,
             PlayerCombatVitals vitals,
@@ -519,6 +552,8 @@ namespace MUSCA.Gate3D
                     return lockOnAcquired &&
                            lockOnTarget == "Sentinel_v01" &&
                            cinemachineLockActive;
+                case "cameraidle":
+                    return cameraIdleStable;
                 case "telegraph":
                     return telegraphObserved && brain != null && brain.TelegraphCount >= 1;
                 case "enemyai":

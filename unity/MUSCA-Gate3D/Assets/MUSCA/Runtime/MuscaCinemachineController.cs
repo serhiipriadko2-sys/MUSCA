@@ -33,10 +33,14 @@ namespace MUSCA.Gate3D
         private float _lockYaw;
         private float _lockYawVelocity;
         private bool _initialized;
+        private bool _wasLocked;
 
         public bool IsUsingLockCamera =>
             lockOn != null && lockOn.IsLocked &&
             lockCamera != null && lockCamera.enabled;
+
+        public float MovementYaw =>
+            lockOn != null && lockOn.IsLocked ? _lockYaw : _freeYaw;
 
         public void Configure(
             Camera cameraValue,
@@ -105,6 +109,8 @@ namespace MUSCA.Gate3D
             lockPivot.position = playerPosition;
 
             bool locked = lockOn != null && lockOn.IsLocked && lockOn.Target != null;
+            HandleModeTransition(locked);
+
             if (locked)
             {
                 UpdateLockPivot(lockOn.Target.transform);
@@ -156,17 +162,34 @@ namespace MUSCA.Gate3D
             }
         }
 
+        private void HandleModeTransition(bool locked)
+        {
+            if (locked == _wasLocked)
+                return;
+
+            if (locked)
+            {
+                _lockYaw = _freeYaw;
+                _lockYawVelocity = 0f;
+            }
+            else
+            {
+                // Resume free orbit from the last lock heading exactly once.
+                // Never feed the Cinemachine output yaw back into the pivot each
+                // frame: that creates a positive feedback loop and continuous spin.
+                _freeYaw = _lockYaw;
+                _lockYawVelocity = 0f;
+            }
+
+            _wasLocked = locked;
+        }
+
         private void SetCameraMode(bool locked)
         {
             if (freeCamera != null)
                 freeCamera.enabled = !locked;
             if (lockCamera != null)
                 lockCamera.enabled = locked;
-
-            if (!locked && outputCamera != null)
-            {
-                _freeYaw = outputCamera.transform.eulerAngles.y;
-            }
         }
     }
 }
