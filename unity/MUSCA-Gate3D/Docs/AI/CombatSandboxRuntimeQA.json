@@ -46,6 +46,21 @@
       "targetAlive": true
     }
   },
+  "humanConfirmation": {
+    "status": "PASS",
+    "date": "2026-09-21",
+    "source": "explicit_user_chat_confirmation",
+    "scope": "free-movement collision regression only",
+    "confirmed": "The rebuilt combat sandbox no longer reproduces the reported player fall-through during human free movement.",
+    "doesNotApprove": [
+      "overall combat feel",
+      "enemy AI",
+      "dodge/stamina",
+      "lock-on",
+      "production art",
+      "souls-like quality"
+    ]
+  },
   "artifacts": {
     "RuntimeQA/grounding-v01.png": {
       "bytes": 504414,
@@ -64,5 +79,5 @@
       "sha256": "3bd312fbd68155219c9c920a6ab9d0b29c390e14c2a0f223a0d25a10c9ccb03c"
     }
   },
-  "claimBoundary": "Proves that the rebuilt Windows development build no longer reproduces the reported floor-fall at the automated grounding probe and that the deterministic melee strike still registers. Human free-movement playtesting remains required before claiming gameplay-feel approval."
+  "claimBoundary": "Automated grounding and melee regressions pass, and the owner explicitly confirmed the original fall-through no longer reproduces in human free movement. This confirmation is scoped to the collision regression and is not overall gameplay-feel approval."
 }

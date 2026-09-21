@@ -53,7 +53,7 @@ See:
 
 ## Claim boundary
 
-The rebuilt development executable passes the automated grounding regression and the deterministic melee regression. This closes the specific reported fall-through defect at the tested combat probe; it does not replace human free-movement testing.
+The rebuilt development executable passes the automated grounding regression and deterministic melee regression. On 2026-09-21 the owner explicitly confirmed that the original fall-through no longer reproduces during human free movement. That confirmation is scoped to the collision regression; it is not overall gameplay-feel approval.
 
 It does **not** prove:
 
@@ -65,4 +65,4 @@ It does **not** prove:
 - human gameplay feel;
 - that the result meets the project's souls-like direction.
 
-The next product gate is human runtime/gameplay-feel review before expanding the system.
+The collision-regression human gate is closed. The next product gate is the staged combat-controls slice: stable movement → dodge/stamina → telegraph → lock-on → simple enemy AI, with a separate human gameplay-feel review before any Kael prediction mechanic is treated as validated.
