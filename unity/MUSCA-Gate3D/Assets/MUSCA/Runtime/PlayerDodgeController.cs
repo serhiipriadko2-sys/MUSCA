@@ -16,7 +16,7 @@ namespace MUSCA.Gate3D
     [RequireComponent(typeof(PlayerCombatVitals))]
     public sealed class PlayerDodgeController : MonoBehaviour
     {
-        [SerializeField] private KeyCode dodgeKey = KeyCode.Space;
+        [SerializeField] private KeyCode dodgeKey = KeyCode.LeftShift;
         [SerializeField] private float staminaCost = 28f;
         [SerializeField] private float dodgeSpeed = 8.5f;
         [SerializeField] private float dodgeDurationSeconds = 0.28f;

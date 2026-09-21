@@ -59,10 +59,10 @@ namespace MUSCA.Gate3D
             EnsureStyles();
             Rect panel = new Rect(24f, 24f, 460f, 252f);
             GUI.Box(panel, GUIContent.none);
-            GUI.Label(new Rect(40f, 36f, 410f, 28f), "MUSCA // COMBAT + KAEL PROBE v0.2", _title);
+            GUI.Label(new Rect(40f, 36f, 410f, 28f), "MUSCA // FIRST THRESHOLD v0.3", _title);
             GUI.Label(new Rect(40f, 68f, 410f, 22f), "WASD + mouse — movement / view", _body);
-            GUI.Label(new Rect(40f, 90f, 410f, 22f), "SPACE — dodge · LMB — strike", _body);
-            GUI.Label(new Rect(40f, 112f, 410f, 22f), "R / MMB — lock target · ESC — cursor", _body);
+            GUI.Label(new Rect(40f, 90f, 410f, 22f), "SPACE — jump · SHIFT — dodge · LMB — strike", _body);
+            GUI.Label(new Rect(40f, 112f, 410f, 22f), "Q / MMB — lock target · ESC — cursor", _body);
             GUI.Label(new Rect(40f, 134f, 410f, 22f), "K — toggle Kael history-only prediction probe", _body);
 
             string playerText = vitals == null
@@ -71,10 +71,10 @@ namespace MUSCA.Gate3D
             GUI.Label(new Rect(40f, 162f, 410f, 22f), playerText, _body);
 
             string targetText = target == null
-                ? "Sentinel: unavailable"
+                ? "KAEL PROXY: unavailable"
                 : target.IsAlive
-                    ? $"Sentinel {target.CurrentHealth:0}/{target.MaxHealth:0}"
-                    : "Sentinel: rebooting…";
+                    ? $"KAEL PROXY {target.CurrentHealth:0}/{target.MaxHealth:0}"
+                    : "KAEL PROXY: rebooting…";
             GUI.Label(new Rect(40f, 184f, 210f, 22f), targetText, _body);
 
             string lockText = lockOn != null && lockOn.IsLocked

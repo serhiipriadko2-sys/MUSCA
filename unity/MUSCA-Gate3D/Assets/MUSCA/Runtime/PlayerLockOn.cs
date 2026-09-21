@@ -5,7 +5,7 @@ namespace MUSCA.Gate3D
     [RequireComponent(typeof(FirstPersonController))]
     public sealed class PlayerLockOn : MonoBehaviour
     {
-        [SerializeField] private KeyCode keyboardToggle = KeyCode.R;
+        [SerializeField] private KeyCode keyboardToggle = KeyCode.Q;
         [SerializeField] private bool middleMouseToggle = true;
         [SerializeField] private float maxDistance = 14f;
         [SerializeField] private float maxAngleDegrees = 82f;

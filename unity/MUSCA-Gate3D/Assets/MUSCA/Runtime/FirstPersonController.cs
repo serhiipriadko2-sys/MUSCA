@@ -10,6 +10,10 @@ namespace MUSCA.Gate3D
         [SerializeField] private float moveAcceleration = 26f;
         [SerializeField] private float moveDeceleration = 34f;
         [SerializeField] private float mouseSensitivity = 2.2f;
+        [SerializeField] private KeyCode jumpKey = KeyCode.Space;
+        [SerializeField] private float jumpHeight = 1.15f;
+        [SerializeField] private float gravity = -24f;
+        [SerializeField] private float groundedStickVelocity = -2f;
         [SerializeField] private float lockTurnSpeedDegrees = 720f;
         [SerializeField] private Vector3 cameraLocalPosition = new Vector3(0f, 1.68f, 0f);
         [SerializeField] private bool cameraCollisionEnabled;
@@ -21,6 +25,7 @@ namespace MUSCA.Gate3D
         private float _pitch;
         private CollisionFlags _lastMoveCollisionFlags;
         private Vector3 _planarVelocity;
+        private float _verticalVelocity;
         private Vector3 _dodgeVelocity;
         private float _dodgeRemainingSeconds;
         private float _dodgeInvulnerableUntil = -1f;
@@ -34,8 +39,14 @@ namespace MUSCA.Gate3D
         public bool LastMoveGrounded => (_lastMoveCollisionFlags & CollisionFlags.Below) != 0;
         public bool IsDodging => _dodgeRemainingSeconds > 0.0001f;
         public bool IsDodgeInvulnerable => IsDodging && Time.time < _dodgeInvulnerableUntil;
-        public bool CanStartDodge => InputEnabled && _controller != null && _controller.enabled && !IsDodging;
+        public bool CanStartDodge => InputEnabled && _controller != null &&
+                                     _controller.enabled && !IsDodging && IsGrounded;
         public float PlanarSpeed => _planarVelocity.magnitude;
+        public Vector3 PlanarVelocity => _planarVelocity;
+        public float VerticalVelocity => _verticalVelocity;
+        public bool IsGrounded => _controller != null &&
+                                  (_controller.isGrounded || LastMoveGrounded);
+        public bool CanJump => InputEnabled && !IsDodging && IsGrounded;
         public Transform LockOnTarget => _lockOnTarget;
 
         private void Awake()
@@ -71,23 +82,35 @@ namespace MUSCA.Gate3D
             // a new dodge still requires the normal gameplay input gate.
             if (IsDodging)
             {
-                float committedSeconds = ComputeCommittedStepSeconds(_dodgeRemainingSeconds, Time.deltaTime);
+                float dodgeFrameSeconds = Mathf.Max(0f, Time.deltaTime);
+                float committedSeconds = ComputeCommittedStepSeconds(
+                    _dodgeRemainingSeconds, dodgeFrameSeconds);
                 Vector3 dodgeDisplacement = _dodgeVelocity * committedSeconds;
-                dodgeDisplacement.y = -2f * Time.deltaTime;
+                if (IsGrounded && _verticalVelocity < 0f)
+                {
+                    _verticalVelocity = groundedStickVelocity;
+                }
+
+                dodgeDisplacement.y = ComputeVerticalDisplacement(
+                    _verticalVelocity, gravity, dodgeFrameSeconds);
+                _verticalVelocity = ComputeVerticalVelocity(
+                    _verticalVelocity, gravity, dodgeFrameSeconds);
                 _lastMoveCollisionFlags = _controller.Move(dodgeDisplacement);
-                _dodgeRemainingSeconds = Mathf.Max(0f, _dodgeRemainingSeconds - committedSeconds);
+                _dodgeRemainingSeconds = Mathf.Max(
+                    0f, _dodgeRemainingSeconds - committedSeconds);
                 if (!IsDodging) _dodgeVelocity = Vector3.zero;
                 return;
             }
 
-            if (Cursor.lockState != CursorLockMode.Locked)
+            bool gameplayInputActive = Cursor.lockState == CursorLockMode.Locked;
+            if (gameplayInputActive)
             {
-                return;
+                UpdateView();
             }
 
-            UpdateView();
-
-            Vector3 input = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
+            Vector3 input = gameplayInputActive
+                ? new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"))
+                : Vector3.zero;
             input = Vector3.ClampMagnitude(input, 1f);
             Vector3 desiredVelocity = transform.TransformDirection(input) * moveSpeed;
             desiredVelocity.y = 0f;
@@ -96,12 +119,31 @@ namespace MUSCA.Gate3D
             _planarVelocity = Vector3.MoveTowards(
                 _planarVelocity, desiredVelocity, Mathf.Max(0f, rate) * Time.deltaTime);
 
-            Vector3 velocity = _planarVelocity;
-            // Keep a small downward bias every frame so CharacterController
-            // maintains stable contact with the floor instead of flapping
-            // between grounded/not-grounded when planar input is idle.
-            velocity.y = -2f;
-            _lastMoveCollisionFlags = _controller.Move(velocity * Time.deltaTime);
+            bool groundedBeforeMove = IsGrounded;
+            if (groundedBeforeMove && _verticalVelocity < 0f)
+            {
+                _verticalVelocity = groundedStickVelocity;
+            }
+
+            bool jumpStarted = gameplayInputActive &&
+                groundedBeforeMove &&
+                Input.GetKeyDown(jumpKey) &&
+                TryStartJump();
+
+            float frameSeconds = Mathf.Max(0f, Time.deltaTime);
+            float verticalDisplacement = ComputeVerticalDisplacement(
+                _verticalVelocity, gravity, frameSeconds);
+            _verticalVelocity = ComputeVerticalVelocity(
+                _verticalVelocity, gravity, frameSeconds);
+
+            Vector3 displacement = _planarVelocity * frameSeconds;
+            displacement.y = verticalDisplacement;
+            _lastMoveCollisionFlags = _controller.Move(displacement);
+
+            if ((_lastMoveCollisionFlags & CollisionFlags.Above) != 0 && _verticalVelocity > 0f)
+            {
+                _verticalVelocity = 0f;
+            }
         }
 
         private void LateUpdate()
@@ -174,6 +216,32 @@ namespace MUSCA.Gate3D
             return Mathf.Min(Mathf.Max(0f, remainingSeconds), Mathf.Max(0f, deltaTime));
         }
 
+        public static float ComputeJumpVelocity(float height, float gravityValue)
+        {
+            if (height <= 0f || gravityValue >= 0f) return 0f;
+            return Mathf.Sqrt(height * -2f * gravityValue);
+        }
+
+        public static float ComputeVerticalDisplacement(
+            float velocity, float gravityValue, float deltaTime)
+        {
+            float dt = Mathf.Max(0f, deltaTime);
+            return velocity * dt + 0.5f * gravityValue * dt * dt;
+        }
+
+        public static float ComputeVerticalVelocity(
+            float velocity, float gravityValue, float deltaTime)
+        {
+            return velocity + gravityValue * Mathf.Max(0f, deltaTime);
+        }
+
+        public bool TryStartJump()
+        {
+            if (!CanJump) return false;
+            _verticalVelocity = ComputeJumpVelocity(jumpHeight, gravity);
+            return _verticalVelocity > 0f;
+        }
+
         public void SetLockOnTarget(Transform target)
         {
             _lockOnTarget = target;
@@ -204,6 +272,7 @@ namespace MUSCA.Gate3D
             transform.SetPositionAndRotation(position, Quaternion.Euler(0f, yawDegrees, 0f));
             _pitch = 0f;
             _planarVelocity = Vector3.zero;
+            _verticalVelocity = groundedStickVelocity;
             CancelDodge();
             ApplyCameraPosition();
             if (playerCamera != null) playerCamera.transform.localRotation = Quaternion.identity;

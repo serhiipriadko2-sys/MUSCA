@@ -94,7 +94,7 @@ namespace MUSCA.Gate3D
                 return;
             }
 
-            if (Input.GetKeyDown(KeyCode.R))
+            if (Input.GetKeyDown(KeyCode.F5))
             {
                 ResetRun();
                 return;

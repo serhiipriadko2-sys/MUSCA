@@ -36,6 +36,9 @@ namespace MUSCA.Gate3D
             public float dodgeDistance;
             public float dodgeStaminaBefore;
             public float dodgeStaminaAfter;
+            public bool jumpStarted;
+            public float jumpHeight;
+            public bool jumpLanded;
             public bool lockOnAcquired;
             public string lockOnTarget;
             public bool telegraphObserved;
@@ -81,6 +84,9 @@ namespace MUSCA.Gate3D
             float dodgeDistance = 0f;
             float dodgeStaminaBefore = 0f;
             float dodgeStaminaAfter = 0f;
+            bool jumpStarted = false;
+            float jumpHeightObserved = 0f;
+            bool jumpLanded = false;
             bool lockOnAcquired = false;
             string lockOnTarget = string.Empty;
             bool telegraphObserved = false;
@@ -95,6 +101,14 @@ namespace MUSCA.Gate3D
             PlayerDodgeController dodge = player.GetComponent<PlayerDodgeController>();
             PlayerLockOn lockOn = player.GetComponent<PlayerLockOn>();
             CharacterController character = player.GetComponent<CharacterController>();
+
+            Vector3 authoredPlayerSpawn = FindMarkerPosition(
+                "CombatPlayerSpawn", new Vector3(0f, 0f, 18f));
+            Vector3 bossPosition = combatTarget != null
+                ? combatTarget.transform.position
+                : new Vector3(0f, 0f, 34f);
+            Vector3 strikePlayerPosition = bossPosition + Vector3.back * 1.55f;
+            Vector3 lockPlayerPosition = bossPosition + Vector3.back * 8f;
 
             if (brain != null && view != "telegraph" && view != "enemyai" && view != "kaelprediction")
             {
@@ -132,31 +146,37 @@ namespace MUSCA.Gate3D
                     if (hud != null) hud.enabled = false;
                     break;
                 case "combat":
-                    ResetCombatPlayer(vitals, new Vector3(0f, 0f, 8.2f), 180f);
+                    ResetCombatPlayer(vitals, authoredPlayerSpawn, 0f);
                     player.InputEnabled = false;
                     break;
                 case "combatstrike":
-                    ResetCombatPlayer(vitals, new Vector3(0f, 0f, 6.4f), 180f);
+                    ResetCombatPlayer(vitals, strikePlayerPosition, 0f);
                     player.InputEnabled = false;
                     break;
                 case "grounding":
-                    ResetCombatPlayer(vitals, new Vector3(0f, 0.75f, 8.2f), 180f);
+                    ResetCombatPlayer(
+                        vitals, authoredPlayerSpawn + Vector3.up * 0.75f, 0f);
                     player.InputEnabled = true;
                     FirstPersonController.LockCursor();
                     break;
                 case "dodge":
-                    ResetCombatPlayer(vitals, new Vector3(0f, 0f, 8.2f), 180f);
+                    ResetCombatPlayer(vitals, authoredPlayerSpawn, 0f);
+                    player.InputEnabled = true;
+                    FirstPersonController.LockCursor();
+                    break;
+                case "jump":
+                    ResetCombatPlayer(vitals, authoredPlayerSpawn, 0f);
                     player.InputEnabled = true;
                     FirstPersonController.LockCursor();
                     break;
                 case "lockon":
-                    ResetCombatPlayer(vitals, new Vector3(0f, 0f, 8.2f), 180f);
+                    ResetCombatPlayer(vitals, lockPlayerPosition, 0f);
                     player.InputEnabled = false;
                     break;
                 case "telegraph":
                 case "enemyai":
                 case "kaelprediction":
-                    ResetCombatPlayer(vitals, new Vector3(0f, 0f, 6.0f), 180f);
+                    ResetCombatPlayer(vitals, strikePlayerPosition, 0f);
                     player.InputEnabled = false;
                     break;
                 default:
@@ -187,13 +207,48 @@ namespace MUSCA.Gate3D
 
             if (view == "dodge")
             {
-                yield return new WaitForFixedUpdate();
+                float groundedTimeout = Time.time + 0.6f;
+                while (!player.IsGrounded && Time.time < groundedTimeout)
+                {
+                    yield return null;
+                }
                 Vector3 dodgeStart = player.transform.position;
                 dodgeStaminaBefore = vitals != null ? vitals.CurrentStamina : -1f;
                 dodgeStarted = dodge != null && dodge.TryDodge(player.transform.forward);
                 yield return new WaitForSeconds(0.42f);
                 dodgeDistance = PlanarDistance(dodgeStart, player.transform.position);
                 dodgeStaminaAfter = vitals != null ? vitals.CurrentStamina : -1f;
+                player.InputEnabled = false;
+                FirstPersonController.UnlockCursor();
+                skipStandardWait = true;
+            }
+
+            if (view == "jump")
+            {
+                float groundedTimeout = Time.time + 0.6f;
+                while (!player.IsGrounded && Time.time < groundedTimeout)
+                {
+                    yield return null;
+                }
+                float jumpStartY = player.transform.position.y;
+                float jumpPeakY = jumpStartY;
+                jumpStarted = player.TryStartJump();
+                float startedAt = Time.time;
+                float timeoutAt = startedAt + 1.8f;
+                while (Time.time < timeoutAt)
+                {
+                    jumpPeakY = Mathf.Max(jumpPeakY, player.transform.position.y);
+                    if (jumpStarted &&
+                        Time.time > startedAt + 0.25f &&
+                        player.IsGrounded &&
+                        Mathf.Abs(player.transform.position.y - jumpStartY) < 0.12f)
+                    {
+                        jumpLanded = true;
+                        break;
+                    }
+                    yield return null;
+                }
+                jumpHeightObserved = jumpPeakY - jumpStartY;
                 player.InputEnabled = false;
                 FirstPersonController.UnlockCursor();
                 skipStandardWait = true;
@@ -311,6 +366,9 @@ namespace MUSCA.Gate3D
                 dodgeDistance,
                 dodgeStaminaBefore,
                 dodgeStaminaAfter,
+                jumpStarted,
+                jumpHeightObserved,
+                jumpLanded,
                 lockOnAcquired,
                 lockOnTarget,
                 telegraphObserved,
@@ -343,6 +401,9 @@ namespace MUSCA.Gate3D
                 dodgeDistance = dodgeDistance,
                 dodgeStaminaBefore = dodgeStaminaBefore,
                 dodgeStaminaAfter = dodgeStaminaAfter,
+                jumpStarted = jumpStarted,
+                jumpHeight = jumpHeightObserved,
+                jumpLanded = jumpLanded,
                 lockOnAcquired = lockOnAcquired,
                 lockOnTarget = lockOnTarget,
                 telegraphObserved = telegraphObserved,
@@ -382,6 +443,7 @@ namespace MUSCA.Gate3D
                    view == "combatstrike" ||
                    view == "grounding" ||
                    view == "dodge" ||
+                   view == "jump" ||
                    view == "lockon" ||
                    view == "telegraph" ||
                    view == "enemyai" ||
@@ -396,6 +458,9 @@ namespace MUSCA.Gate3D
             float dodgeDistance,
             float dodgeStaminaBefore,
             float dodgeStaminaAfter,
+            bool jumpStarted,
+            float jumpHeight,
+            bool jumpLanded,
             bool lockOnAcquired,
             string lockOnTarget,
             bool telegraphObserved,
@@ -413,6 +478,10 @@ namespace MUSCA.Gate3D
                     return dodgeStarted &&
                            dodgeDistance >= 1.5f && dodgeDistance <= 3.2f &&
                            dodgeStaminaBefore - dodgeStaminaAfter >= 20f;
+                case "jump":
+                    return jumpStarted &&
+                           jumpHeight >= 0.65f && jumpHeight <= 1.55f &&
+                           jumpLanded;
                 case "lockon":
                     return lockOnAcquired && lockOnTarget == "Sentinel_v01";
                 case "telegraph":
@@ -437,6 +506,12 @@ namespace MUSCA.Gate3D
                 default:
                     return true;
             }
+        }
+
+        private static Vector3 FindMarkerPosition(string name, Vector3 fallback)
+        {
+            GameObject marker = GameObject.Find(name);
+            return marker != null ? marker.transform.position : fallback;
         }
 
         private static float PlanarDistance(Vector3 a, Vector3 b)

@@ -192,5 +192,30 @@ namespace MUSCA.Gate3D.Tests
                 FirstPersonController.ComputeCommittedStepSeconds(0.28f, 0.016f),
                 Is.EqualTo(0.016f).Within(0.0001f));
         }
+
+        [Test]
+        public void JumpVelocityUsesHeightAndDownwardGravity()
+        {
+            float velocity = FirstPersonController.ComputeJumpVelocity(1.15f, -24f);
+
+            Assert.That(velocity, Is.GreaterThan(7.4f));
+            Assert.That(velocity, Is.LessThan(7.5f));
+            Assert.That(FirstPersonController.ComputeJumpVelocity(0f, -24f), Is.EqualTo(0f));
+            Assert.That(FirstPersonController.ComputeJumpVelocity(1f, 9.81f), Is.EqualTo(0f));
+        }
+
+        [Test]
+        public void VerticalIntegrationPreservesJumpImpulseAcrossLongFrame()
+        {
+            float velocity = FirstPersonController.ComputeJumpVelocity(1.15f, -24f);
+            float displacement = FirstPersonController.ComputeVerticalDisplacement(
+                velocity, -24f, 0.28f);
+            float finalVelocity = FirstPersonController.ComputeVerticalVelocity(
+                velocity, -24f, 0.28f);
+
+            Assert.That(displacement, Is.GreaterThan(1.10f));
+            Assert.That(displacement, Is.LessThan(1.16f));
+            Assert.That(finalVelocity, Is.GreaterThan(0f));
+        }
     }
 }

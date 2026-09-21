@@ -14,7 +14,11 @@ namespace MUSCA.Gate3D.Editor
         private const string SentinelAsset = "Assets/MUSCA/Art/CombatV01/Sentinel_FormProxy_v0.1.fbx";
         private const string MaterialRoot = "Assets/MUSCA/Art/FormV03/UnityMaterials";
 
-        [MenuItem("MUSCA/Combat/Build Sandbox v0.2")]
+        private static readonly Vector3 PlayerSpawn = new Vector3(0f, 0f, 18f);
+        private static readonly Vector3 SentinelSpawn = new Vector3(0f, 0f, 34f);
+        private const float BossVisualScale = 1.18f;
+
+        [MenuItem("MUSCA/Combat/Build First Threshold v0.3")]
         public static void Build()
         {
             RequireAsset(SourceScene);
@@ -23,8 +27,8 @@ namespace MUSCA.Gate3D.Editor
             Scene scene = OpenOrCreateTargetScene();
 
             GameObject player = FindRoot(scene, "Player");
-            GameObject functionEnvironment = FindRoot(scene, "Function_Environment");
-            EnsureFunctionFloorCollider(functionEnvironment);
+            GameObject functionEnvironment = FindRootOptional(scene, "Function_Environment");
+            GameObject formEnvironment = FindRootOptional(scene, "FormV03_Environment");
 
             FirstPersonController movement = player.GetComponent<FirstPersonController>();
             Camera camera = player.GetComponentInChildren<Camera>(true);
@@ -48,46 +52,71 @@ namespace MUSCA.Gate3D.Editor
             PlayerLockOn lockOn = player.GetComponent<PlayerLockOn>();
             if (lockOn == null) lockOn = player.AddComponent<PlayerLockOn>();
 
+            ApplyCombatInputBindings(movement, dodge, lockOn);
+
             GameObject sandbox = FindRootOptional(scene, "CombatSandbox_v01");
             if (sandbox == null) sandbox = new GameObject("CombatSandbox_v01");
 
-            GameObject sentinel = GetOrCreateSentinel(sandbox.transform);
-            sentinel.transform.SetParent(sandbox.transform, false);
-            sentinel.transform.SetPositionAndRotation(
-                new Vector3(0f, 0f, 4.6f), Quaternion.identity);
-            RemapMaterials(sentinel, LoadMaterialMap());
-            AlignFeetToWorld(sentinel, 0f);
+            Dictionary<string, Material> materials = LoadMaterialMap();
+            BuildFirstThresholdArena(sandbox.transform, materials);
 
-            CapsuleCollider capsule = sentinel.GetComponent<CapsuleCollider>();
-            if (capsule == null) capsule = sentinel.AddComponent<CapsuleCollider>();
-            ConfigureWorldCapsule(capsule, 1.76f, 0.42f, 0.88f);
+            if (functionEnvironment != null) functionEnvironment.SetActive(false);
+            if (formEnvironment != null) formEnvironment.SetActive(false);
 
-            CombatDamageReceiver receiver = sentinel.GetComponent<CombatDamageReceiver>();
-            if (receiver == null) receiver = sentinel.AddComponent<CombatDamageReceiver>();
-            receiver.Configure(100f, 1.75f);
+            GateRuntime gateRuntime = UnityEngine.Object.FindAnyObjectByType<GateRuntime>(
+                FindObjectsInactive.Include);
+            if (gateRuntime != null) gateRuntime.enabled = false;
+
+            GateHud gateHud = UnityEngine.Object.FindAnyObjectByType<GateHud>(
+                FindObjectsInactive.Include);
+            if (gateHud != null) gateHud.enabled = false;
+
+            CharacterController playerCharacter = player.GetComponent<CharacterController>();
+            if (playerCharacter != null) playerCharacter.enabled = false;
+            player.transform.SetPositionAndRotation(PlayerSpawn, Quaternion.identity);
+            if (playerCharacter != null) playerCharacter.enabled = true;
+
+            GameObject sentinel = RebuildSentinel(sandbox.transform, materials);
+            Transform sentinelVisual = sentinel.transform.Find("SentinelVisual");
+
+            CapsuleCollider capsule = sentinel.AddComponent<CapsuleCollider>();
+            ConfigureWorldCapsule(capsule, 2.06f, 0.48f, 1.03f);
+
+            CombatDamageReceiver receiver = sentinel.AddComponent<CombatDamageReceiver>();
+            receiver.Configure(130f, 2.15f);
 
             GameObject telegraph = EnsureTelegraphMarker(
                 sandbox.transform, sentinel.transform.position);
 
-            KaelPredictionProbe prediction = sentinel.GetComponent<KaelPredictionProbe>();
-            if (prediction == null) prediction = sentinel.AddComponent<KaelPredictionProbe>();
+            KaelPredictionProbe prediction = sentinel.AddComponent<KaelPredictionProbe>();
             prediction.Configure(dodge, vitals);
             prediction.SetPrototypeActive(false, true);
 
-            SentinelCombatBrain brain = sentinel.GetComponent<SentinelCombatBrain>();
-            if (brain == null) brain = sentinel.AddComponent<SentinelCombatBrain>();
+            SentinelCombatBrain brain = sentinel.AddComponent<SentinelCombatBrain>();
             brain.Configure(vitals, telegraph.transform, prediction);
+
+            Transform spear = BuildKaelSpear(sentinel.transform, materials);
+            Transform crown = BuildPredictionCrown(sentinel.transform, materials);
+
+            SentinelPresentation presentation = sentinel.AddComponent<SentinelPresentation>();
+            presentation.Configure(brain, sentinelVisual, spear);
+
+            KaelCrownPresentation crownPresentation =
+                crown.gameObject.AddComponent<KaelCrownPresentation>();
+            crownPresentation.Configure(
+                prediction,
+                crown.Find("CrownRing_A"),
+                crown.Find("CrownRing_B"),
+                crown.Find("CrownRing_C"));
 
             GameObject hudRoot = EnsureChild(sandbox.transform, "CombatSandboxHUD");
             CombatSandboxHud hud = hudRoot.GetComponent<CombatSandboxHud>();
             if (hud == null) hud = hudRoot.AddComponent<CombatSandboxHud>();
             hud.Configure(receiver, combat, vitals, dodge, lockOn, brain, prediction);
 
-            GateHud gateHud = UnityEngine.Object.FindAnyObjectByType<GateHud>(
-                FindObjectsInactive.Include);
-            if (gateHud != null) gateHud.enabled = false;
-
-            EnsureArenaMarkers(sandbox.transform);
+            DestroyChildIfPresent(sandbox.transform, "CombatBoundary_Left");
+            DestroyChildIfPresent(sandbox.transform, "CombatBoundary_Right");
+            DestroyChildIfPresent(sandbox.transform, "CombatFocus");
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, TargetScene);
@@ -95,6 +124,41 @@ namespace MUSCA.Gate3D.Editor
             AssetDatabase.Refresh();
             Selection.activeGameObject = sentinel;
             Debug.Log($"MUSCA_COMBAT_SANDBOX_BUILT scene={TargetScene}");
+        }
+
+        private static void ApplyCombatInputBindings(
+            FirstPersonController movement,
+            PlayerDodgeController dodge,
+            PlayerLockOn lockOn)
+        {
+            SetKeyCode(movement, "jumpKey", KeyCode.Space);
+            SetKeyCode(dodge, "dodgeKey", KeyCode.LeftShift);
+            SetKeyCode(lockOn, "keyboardToggle", KeyCode.Q);
+
+            SerializedObject lockSerialized = new SerializedObject(lockOn);
+            SerializedProperty middleMouse = lockSerialized.FindProperty("middleMouseToggle");
+            if (middleMouse == null)
+            {
+                throw new InvalidOperationException(
+                    "PlayerLockOn.middleMouseToggle serialized field missing.");
+            }
+            middleMouse.boolValue = true;
+            lockSerialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void SetKeyCode(
+            UnityEngine.Object target, string fieldName, KeyCode keyCode)
+        {
+            SerializedObject serialized = new SerializedObject(target);
+            SerializedProperty property = serialized.FindProperty(fieldName);
+            if (property == null)
+            {
+                throw new InvalidOperationException(
+                    $"{target.GetType().Name}.{fieldName} serialized field missing.");
+            }
+
+            property.intValue = (int)keyCode;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static Scene OpenOrCreateTargetScene()
@@ -114,14 +178,245 @@ namespace MUSCA.Gate3D.Editor
             return source;
         }
 
-        private static GameObject GetOrCreateSentinel(Transform sandbox)
+        private static GameObject RebuildSentinel(
+            Transform sandbox, Dictionary<string, Material> materials)
         {
-            Transform existing = sandbox.Find("Sentinel_v01");
-            if (existing != null) return existing.gameObject;
+            DestroyChildIfPresent(sandbox, "Sentinel_v01");
 
-            GameObject sentinel = InstantiateModel(SentinelAsset, "Sentinel_v01");
+            GameObject sentinel = new GameObject("Sentinel_v01");
             sentinel.transform.SetParent(sandbox, false);
+            sentinel.transform.SetPositionAndRotation(SentinelSpawn, Quaternion.identity);
+
+            GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(SentinelAsset);
+            if (asset == null)
+            {
+                throw new InvalidOperationException($"Model could not be loaded: {SentinelAsset}");
+            }
+
+            GameObject visual = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+            visual.name = "SentinelVisual";
+            visual.transform.SetParent(sentinel.transform, false);
+            visual.transform.localPosition = asset.transform.localPosition;
+            visual.transform.localRotation = asset.transform.localRotation;
+            visual.transform.localScale = asset.transform.localScale * BossVisualScale;
+            RemapMaterials(visual, materials);
+            AlignFeetToWorld(visual, SentinelSpawn.y);
+
             return sentinel;
+        }
+
+        private static void BuildFirstThresholdArena(
+            Transform sandbox, Dictionary<string, Material> materials)
+        {
+            DestroyChildIfPresent(sandbox, "FirstThresholdArena_v03");
+
+            GameObject arena = new GameObject("FirstThresholdArena_v03");
+            arena.transform.SetParent(sandbox, false);
+
+            Material dark = AssetDatabase.LoadAssetAtPath<Material>(
+                $"{MaterialRoot}/DarkMetal.mat");
+            Material ceramic = AssetDatabase.LoadAssetAtPath<Material>(
+                $"{MaterialRoot}/MuscaCeramic.mat");
+            Material water = AssetDatabase.LoadAssetAtPath<Material>(
+                $"{MaterialRoot}/CyanSoft.mat");
+            Material cyan = AssetDatabase.LoadAssetAtPath<Material>(
+                $"{MaterialRoot}/Cyan.mat");
+            Material amber = AssetDatabase.LoadAssetAtPath<Material>(
+                $"{MaterialRoot}/AccentOrange.mat");
+
+            CreateArenaCube(
+                arena.transform, "ArenaFloor",
+                new Vector3(0f, -0.12f, 34f),
+                new Vector3(20f, 0.24f, 40f), dark, true);
+            CreateArenaCube(
+                arena.transform, "ShallowWater",
+                new Vector3(0f, 0.015f, 34f),
+                new Vector3(19.5f, 0.018f, 39.5f), water, false);
+            CreateArenaCube(
+                arena.transform, "ThresholdCauseway",
+                new Vector3(0f, 0.035f, 36f),
+                new Vector3(3.4f, 0.04f, 34f), ceramic, false);
+
+            float[] zPositions = { 22f, 30f, 38f, 46f };
+            float[] heightsLeft = { 5.2f, 3.4f, 6.1f, 4.2f };
+            float[] heightsRight = { 3.8f, 5.8f, 4.5f, 6.4f };
+            for (int i = 0; i < zPositions.Length; i++)
+            {
+                CreateArenaCube(
+                    arena.transform, $"RuinColumn_L_{i}",
+                    new Vector3(-7.8f, heightsLeft[i] * 0.5f, zPositions[i]),
+                    new Vector3(0.9f, heightsLeft[i], 0.9f), ceramic, true);
+                CreateArenaCube(
+                    arena.transform, $"RuinColumn_R_{i}",
+                    new Vector3(7.8f, heightsRight[i] * 0.5f, zPositions[i] + 1.1f),
+                    new Vector3(0.9f, heightsRight[i], 0.9f), ceramic, true);
+            }
+
+            CreateArenaCube(
+                arena.transform, "ThresholdFrame_L",
+                new Vector3(-5.4f, 3.5f, 52f),
+                new Vector3(0.9f, 7f, 0.9f), dark, true);
+            CreateArenaCube(
+                arena.transform, "ThresholdFrame_R",
+                new Vector3(5.4f, 3.5f, 52f),
+                new Vector3(0.9f, 7f, 0.9f), dark, true);
+            CreateArenaCube(
+                arena.transform, "ThresholdLintel",
+                new Vector3(0f, 7.0f, 52f),
+                new Vector3(11.7f, 0.9f, 0.9f), dark, true);
+            CreateArenaCube(
+                arena.transform, "ThresholdLight",
+                new Vector3(0f, 4f, 52.15f),
+                new Vector3(0.10f, 8f, 0.10f), cyan, false);
+
+            CreateLineRing(
+                arena.transform, "ThresholdRing_A",
+                new Vector3(0f, 3.6f, 52.05f), 4.15f, 0.055f, water, Quaternion.identity);
+            CreateLineRing(
+                arena.transform, "ThresholdRing_B",
+                new Vector3(0f, 3.6f, 52.00f), 4.80f, 0.035f, water,
+                Quaternion.Euler(0f, 0f, 12f));
+            CreateLineRing(
+                arena.transform, "ThresholdRing_C",
+                new Vector3(0f, 3.6f, 51.95f), 5.45f, 0.025f, amber,
+                Quaternion.Euler(0f, 0f, -9f));
+
+            CreateArenaLight(
+                arena.transform, "ArenaLight_Cyan",
+                new Vector3(-5f, 3.2f, 34f), new Color(0.08f, 0.55f, 1f), 14f, 3.2f);
+            CreateArenaLight(
+                arena.transform, "ArenaLight_Amber",
+                new Vector3(5f, 2.6f, 38f), new Color(1f, 0.28f, 0.06f), 12f, 2.4f);
+
+            CreateMarkerTransform(arena.transform, "CombatPlayerSpawn", PlayerSpawn);
+            CreateMarkerTransform(arena.transform, "CombatBossSpawn", SentinelSpawn);
+        }
+
+        private static Transform BuildKaelSpear(
+            Transform sentinel, Dictionary<string, Material> materials)
+        {
+            GameObject root = new GameObject("KaelSpear");
+            root.transform.SetParent(sentinel, false);
+            root.transform.localPosition = new Vector3(0.58f, 1.30f, 0.04f);
+
+            Material dark = AssetDatabase.LoadAssetAtPath<Material>(
+                $"{MaterialRoot}/DarkMetal.mat");
+            Material cyan = AssetDatabase.LoadAssetAtPath<Material>(
+                $"{MaterialRoot}/Cyan.mat");
+
+            GameObject shaft = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            shaft.name = "SpearShaft";
+            shaft.transform.SetParent(root.transform, false);
+            shaft.transform.localScale = new Vector3(0.045f, 1.55f, 0.045f);
+            RemoveCollider(shaft);
+            SetMaterial(shaft, dark);
+
+            GameObject blade = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            blade.name = "SpearBlade";
+            blade.transform.SetParent(root.transform, false);
+            blade.transform.localPosition = new Vector3(0f, 1.72f, 0f);
+            blade.transform.localScale = new Vector3(0.12f, 0.38f, 0.055f);
+            blade.transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            RemoveCollider(blade);
+            SetMaterial(blade, cyan);
+
+            return root.transform;
+        }
+
+        private static Transform BuildPredictionCrown(
+            Transform sentinel, Dictionary<string, Material> materials)
+        {
+            GameObject crown = new GameObject("PredictionCrown");
+            crown.transform.SetParent(sentinel, false);
+            crown.transform.localPosition = new Vector3(0f, 2.20f, 0f);
+
+            Material cyan = AssetDatabase.LoadAssetAtPath<Material>(
+                $"{MaterialRoot}/CyanSoft.mat");
+            CreateLineRing(
+                crown.transform, "CrownRing_A", Vector3.zero,
+                0.42f, 0.026f, cyan, Quaternion.Euler(90f, 0f, 0f));
+            CreateLineRing(
+                crown.transform, "CrownRing_B", Vector3.zero,
+                0.50f, 0.022f, cyan, Quaternion.Euler(55f, 20f, 0f));
+            CreateLineRing(
+                crown.transform, "CrownRing_C", Vector3.zero,
+                0.58f, 0.018f, cyan, Quaternion.Euler(-48f, -22f, 0f));
+            return crown.transform;
+        }
+
+        private static void CreateArenaCube(
+            Transform parent, string name, Vector3 position, Vector3 scale,
+            Material material, bool keepCollider)
+        {
+            GameObject item = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            item.name = name;
+            item.transform.SetParent(parent, false);
+            item.transform.position = position;
+            item.transform.localScale = scale;
+            if (!keepCollider) RemoveCollider(item);
+            SetMaterial(item, material);
+        }
+
+        private static void CreateLineRing(
+            Transform parent, string name, Vector3 localPosition,
+            float radius, float width, Material material, Quaternion localRotation)
+        {
+            GameObject ring = new GameObject(name);
+            ring.transform.SetParent(parent, false);
+            ring.transform.localPosition = localPosition;
+            ring.transform.localRotation = localRotation;
+
+            LineRenderer line = ring.AddComponent<LineRenderer>();
+            line.useWorldSpace = false;
+            line.loop = true;
+            line.positionCount = 48;
+            line.widthMultiplier = width;
+            line.sharedMaterial = material;
+            line.numCornerVertices = 3;
+            line.numCapVertices = 2;
+            for (int i = 0; i < line.positionCount; i++)
+            {
+                float angle = i / (float)line.positionCount * Mathf.PI * 2f;
+                line.SetPosition(i, new Vector3(
+                    Mathf.Cos(angle) * radius,
+                    Mathf.Sin(angle) * radius,
+                    0f));
+            }
+        }
+
+        private static void CreateArenaLight(
+            Transform parent, string name, Vector3 position,
+            Color color, float range, float intensity)
+        {
+            GameObject item = new GameObject(name);
+            item.transform.SetParent(parent, false);
+            item.transform.position = position;
+            Light light = item.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = color;
+            light.range = range;
+            light.intensity = intensity;
+            light.shadows = LightShadows.Soft;
+        }
+
+        private static void CreateMarkerTransform(
+            Transform parent, string name, Vector3 position)
+        {
+            GameObject marker = new GameObject(name);
+            marker.transform.SetParent(parent, false);
+            marker.transform.position = position;
+        }
+
+        private static void DestroyChildIfPresent(Transform parent, string name)
+        {
+            Transform child = parent.Find(name);
+            if (child != null) UnityEngine.Object.DestroyImmediate(child.gameObject);
+        }
+
+        private static void SetMaterial(GameObject item, Material material)
+        {
+            Renderer renderer = item.GetComponent<Renderer>();
+            if (renderer != null && material != null) renderer.sharedMaterial = material;
         }
 
         private static GameObject EnsureChild(Transform parent, string name)
