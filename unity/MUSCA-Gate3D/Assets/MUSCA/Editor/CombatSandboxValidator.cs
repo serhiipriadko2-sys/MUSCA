@@ -21,7 +21,13 @@ namespace MUSCA.Gate3D.Editor
             public int missingScripts;
             public int sentinelRenderers;
             public bool playerCombat;
+            public bool playerVitals;
+            public bool playerDodge;
+            public bool playerLockOn;
             public bool sentinelHealth;
+            public bool sentinelBrain;
+            public bool kaelPrediction;
+            public bool telegraphPresent;
             public bool sentinelCollider;
             public bool sentinelColliderWorldSizeValid;
             public bool sentinelOverlapsPlayer;
@@ -46,16 +52,28 @@ namespace MUSCA.Gate3D.Editor
             GameObject functionEnvironment = FindRoot(scene, "Function_Environment", findings);
 
             PlayerMeleeCombat combat = player != null ? player.GetComponent<PlayerMeleeCombat>() : null;
+            PlayerCombatVitals vitals = player != null ? player.GetComponent<PlayerCombatVitals>() : null;
+            PlayerDodgeController dodge = player != null ? player.GetComponent<PlayerDodgeController>() : null;
+            PlayerLockOn lockOn = player != null ? player.GetComponent<PlayerLockOn>() : null;
             CharacterController playerCharacter = player != null ? player.GetComponent<CharacterController>() : null;
             if (combat == null) findings.Add("player melee combat missing");
+            if (vitals == null) findings.Add("player combat vitals missing");
+            if (dodge == null) findings.Add("player dodge missing");
+            if (lockOn == null) findings.Add("player lock-on missing");
             if (playerCharacter == null) findings.Add("player CharacterController missing");
 
             Transform sentinelTransform = sandbox != null ? sandbox.transform.Find("Sentinel_v01") : null;
             CombatDamageReceiver health = sentinelTransform != null ? sentinelTransform.GetComponent<CombatDamageReceiver>() : null;
+            SentinelCombatBrain brain = sentinelTransform != null ? sentinelTransform.GetComponent<SentinelCombatBrain>() : null;
+            KaelPredictionProbe prediction = sentinelTransform != null ? sentinelTransform.GetComponent<KaelPredictionProbe>() : null;
+            Transform telegraph = sandbox != null ? sandbox.transform.Find("SentinelTelegraph") : null;
             CapsuleCollider collider = sentinelTransform != null ? sentinelTransform.GetComponent<CapsuleCollider>() : null;
             int rendererCount = sentinelTransform != null ? sentinelTransform.GetComponentsInChildren<Renderer>(true).Length : 0;
             if (sentinelTransform == null) findings.Add("sentinel missing");
             if (health == null) findings.Add("sentinel health missing");
+            if (brain == null) findings.Add("sentinel combat brain missing");
+            if (prediction == null) findings.Add("Kael prediction probe missing");
+            if (telegraph == null) findings.Add("sentinel telegraph marker missing");
             if (collider == null) findings.Add("sentinel collider missing");
             if (rendererCount == 0) findings.Add("sentinel renderers missing");
 
@@ -107,7 +125,13 @@ namespace MUSCA.Gate3D.Editor
                 missingScripts = missingScripts,
                 sentinelRenderers = rendererCount,
                 playerCombat = combat != null,
+                playerVitals = vitals != null,
+                playerDodge = dodge != null,
+                playerLockOn = lockOn != null,
                 sentinelHealth = health != null,
+                sentinelBrain = brain != null,
+                kaelPrediction = prediction != null,
+                telegraphPresent = telegraph != null,
                 sentinelCollider = collider != null,
                 sentinelColliderWorldSizeValid = sentinelColliderWorldSizeValid,
                 sentinelOverlapsPlayer = sentinelOverlapsPlayer,

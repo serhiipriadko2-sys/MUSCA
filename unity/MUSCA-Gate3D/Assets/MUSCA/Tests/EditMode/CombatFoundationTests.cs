@@ -47,5 +47,150 @@ namespace MUSCA.Gate3D.Tests
             Assert.That(PlayerMeleeCombat.IsWithinAttackArc(
                 Vector3.zero, Vector3.forward, new Vector3(0f, 0f, 2.1f), 1.8f, 0.12f), Is.False);
         }
+
+        [Test]
+        public void StaminaSpendUsesDelayThenRegenerates()
+        {
+            var stamina = new CombatStamina(100f, 20f, 0.5f);
+
+            Assert.That(stamina.TrySpend(28f), Is.True);
+            Assert.That(stamina.CurrentStamina, Is.EqualTo(72f));
+
+            stamina.Tick(0.25f);
+            Assert.That(stamina.CurrentStamina, Is.EqualTo(72f));
+            Assert.That(stamina.RegenDelayRemaining, Is.EqualTo(0.25f).Within(0.001f));
+
+            stamina.Tick(0.25f);
+            Assert.That(stamina.CurrentStamina, Is.EqualTo(72f));
+
+            stamina.Tick(0.5f);
+            Assert.That(stamina.CurrentStamina, Is.EqualTo(82f).Within(0.001f));
+        }
+
+        [Test]
+        public void StaminaRejectsOverdraw()
+        {
+            var stamina = new CombatStamina(30f, 10f, 0f);
+            Assert.That(stamina.TrySpend(28f), Is.True);
+            Assert.That(stamina.TrySpend(28f), Is.False);
+            Assert.That(stamina.CurrentStamina, Is.EqualTo(2f));
+        }
+
+        [Test]
+        public void StaminaFrameSpikeConsumesDelayThenRegeneratesRemainder()
+        {
+            var stamina = new CombatStamina(100f, 20f, 0.5f);
+            stamina.TrySpend(28f);
+
+            stamina.Tick(1f);
+
+            Assert.That(stamina.RegenDelayRemaining, Is.EqualTo(0f));
+            Assert.That(stamina.CurrentStamina, Is.EqualTo(82f).Within(0.001f));
+        }
+
+        [Test]
+        public void NeutralDodgeResolvesToBackstep()
+        {
+            Vector3 direction = PlayerDodgeController.ResolveDodgeDirection(
+                0f, 0f, Vector3.forward, Vector3.right);
+
+            Assert.That(direction, Is.EqualTo(Vector3.back));
+            Assert.That(PlayerDodgeController.ClassifyDirection(
+                direction, Vector3.forward, Vector3.right), Is.EqualTo(DodgeDirection.Backward));
+        }
+
+        [Test]
+        public void DiagonalDodgeIsNormalizedAndClassified()
+        {
+            Vector3 direction = PlayerDodgeController.ResolveDodgeDirection(
+                1f, 0.4f, Vector3.forward, Vector3.right);
+
+            Assert.That(direction.magnitude, Is.EqualTo(1f).Within(0.001f));
+            Assert.That(PlayerDodgeController.ClassifyDirection(
+                direction, Vector3.forward, Vector3.right), Is.EqualTo(DodgeDirection.Right));
+        }
+
+        [Test]
+        public void LockOnScorePrefersCenteredTarget()
+        {
+            float centered = PlayerLockOn.ScoreCandidate(8f, 5f, 14f, 82f);
+            float peripheral = PlayerLockOn.ScoreCandidate(5f, 50f, 14f, 82f);
+
+            Assert.That(centered, Is.LessThan(peripheral));
+        }
+
+        [Test]
+        public void SentinelStrikeUsesCommittedTelegraphPoint()
+        {
+            Vector3 committed = new Vector3(0f, 0f, 1.5f);
+
+            Assert.That(SentinelCombatBrain.IsPointInsideStrike(
+                new Vector3(0.4f, 0f, 1.5f), committed, 0.95f), Is.True);
+            Assert.That(SentinelCombatBrain.IsPointInsideStrike(
+                new Vector3(1.2f, 0f, 1.5f), committed, 0.95f), Is.False);
+        }
+
+        [Test]
+        public void KaelPredictionDoesNotLockBeforeMinimumHistory()
+        {
+            var model = new KaelPredictionModel(7, 4, 0.6f);
+            model.Record(DodgeDirection.Right);
+            model.Record(DodgeDirection.Right);
+            model.Record(DodgeDirection.Right);
+
+            KaelPredictionSnapshot snapshot = model.Snapshot();
+            Assert.That(snapshot.Direction, Is.EqualTo(DodgeDirection.Right));
+            Assert.That(snapshot.SampleCount, Is.EqualTo(3));
+            Assert.That(snapshot.Confidence, Is.EqualTo(1f));
+            Assert.That(snapshot.Locked, Is.False);
+        }
+
+        [Test]
+        public void KaelPredictionLocksRepeatedRightHabit()
+        {
+            var model = new KaelPredictionModel(7, 4, 0.6f);
+            for (int i = 0; i < 5; i++) model.Record(DodgeDirection.Right);
+            model.Record(DodgeDirection.Left);
+
+            KaelPredictionSnapshot snapshot = model.Snapshot();
+            Assert.That(snapshot.Direction, Is.EqualTo(DodgeDirection.Right));
+            Assert.That(snapshot.SampleCount, Is.EqualTo(6));
+            Assert.That(snapshot.Confidence, Is.EqualTo(5f / 6f).Within(0.001f));
+            Assert.That(snapshot.Locked, Is.True);
+        }
+
+        [Test]
+        public void KaelPredictionSlidingWindowCanBeBrokenByNewHabit()
+        {
+            var model = new KaelPredictionModel(5, 4, 0.6f);
+            for (int i = 0; i < 5; i++) model.Record(DodgeDirection.Right);
+            for (int i = 0; i < 5; i++) model.Record(DodgeDirection.Left);
+
+            KaelPredictionSnapshot snapshot = model.Snapshot();
+            Assert.That(snapshot.Direction, Is.EqualTo(DodgeDirection.Left));
+            Assert.That(snapshot.SampleCount, Is.EqualTo(5));
+            Assert.That(snapshot.Confidence, Is.EqualTo(1f));
+            Assert.That(snapshot.Locked, Is.True);
+        }
+
+        [Test]
+        public void KaelPredictionDirectionUsesPlayerReferenceFrame()
+        {
+            Vector3 direction = KaelPredictionModel.ResolveWorldDirection(
+                DodgeDirection.Right, Vector3.back, Vector3.left);
+
+            Assert.That(direction, Is.EqualTo(Vector3.left));
+        }
+
+        [Test]
+        public void DodgeCommittedStepConsumesFullRemainingTimeAcrossFrameSpike()
+        {
+            Assert.That(
+                FirstPersonController.ComputeCommittedStepSeconds(0.28f, 0.5f),
+                Is.EqualTo(0.28f).Within(0.0001f));
+            Assert.That(
+                FirstPersonController.ComputeCommittedStepSeconds(0.28f, 0.016f),
+                Is.EqualTo(0.016f).Within(0.0001f));
+        }
     }
 }

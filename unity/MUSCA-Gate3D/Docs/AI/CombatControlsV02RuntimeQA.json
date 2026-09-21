@@ -1,0 +1,146 @@
+﻿{
+    "schema":  "musca.combat-controls-runtime-qa.v1",
+    "status":  "PASS",
+    "verifiedAt":  "2026-09-21",
+    "branch":  "feature/combat-controls-ai-v02",
+    "unityVersion":  "6000.6.1f1",
+    "scene":  "Assets/MUSCA/Scenes/CombatSandbox_v01.unity",
+    "sequence":  {
+                     "stableMovement":  {
+                                            "status":  "PASS",
+                                            "finalY":  0.07999974489212036,
+                                            "grounded":  true,
+                                            "collisionSafe":  true,
+                                            "floor":  "Function_Environment/Floor"
+                                        },
+                     "dodgeStamina":  {
+                                          "status":  "PASS",
+                                          "distance":  2.380000114440918,
+                                          "staminaBefore":  100.0,
+                                          "staminaAfterSpend":  72.0,
+                                          "runtimeStaminaAtCapture":  77.4762954711914,
+                                          "frameSpikeRegression":  "fixed: committed dodge time is fully consumed and stamina regen applies deltaTime remaining after the regen delay"
+                                      },
+                     "enemyTelegraph":  {
+                                            "status":  "PASS",
+                                            "observed":  true,
+                                            "state":  "Telegraph",
+                                            "telegraphs":  1,
+                                            "damagingAreaCommittedToMarker":  true
+                                        },
+                     "lockOn":  {
+                                    "status":  "PASS",
+                                    "acquired":  true,
+                                    "target":  "Sentinel_v01"
+                                },
+                     "simpleEnemyAI":  {
+                                           "status":  "PASS",
+                                           "telegraphObserved":  true,
+                                           "attacks":  1,
+                                           "lastAttackHit":  true,
+                                           "playerHealthAfter":  74.0
+                                       },
+                     "meleeRegression":  {
+                                             "status":  "PASS",
+                                             "hitCount":  1,
+                                             "sentinelHealthAfter":  66.0
+                                         },
+                     "kaelPredictionPrototype":  {
+                                                     "status":  "PASS",
+                                                     "defaultEnabled":  false,
+                                                     "manualToggle":  "K",
+                                                     "historyOnly":  true,
+                                                     "predictedDirection":  "Right",
+                                                     "sampleCount":  5,
+                                                     "confidence":  1.0,
+                                                     "locked":  true,
+                                                     "predictionApplied":  true,
+                                                     "projectedDodgeDistance":  2.38,
+                                                     "strikePoint":  {
+                                                                         "x":  -2.380000114440918,
+                                                                         "z":  6.0
+                                                                     }
+                                                 }
+                 },
+    "validation":  {
+                       "scene":  "PASS",
+                       "missingScripts":  0,
+                       "collisionFloorEnabled":  true,
+                       "sentinelOverlapsPlayer":  false,
+                       "editMode":  {
+                                        "total":  23,
+                                        "passed":  23,
+                                        "failed":  0
+                                    },
+                       "windowsBuild":  {
+                                            "status":  "PASS",
+                                            "bytes":  173133492,
+                                            "exeBytes":  667136,
+                                            "exeSha256":  "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
+                                            "runtimeDllBytes":  63488,
+                                            "runtimeDllSha256":  "bed7ecd686e0234a9ee947eb851ff74d6276c59d02feefed8ce9c376ca7909b6",
+                                            "errors":  0,
+                                            "warnings":  0
+                                        }
+                   },
+    "artifacts":  {
+                      "RuntimeQA/grounding-v02.json":  {
+                                                           "bytes":  1142,
+                                                           "sha256":  "03c0d266974e16f23121072597fe083638df02a2c4947bd7a02266591135028e"
+                                                       },
+                      "RuntimeQA/grounding-v02.png":  {
+                                                          "bytes":  521454,
+                                                          "sha256":  "8a20a5a2ed446c3f808a07e0e323834257a1fc3c796ad7c0d4c1cd6e1598d311"
+                                                      },
+                      "RuntimeQA/dodge-v02.json":  {
+                                                       "bytes":  1154,
+                                                       "sha256":  "3369881939cae586527adc01a499ad39d35d824f1ca96378ddb2ada53940a893"
+                                                   },
+                      "RuntimeQA/dodge-v02.png":  {
+                                                      "bytes":  567691,
+                                                      "sha256":  "45c220af2c7c80b3e77625662ecef97e0b68ce3fb66dbac03d6d1184942b7ea7"
+                                                  },
+                      "RuntimeQA/lockon-v02.json":  {
+                                                        "bytes":  1107,
+                                                        "sha256":  "0974274fe4de13d6cbda2d9a206780378222e1ddc2b8149287372f96cdc3b17d"
+                                                    },
+                      "RuntimeQA/lockon-v02.png":  {
+                                                       "bytes":  528408,
+                                                       "sha256":  "e56c464991b1723a93aafbbf89afe2b5508334d23e1e40400d3529627fee1182"
+                                                   },
+                      "RuntimeQA/telegraph-v02.json":  {
+                                                           "bytes":  1092,
+                                                           "sha256":  "4003023657f088832f6fb1732450463af2057736cb828a0a8dedfd1d537c6456"
+                                                       },
+                      "RuntimeQA/telegraph-v02.png":  {
+                                                          "bytes":  570930,
+                                                          "sha256":  "b95f74f26574e9285c96e3800df8343cab58f0920b1c0d3f982e874cf8f3cb51"
+                                                      },
+                      "RuntimeQA/enemyai-v02.json":  {
+                                                         "bytes":  1085,
+                                                         "sha256":  "b06cc7eaf4a5ea7436375d1b5628cee0cb93473227f81e4212ea6294ed9e9e5f"
+                                                     },
+                      "RuntimeQA/enemyai-v02.png":  {
+                                                        "bytes":  562606,
+                                                        "sha256":  "32db13e6adb39f9e6aa009fdf0644b9c9ffbae42e3cf99f183ab4463e5b5716b"
+                                                    },
+                      "RuntimeQA/combatstrike-v02.json":  {
+                                                              "bytes":  1107,
+                                                              "sha256":  "ccc26b14417225bd8522526e978a039d0b31a149b595d9f6473fa246120a731e"
+                                                          },
+                      "RuntimeQA/combatstrike-v02.png":  {
+                                                             "bytes":  558475,
+                                                             "sha256":  "595b572432f341c3672731c0c47ebd4d26fd3f91b0f03eb21014c69da39f3d04"
+                                                         },
+                      "RuntimeQA/kaelprediction-v02.json":  {
+                                                                "bytes":  1115,
+                                                                "sha256":  "3cbbad86fe53a8fb51240d6d13787c5b01c28e5ce12e7f78557e3d898bf72853"
+                                                            },
+                      "RuntimeQA/kaelprediction-v02.png":  {
+                                                               "bytes":  572997,
+                                                               "sha256":  "06770fdcce4ea47b22acda7cc6e90314657431e7d6db1e58ce88184a4bb834f6"
+                                                           }
+                  },
+    "humanApproval":  null,
+    "claimBoundary":  "Automated engineering evidence only. It verifies the staged combat-control mechanics and the history-only Kael prediction probe in the tested Windows development build. It does not establish human gameplay feel, final balance, animation quality, production art, or that Kael prediction feels fair rather than like input reading."
+}
