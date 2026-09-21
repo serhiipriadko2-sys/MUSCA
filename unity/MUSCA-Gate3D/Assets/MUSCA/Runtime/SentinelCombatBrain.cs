@@ -36,6 +36,7 @@ namespace MUSCA.Gate3D
         private Vector3 _strikePoint;
         private Vector3 _predictionStrikePoint;
         private bool _predictionApplied;
+        private float _predictionBrokenAt = float.NegativeInfinity;
 
         public SentinelCombatState State => _state;
         public bool TelegraphVisible => telegraphIndicator != null && telegraphIndicator.gameObject.activeSelf;
@@ -48,6 +49,11 @@ namespace MUSCA.Gate3D
         public int TelegraphCount { get; private set; }
         public int AttackCount { get; private set; }
         public bool LastAttackHit { get; private set; }
+        public bool LastPredictionHit { get; private set; }
+        public bool LastPredictionBroken { get; private set; }
+        public int BrokenPredictionCount { get; private set; }
+        public bool PredictionBreakPulse =>
+            Time.time - _predictionBrokenAt <= 0.85f;
 
         private void Awake()
         {
@@ -198,6 +204,15 @@ namespace MUSCA.Gate3D
                 IsPointInsideStrike(
                     point, _predictionStrikePoint, predictionStrikeRadius);
 
+            LastPredictionHit = predictionHit;
+            LastPredictionBroken = WasPredictionBroken(
+                _predictionApplied, predictionHit);
+            if (LastPredictionBroken)
+            {
+                BrokenPredictionCount++;
+                _predictionBrokenAt = Time.time;
+            }
+
             LastAttackHit = baseHit || predictionHit;
             if (LastAttackHit)
             {
@@ -238,6 +253,12 @@ namespace MUSCA.Gate3D
             {
                 predictionIndicator.gameObject.SetActive(value);
             }
+        }
+
+        public static bool WasPredictionBroken(
+            bool predictionApplied, bool predictionHit)
+        {
+            return predictionApplied && !predictionHit;
         }
 
         public static bool IsPointInsideStrike(

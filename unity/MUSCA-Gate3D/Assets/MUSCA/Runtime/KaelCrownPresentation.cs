@@ -5,6 +5,7 @@ namespace MUSCA.Gate3D
     public sealed class KaelCrownPresentation : MonoBehaviour
     {
         [SerializeField] private KaelPredictionProbe prediction;
+        [SerializeField] private SentinelCombatBrain brain;
         [SerializeField] private Transform ringA;
         [SerializeField] private Transform ringB;
         [SerializeField] private Transform ringC;
@@ -28,6 +29,10 @@ namespace MUSCA.Gate3D
 
         private void Awake()
         {
+            if (prediction == null)
+                prediction = GetComponentInParent<KaelPredictionProbe>();
+            if (brain == null)
+                brain = GetComponentInParent<SentinelCombatBrain>();
             CacheLines();
         }
 
@@ -39,14 +44,18 @@ namespace MUSCA.Gate3D
             float confidence = prediction.PrototypeActive ? snapshot.Confidence : 0f;
             float speed = Mathf.Lerp(12f, 75f, confidence);
             if (snapshot.Locked) speed *= 1.35f;
+            if (brain != null && brain.PredictionBreakPulse)
+                speed *= -1.8f;
 
             if (ringA != null) ringA.Rotate(Vector3.up, speed * Time.deltaTime, Space.Self);
             if (ringB != null) ringB.Rotate(Vector3.right, speed * 0.72f * Time.deltaTime, Space.Self);
             if (ringC != null) ringC.Rotate(Vector3.forward, -speed * 0.55f * Time.deltaTime, Space.Self);
 
-            Color color = snapshot.Locked
-                ? new Color(1f, 0.42f, 0.08f, 0.95f)
-                : new Color(0.10f, 0.78f, 1f, prediction.PrototypeActive ? 0.82f : 0.38f);
+            Color color = brain != null && brain.PredictionBreakPulse
+                ? new Color(0.18f, 1f, 0.72f, 1f)
+                : snapshot.Locked
+                    ? new Color(1f, 0.42f, 0.08f, 0.95f)
+                    : new Color(0.10f, 0.78f, 1f, prediction.PrototypeActive ? 0.82f : 0.38f);
             ApplyColor(_lineA, color);
             ApplyColor(_lineB, color);
             ApplyColor(_lineC, color);

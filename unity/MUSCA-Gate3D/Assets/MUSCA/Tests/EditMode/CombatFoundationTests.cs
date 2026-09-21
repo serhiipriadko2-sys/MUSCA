@@ -194,7 +194,7 @@ namespace MUSCA.Gate3D.Tests
         }
 
         [Test]
-        public void DodgeProgressIsFastStartEaseOutAndPreservesEndpoints()
+        public void DodgeProgressIsControlledEaseOutAndPreservesEndpoints()
         {
             float start = FirstPersonController.ComputeDodgeProgress(0f);
             float quarter = FirstPersonController.ComputeDodgeProgress(0.25f);
@@ -203,10 +203,34 @@ namespace MUSCA.Gate3D.Tests
 
             Assert.That(start, Is.EqualTo(0f).Within(0.0001f));
             Assert.That(end, Is.EqualTo(1f).Within(0.0001f));
-            Assert.That(quarter, Is.GreaterThan(0.5f));
-            Assert.That(half, Is.EqualTo(0.875f).Within(0.0001f));
+            Assert.That(quarter, Is.EqualTo(0.4375f).Within(0.0001f));
+            Assert.That(half, Is.EqualTo(0.75f).Within(0.0001f));
+            Assert.That(quarter, Is.LessThan(0.5f));
             Assert.That(quarter, Is.LessThan(half));
             Assert.That(half, Is.LessThan(end));
+        }
+
+        [Test]
+        public void CameraRelativeMovementUsesCameraHeading()
+        {
+            GameObject cameraObject = new GameObject("qa-camera");
+            Camera camera = cameraObject.AddComponent<Camera>();
+            camera.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+
+            Vector3 movement = FirstPersonController.ResolveCameraRelativeMovement(
+                Vector3.forward, camera, null);
+
+            Assert.That(movement.x, Is.EqualTo(1f).Within(0.001f));
+            Assert.That(movement.z, Is.EqualTo(0f).Within(0.001f));
+            Object.DestroyImmediate(cameraObject);
+        }
+
+        [Test]
+        public void PredictionBreakRequiresAppliedMiss()
+        {
+            Assert.That(SentinelCombatBrain.WasPredictionBroken(true, false), Is.True);
+            Assert.That(SentinelCombatBrain.WasPredictionBroken(true, true), Is.False);
+            Assert.That(SentinelCombatBrain.WasPredictionBroken(false, false), Is.False);
         }
 
         [Test]

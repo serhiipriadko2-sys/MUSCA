@@ -188,9 +188,19 @@ namespace MUSCA.Gate3D
                     pelvisEuler = new Vector3(
                         0f, stride * 4.5f, stride * 2.5f);
                     leftAnkleEuler = new Vector3(
-                        -stride * 11f, 0f, 0f);
+                        Mathf.Clamp(
+                            -leftHipX * 0.24f - leftKneeX * 0.44f,
+                            -20f,
+                            16f),
+                        0f,
+                        0f);
                     rightAnkleEuler = new Vector3(
-                        stride * 11f, 0f, 0f);
+                        Mathf.Clamp(
+                            -rightHipX * 0.24f - rightKneeX * 0.44f,
+                            -20f,
+                            16f),
+                        0f,
+                        0f);
                     torsoEuler = new Vector3(
                         3.5f, -stride * 7f, -stride * 3.5f);
                     headEuler = new Vector3(

@@ -1,0 +1,118 @@
+{
+    "schema":  "musca.combat-embodiment-v06.runtime-qa.v1",
+    "status":  "PASS",
+    "unityVersion":  "6000.6.1f1",
+    "editModeTests":  {
+                          "total":  30,
+                          "passed":  30,
+                          "failed":  0
+                      },
+    "sceneValidation":  "PASS",
+    "cinemachine":  {
+                        "packageVersion":  "6.6.0",
+                        "brainPresent":  true,
+                        "controllerPresent":  true,
+                        "freeCameraPresent":  true,
+                        "lockCameraPresent":  true,
+                        "smartUpdate":  true,
+                        "outputDetachedFromPlayer":  true,
+                        "runtimeLockAcquired":  true,
+                        "runtimeLockTarget":  "Sentinel_v01",
+                        "runtimeLockCameraActive":  true,
+                        "runtimeActiveCamera":  "CM_Lock",
+                        "architecture":  "detached Unity output camera + CinemachineBrain; separate free and lock CinemachineCamera pipelines; player movement is camera-relative; body facing is independent from output camera transform"
+                    },
+    "locomotion":  {
+                       "playerProxyRig":  true,
+                       "sentinelProxyRig":  true,
+                       "proxyFootPlantPass":  "ankle counter-rotation improved; humanoid animation/IK still pending",
+                       "dodgeDistanceMeters":  2.3800008296966553,
+                       "dodgeCurve":  "quadratic ease-out"
+                   },
+    "boss":  {
+                 "colliderHeight":  3.4600000381469727,
+                 "visualHeight":  3.4579997062683105,
+                 "upright":  true
+             },
+    "prediction":  {
+                       "baseStrikeX":  0.0,
+                       "baseStrikeZ":  32.45000076293945,
+                       "predictedStrikeX":  2.380000114440918,
+                       "predictedStrikeZ":  32.45000076293945,
+                       "fresh":  true,
+                       "applied":  true,
+                       "brokenFuturePresentation":  "runtime event implemented; human readability pending"
+                   },
+    "arena":  {
+                  "present":  true,
+                  "collisionFloor":  true,
+                  "v06Composition":  "side terraces + threshold shards + rear walls added outside primary combat lane"
+              },
+    "repositoryRegression":  {
+                                 "python":  "128/128 PASS",
+                                 "node":  "8/8 PASS",
+                                 "browserCheck":  "PASS",
+                                 "roomValidation":  "PASS"
+                             },
+    "runtimeViews":  [
+                         {
+                             "view":  "grounding",
+                             "status":  "PASS",
+                             "jsonSha256":  "aa06273f65b06adfaf0c9b0e1f76a4b3cb6090df28e55428986b0f000ce1ed18",
+                             "pngSha256":  "ee311c4c249b5fdb49ac5b8d524f12f08ecbf77d38ef990a5b100ecc70c51d8c"
+                         },
+                         {
+                             "view":  "jump",
+                             "status":  "PASS",
+                             "jsonSha256":  "990f5988a02e8694300c4c955765321342f9a16a444906595aa4d7d6ac5ff5e8",
+                             "pngSha256":  "a3d862f8845907307b0daf5122de1f94e322f776c02dfcae837d220a35609663"
+                         },
+                         {
+                             "view":  "dodge",
+                             "status":  "PASS",
+                             "jsonSha256":  "0e8b57fbacc4aea654ed3b330909908c43e09243daf635735c073bb3fb95145d",
+                             "pngSha256":  "52940359519f3cb89592326645526f1efe74ba44242e5277073368ca9ff695c6"
+                         },
+                         {
+                             "view":  "lockon",
+                             "status":  "PASS",
+                             "jsonSha256":  "2f66ac9e8958d25a1173078f1dec701e1945a134f4a9a159a1d2b54ecc0e62c9",
+                             "pngSha256":  "7929160ddf04566083c9c973188267bd1456db4bd5ced73081752f12bb5a58c3"
+                         },
+                         {
+                             "view":  "telegraph",
+                             "status":  "PASS",
+                             "jsonSha256":  "a55e61af76b6519f21c58165f788a82cc2c712b4e012f29c943f6d0641b3b958",
+                             "pngSha256":  "a18cf1dbb5b316dd242d6f911511315c943c3d2196ab2e18465b316d931c043a"
+                         },
+                         {
+                             "view":  "enemyai",
+                             "status":  "PASS",
+                             "jsonSha256":  "9d3255fcbab0fa10d6792e689339ac86b719a6336b52348f221d2519502fdd89",
+                             "pngSha256":  "cfd97467ef437a47fd53adbed69a7ca33b71ad85b5de6a317d597dc4a1db3d07"
+                         },
+                         {
+                             "view":  "combatstrike",
+                             "status":  "PASS",
+                             "jsonSha256":  "5cdbd4a1675e3f58e1afbc2e7c633b921cb8a38d7b68f56c435eab7357965d76",
+                             "pngSha256":  "39c5ddd565deda3253408312a76701301bb5d2af8c2737e2b98d8b6bad009eae"
+                         },
+                         {
+                             "view":  "kaelprediction",
+                             "status":  "PASS",
+                             "jsonSha256":  "c67c0c720b4e4b5696155db59a3ed5fdff3b82a18c8dc62eff75f2c59bcf9ef0",
+                             "pngSha256":  "aa9fde3e5fe3af81834f4fc89929fce08ece93d93f868037d040549e7d63264d"
+                         }
+                     ],
+    "build":  {
+                  "status":  "PASS",
+                  "exeBytes":  667136,
+                  "exeSha256":  "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
+                  "runtimeDllBytes":  84480,
+                  "runtimeDllSha256":  "b3ab9255516976cb7a58946c1063e2a5aa8aa5f7054b51eb3d69edd0759b6feb",
+                  "errors":  0,
+                  "warnings":  0
+              },
+    "humanRetest":  "PENDING",
+    "claimBoundary":  "Automated evidence proves Cinemachine 6.6.0 is linked into the build, CM_Lock activates at runtime, the output camera is detached from the player body, combat/prediction/build regressions remain green, and the v0.6 scene composition is present. It does not prove perceptual camera smoothness, natural humanoid animation, satisfying dodge weight, readable broken-future feedback to a human, or production-quality environment art."
+}

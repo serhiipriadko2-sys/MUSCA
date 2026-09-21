@@ -14,10 +14,11 @@ namespace MUSCA.Gate3D
         [SerializeField] private float jumpHeight = 1.15f;
         [SerializeField] private float gravity = -24f;
         [SerializeField] private float groundedStickVelocity = -2f;
-        [SerializeField] private float lockTurnSpeedDegrees = 420f;
-        [SerializeField] private float lockCameraYawSmoothTime = 0.10f;
-        [SerializeField] private float lockCameraMaxYawSpeed = 420f;
-        [SerializeField] private float lockYawDeadZoneDegrees = 0.12f;
+        [SerializeField] private float lockTurnSpeedDegrees = 360f;
+        [SerializeField] private float lockCameraYawSmoothTime = 0.085f;
+        [SerializeField] private float lockCameraMaxYawSpeed = 480f;
+        [SerializeField] private float lockYawDeadZoneDegrees = 0.10f;
+        [SerializeField] private float lockAimSmoothTime = 0.055f;
         [SerializeField] private float lockCameraPositionSmoothTime = 0.08f;
         [SerializeField] private Vector3 cameraLocalPosition = new Vector3(0f, 1.68f, 0f);
         [SerializeField] private bool cameraCollisionEnabled;
@@ -40,7 +41,11 @@ namespace MUSCA.Gate3D
         private float _cameraYaw;
         private float _cameraYawVelocity;
         private Vector3 _cameraPositionVelocity;
+        private Vector3 _lockAimPoint;
+        private Vector3 _lockAimVelocity;
+        private bool _lockAimInitialized;
         private bool _cameraYawInitialized;
+        private bool _externalCameraDriverActive;
         private readonly RaycastHit[] _cameraHits = new RaycastHit[16];
 
         public bool InputEnabled { get; set; } = true;
@@ -139,14 +144,25 @@ namespace MUSCA.Gate3D
             bool gameplayInputActive = Cursor.lockState == CursorLockMode.Locked;
             if (gameplayInputActive)
             {
-                UpdateView();
+                if (_externalCameraDriverActive)
+                {
+                    UpdateExternalBodyFacing();
+                }
+                else
+                {
+                    UpdateView();
+                }
             }
 
             Vector3 input = gameplayInputActive
                 ? new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"))
                 : Vector3.zero;
             input = Vector3.ClampMagnitude(input, 1f);
-            Vector3 desiredVelocity = transform.TransformDirection(input) * moveSpeed;
+            Vector3 desiredDirection = _externalCameraDriverActive
+                ? ResolveCameraRelativeMovement(input, playerCamera, transform)
+                : ResolveMovementDirection(
+                    input, transform, _cameraYaw, _lockOnTarget != null);
+            Vector3 desiredVelocity = desiredDirection * moveSpeed;
             desiredVelocity.y = 0f;
 
             float rate = input.sqrMagnitude > 0.0001f ? moveAcceleration : moveDeceleration;
@@ -182,8 +198,38 @@ namespace MUSCA.Gate3D
 
         private void LateUpdate()
         {
+            if (_externalCameraDriverActive)
+            {
+                return;
+            }
+
+            UpdateLockCameraYaw();
             UpdateCameraPose();
             UpdateCameraCollision();
+        }
+
+        private void UpdateExternalBodyFacing()
+        {
+            float targetYaw = transform.eulerAngles.y;
+            if (_lockOnTarget != null)
+            {
+                Vector3 toTarget = _lockOnTarget.position - transform.position;
+                toTarget.y = 0f;
+                if (toTarget.sqrMagnitude > 0.0001f)
+                {
+                    targetYaw = Mathf.Atan2(toTarget.x, toTarget.z) * Mathf.Rad2Deg;
+                }
+            }
+            else if (playerCamera != null)
+            {
+                targetYaw = playerCamera.transform.eulerAngles.y;
+            }
+
+            float bodyYaw = Mathf.MoveTowardsAngle(
+                transform.eulerAngles.y,
+                targetYaw,
+                Mathf.Max(1f, lockTurnSpeedDegrees) * Time.deltaTime);
+            transform.rotation = Quaternion.Euler(0f, bodyYaw, 0f);
         }
 
         private void UpdateView()
@@ -194,25 +240,15 @@ namespace MUSCA.Gate3D
 
             if (_lockOnTarget != null)
             {
-                Vector3 toTarget = _lockOnTarget.position - transform.position;
-                toTarget.y = 0f;
-                if (toTarget.sqrMagnitude > 0.0001f)
-                {
-                    float desiredYaw = Mathf.Atan2(
-                        toTarget.x, toTarget.z) * Mathf.Rad2Deg;
-                    _cameraYaw = ComputeLockYawStep(
-                        _cameraYaw,
-                        desiredYaw,
-                        ref _cameraYawVelocity,
-                        lockCameraYawSmoothTime,
-                        Mathf.Min(
-                            Mathf.Max(1f, lockTurnSpeedDegrees),
-                            Mathf.Max(1f, lockCameraMaxYawSpeed)),
-                        lockYawDeadZoneDegrees,
-                        Time.deltaTime);
-                    transform.rotation =
-                        Quaternion.Euler(0f, _cameraYaw, 0f);
-                }
+                // Camera orbit and body facing are deliberately decoupled.
+                // The body follows the previous LateUpdate camera solution while
+                // movement remains camera-relative, so strafing cannot feed back
+                // into its own reference axes.
+                float bodyYaw = Mathf.MoveTowardsAngle(
+                    transform.eulerAngles.y,
+                    _cameraYaw,
+                    Mathf.Max(1f, lockTurnSpeedDegrees) * Time.deltaTime);
+                transform.rotation = Quaternion.Euler(0f, bodyYaw, 0f);
             }
             else
             {
@@ -224,20 +260,58 @@ namespace MUSCA.Gate3D
             _pitch = Mathf.Clamp(_pitch - mouseY, -80f, 80f);
         }
 
-        private void UpdateCameraPose()
+        private void UpdateLockCameraYaw()
         {
             EnsureCameraYawInitialized();
-
-            // Lock yaw is solved exactly once in UpdateView, before movement.
-            // LateUpdate only applies that frozen frame solution to the camera.
-            // This avoids body yaw and camera yaw chasing the same moving target
-            // through two different smoothing laws inside one rendered frame.
             if (_lockOnTarget == null)
             {
                 _cameraYaw = transform.eulerAngles.y;
                 _cameraYawVelocity = 0f;
+                _lockAimVelocity = Vector3.zero;
+                _lockAimInitialized = false;
+                return;
             }
 
+            Vector3 rawAim = _lockOnTarget.position;
+            if (!_lockAimInitialized)
+            {
+                _lockAimPoint = rawAim;
+                _lockAimVelocity = Vector3.zero;
+                _lockAimInitialized = true;
+            }
+            else
+            {
+                _lockAimPoint = Vector3.SmoothDamp(
+                    _lockAimPoint,
+                    rawAim,
+                    ref _lockAimVelocity,
+                    Mathf.Max(0.0001f, lockAimSmoothTime),
+                    Mathf.Infinity,
+                    Time.deltaTime);
+            }
+
+            Vector3 toTarget = _lockAimPoint - transform.position;
+            toTarget.y = 0f;
+            if (toTarget.sqrMagnitude <= 0.0001f)
+            {
+                return;
+            }
+
+            float desiredYaw = Mathf.Atan2(
+                toTarget.x, toTarget.z) * Mathf.Rad2Deg;
+            _cameraYaw = ComputeLockYawStep(
+                _cameraYaw,
+                desiredYaw,
+                ref _cameraYawVelocity,
+                lockCameraYawSmoothTime,
+                lockCameraMaxYawSpeed,
+                lockYawDeadZoneDegrees,
+                Time.deltaTime);
+        }
+
+        private void UpdateCameraPose()
+        {
+            EnsureCameraYawInitialized();
             if (playerCamera != null)
             {
                 playerCamera.transform.rotation =
@@ -284,11 +358,79 @@ namespace MUSCA.Gate3D
             _dodgeElapsedSeconds = 0f;
         }
 
+        public static Vector3 ResolveCameraRelativeMovement(
+            Vector3 input,
+            Camera camera,
+            Transform fallbackBody)
+        {
+            input.y = 0f;
+            input = Vector3.ClampMagnitude(input, 1f);
+            if (input.sqrMagnitude < 0.0001f)
+            {
+                return Vector3.zero;
+            }
+
+            if (camera == null)
+            {
+                return fallbackBody != null
+                    ? fallbackBody.TransformDirection(input).normalized
+                    : input.normalized;
+            }
+
+            Vector3 forward = camera.transform.forward;
+            Vector3 right = camera.transform.right;
+            forward.y = 0f;
+            right.y = 0f;
+            forward = forward.sqrMagnitude > 0.0001f
+                ? forward.normalized
+                : Vector3.forward;
+            right = right.sqrMagnitude > 0.0001f
+                ? right.normalized
+                : Vector3.right;
+
+            Vector3 world = right * input.x + forward * input.z;
+            return world.sqrMagnitude > 0.0001f
+                ? world.normalized
+                : Vector3.zero;
+        }
+
         public static float ComputeDodgeProgress(float normalizedTime)
         {
             float t = Mathf.Clamp01(normalizedTime);
             float inverse = 1f - t;
-            return 1f - inverse * inverse * inverse;
+            // Quadratic ease-out keeps the evade decisive without the v0.5
+            // cubic curve's near-teleport launch. Endpoints remain exact.
+            return 1f - inverse * inverse;
+        }
+
+        public static Vector3 ResolveMovementDirection(
+            Vector3 input,
+            Transform body,
+            float cameraYawDegrees,
+            bool lockOn)
+        {
+            input.y = 0f;
+            input = Vector3.ClampMagnitude(input, 1f);
+            if (input.sqrMagnitude < 0.0001f)
+            {
+                return Vector3.zero;
+            }
+
+            if (!lockOn || body == null)
+            {
+                return body != null
+                    ? body.TransformDirection(input).normalized
+                    : input.normalized;
+            }
+
+            Quaternion cameraBasis = Quaternion.Euler(0f, cameraYawDegrees, 0f);
+            Vector3 forward = cameraBasis * Vector3.forward;
+            Vector3 right = cameraBasis * Vector3.right;
+            Vector3 world = right * input.x + forward * input.z;
+            world.y = 0f;
+            return world.sqrMagnitude > 0.0001f
+                ? world.normalized
+                : Vector3.zero;
         }
 
         public static float ComputeLockYawStep(
@@ -347,6 +489,22 @@ namespace MUSCA.Gate3D
             return _verticalVelocity > 0f;
         }
 
+        public void SetExternalCameraDriver(bool active)
+        {
+            _externalCameraDriverActive = active;
+            if (active)
+            {
+                _cameraPositionVelocity = Vector3.zero;
+                _cameraYawVelocity = 0f;
+                _lockAimVelocity = Vector3.zero;
+                _lockAimInitialized = false;
+            }
+            else
+            {
+                SyncCameraYaw();
+            }
+        }
+
         public void SetLockOnTarget(Transform target)
         {
             EnsureCameraYawInitialized();
@@ -354,8 +512,17 @@ namespace MUSCA.Gate3D
             {
                 transform.rotation = Quaternion.Euler(0f, _cameraYaw, 0f);
                 _cameraYawVelocity = 0f;
+                _lockAimVelocity = Vector3.zero;
+                _lockAimInitialized = false;
             }
+
             _lockOnTarget = target;
+            if (_lockOnTarget != null)
+            {
+                _lockAimPoint = _lockOnTarget.position;
+                _lockAimVelocity = Vector3.zero;
+                _lockAimInitialized = true;
+            }
         }
 
         public void ConfigureCamera(Camera value, Vector3 localPosition, float fieldOfView)

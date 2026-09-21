@@ -174,14 +174,25 @@ namespace MUSCA.Gate3D
                 0f,
                 stride * 5.5f * movement * sagittalWeight,
                 -strafe * 5f + cycle * 2.5f * movement);
+            // Counter-rotate the feet against hip/knee swing so the sole
+            // spends more of each step near level instead of behaving like a
+            // rigid pendulum. This is a proxy foot-plant until humanoid IK lands.
+            float leftFootPitch = Mathf.Clamp(
+                -leftHipX * 0.30f - leftKneeX * 0.48f,
+                -22f,
+                18f);
+            float rightFootPitch = Mathf.Clamp(
+                -rightHipX * 0.30f - rightKneeX * 0.48f,
+                -22f,
+                18f);
             Vector3 leftAnkleEuler = new Vector3(
-                Mathf.Clamp(-stride * 14f, -12f, 14f) * movement,
+                leftFootPitch * movement,
                 0f,
-                -strafe * 5f * strafeWeight);
+                -strafe * 6f * strafeWeight);
             Vector3 rightAnkleEuler = new Vector3(
-                Mathf.Clamp(stride * 14f, -12f, 14f) * movement,
+                rightFootPitch * movement,
                 0f,
-                -strafe * 5f * strafeWeight);
+                -strafe * 6f * strafeWeight);
 
             Vector3 torsoEuler = new Vector3(
                 Mathf.Abs(forward) * 2.8f,

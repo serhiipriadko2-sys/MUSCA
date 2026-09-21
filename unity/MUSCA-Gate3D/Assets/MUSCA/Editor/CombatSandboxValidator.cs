@@ -5,6 +5,8 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Cinemachine;
+using UnityEditor.PackageManager;
 
 namespace MUSCA.Gate3D.Editor
 {
@@ -29,6 +31,13 @@ namespace MUSCA.Gate3D.Editor
             public bool lockBindingCorrect;
             public bool lockMiddleMouseEnabled;
             public bool lockCameraTuningCorrect;
+            public string cinemachineVersion;
+            public bool cinemachineBrainPresent;
+            public bool cinemachineControllerPresent;
+            public bool cinemachineFreeCameraPresent;
+            public bool cinemachineLockCameraPresent;
+            public bool cinemachineSmartUpdate;
+            public bool cinemachineOutputDetachedFromPlayer;
             public bool playerProxyRigPresent;
             public bool sentinelHealth;
             public bool sentinelBrain;
@@ -95,6 +104,49 @@ namespace MUSCA.Gate3D.Editor
             if (!lockBindingCorrect) findings.Add("lock-on keyboard binding is not Q");
             if (!lockMiddleMouseEnabled) findings.Add("lock-on middle mouse binding is disabled");
             if (!lockCameraTuningCorrect) findings.Add("lock-on camera tuning drifted");
+
+            Camera outputCamera = movement != null ? movement.PlayerCamera : null;
+            CinemachineBrain cinemachineBrain =
+                outputCamera != null ? outputCamera.GetComponent<CinemachineBrain>() : null;
+            MuscaCinemachineController cinemachineController =
+                player != null ? player.GetComponent<MuscaCinemachineController>() : null;
+            Transform cinemachineRig = sandbox != null
+                ? sandbox.transform.Find("MUSCA_CinemachineRig")
+                : null;
+            CinemachineCamera freeCinemachine = cinemachineRig != null
+                ? cinemachineRig.Find("CM_Free")?.GetComponent<CinemachineCamera>()
+                : null;
+            CinemachineCamera lockCinemachine = cinemachineRig != null
+                ? cinemachineRig.Find("CM_Lock")?.GetComponent<CinemachineCamera>()
+                : null;
+            bool cinemachineBrainPresent = cinemachineBrain != null;
+            bool cinemachineControllerPresent = cinemachineController != null;
+            bool cinemachineFreeCameraPresent = freeCinemachine != null &&
+                freeCinemachine.GetComponent<CinemachineThirdPersonFollow>() != null &&
+                freeCinemachine.GetComponent<CinemachineRotationComposer>() != null;
+            bool cinemachineLockCameraPresent = lockCinemachine != null &&
+                lockCinemachine.GetComponent<CinemachineThirdPersonFollow>() != null &&
+                lockCinemachine.GetComponent<CinemachineRotationComposer>() != null;
+            bool cinemachineSmartUpdate = cinemachineBrain != null &&
+                cinemachineBrain.UpdateMethod == CinemachineBrain.UpdateMethods.SmartUpdate &&
+                cinemachineBrain.BlendUpdateMethod ==
+                    CinemachineBrain.BrainUpdateMethods.LateUpdate;
+            bool cinemachineOutputDetachedFromPlayer =
+                outputCamera != null && player != null &&
+                !outputCamera.transform.IsChildOf(player.transform);
+            UnityEditor.PackageManager.PackageInfo cinemachinePackage =
+                UnityEditor.PackageManager.PackageInfo.FindForAssembly(
+                    typeof(CinemachineCamera).Assembly);
+            string cinemachineVersion =
+                cinemachinePackage != null ? cinemachinePackage.version : string.Empty;
+
+            if (!cinemachineBrainPresent) findings.Add("CinemachineBrain missing on output camera");
+            if (!cinemachineControllerPresent) findings.Add("MUSCA Cinemachine controller missing");
+            if (!cinemachineFreeCameraPresent) findings.Add("free Cinemachine camera pipeline incomplete");
+            if (!cinemachineLockCameraPresent) findings.Add("lock Cinemachine camera pipeline incomplete");
+            if (!cinemachineSmartUpdate) findings.Add("Cinemachine update mode is not SmartUpdate/LateUpdate");
+            if (!cinemachineOutputDetachedFromPlayer)
+                findings.Add("output camera is still parented to player body");
 
             Transform playerVisual = player != null
                 ? FindDeep(player.transform, "FormV03_Researcher_Visual")
@@ -254,6 +306,14 @@ namespace MUSCA.Gate3D.Editor
                 lockBindingCorrect = lockBindingCorrect,
                 lockMiddleMouseEnabled = lockMiddleMouseEnabled,
                 lockCameraTuningCorrect = lockCameraTuningCorrect,
+                cinemachineVersion = cinemachineVersion,
+                cinemachineBrainPresent = cinemachineBrainPresent,
+                cinemachineControllerPresent = cinemachineControllerPresent,
+                cinemachineFreeCameraPresent = cinemachineFreeCameraPresent,
+                cinemachineLockCameraPresent = cinemachineLockCameraPresent,
+                cinemachineSmartUpdate = cinemachineSmartUpdate,
+                cinemachineOutputDetachedFromPlayer =
+                    cinemachineOutputDetachedFromPlayer,
                 playerProxyRigPresent = playerProxyRigPresent,
                 sentinelHealth = health != null,
                 sentinelBrain = brain != null,

@@ -51,8 +51,13 @@ namespace MUSCA.Gate3D
                 FindObjectsByType<CombatDamageReceiver>(FindObjectsInactive.Exclude);
 
             Camera camera = _movement.PlayerCamera;
-            Vector3 origin = camera != null ? camera.transform.position : transform.position + Vector3.up;
-            Vector3 forward = camera != null ? camera.transform.forward : transform.forward;
+            Vector3 playerOrigin = transform.position + Vector3.up;
+            Vector3 viewOrigin = camera != null
+                ? camera.transform.position
+                : playerOrigin;
+            Vector3 forward = camera != null
+                ? camera.transform.forward
+                : transform.forward;
 
             CombatDamageReceiver best = null;
             float bestScore = float.PositiveInfinity;
@@ -60,11 +65,13 @@ namespace MUSCA.Gate3D
             {
                 if (candidate == null || !candidate.IsAlive) continue;
 
-                Vector3 delta = candidate.transform.position - origin;
-                float distance = delta.magnitude;
+                Vector3 playerDelta = candidate.transform.position - playerOrigin;
+                float distance = playerDelta.magnitude;
                 if (distance > maxDistance || distance < 0.001f) continue;
 
-                float angle = Vector3.Angle(forward, delta);
+                Vector3 viewDelta = candidate.transform.position - viewOrigin;
+                if (viewDelta.sqrMagnitude < 0.0001f) continue;
+                float angle = Vector3.Angle(forward, viewDelta);
                 if (angle > maxAngleDegrees) continue;
 
                 float score = ScoreCandidate(distance, angle, maxDistance, maxAngleDegrees);

@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Cinemachine;
 
 namespace MUSCA.Gate3D.Editor
 {
@@ -19,7 +20,7 @@ namespace MUSCA.Gate3D.Editor
         private const float BossVisualScale = 1.976f;
         private const float BossAccessoryScale = 1.30f;
 
-        [MenuItem("MUSCA/Combat/Build First Threshold v0.5")]
+        [MenuItem("MUSCA/Combat/Build First Threshold v0.6")]
         public static void Build()
         {
             RequireAsset(SourceScene);
@@ -32,7 +33,9 @@ namespace MUSCA.Gate3D.Editor
             GameObject formEnvironment = FindRootOptional(scene, "FormV03_Environment");
 
             FirstPersonController movement = player.GetComponent<FirstPersonController>();
-            Camera camera = player.GetComponentInChildren<Camera>(true);
+            Camera camera = movement != null && movement.PlayerCamera != null
+                ? movement.PlayerCamera
+                : player.GetComponentInChildren<Camera>(true);
             if (movement == null || camera == null)
             {
                 throw new InvalidOperationException(
@@ -113,6 +116,14 @@ namespace MUSCA.Gate3D.Editor
             SentinelPresentation presentation = sentinel.AddComponent<SentinelPresentation>();
             presentation.Configure(brain, sentinelVisual, spear);
 
+            BuildCinemachineRig(
+                sandbox.transform,
+                player,
+                sentinel,
+                camera,
+                movement,
+                lockOn);
+
             KaelCrownPresentation crownPresentation =
                 crown.gameObject.AddComponent<KaelCrownPresentation>();
             crownPresentation.Configure(
@@ -136,6 +147,149 @@ namespace MUSCA.Gate3D.Editor
             AssetDatabase.Refresh();
             Selection.activeGameObject = sentinel;
             Debug.Log($"MUSCA_COMBAT_SANDBOX_BUILT scene={TargetScene}");
+        }
+
+
+        private static void BuildCinemachineRig(
+            Transform sandbox,
+            GameObject player,
+            GameObject sentinel,
+            Camera outputCamera,
+            FirstPersonController movement,
+            PlayerLockOn lockOn)
+        {
+            Transform existingRig = sandbox.Find("MUSCA_CinemachineRig");
+            if (existingRig != null &&
+                outputCamera != null &&
+                outputCamera.transform.IsChildOf(existingRig))
+            {
+                outputCamera.transform.SetParent(player.transform, true);
+            }
+            DestroyChildIfPresent(sandbox, "MUSCA_CinemachineRig");
+
+            GameObject rig = new GameObject("MUSCA_CinemachineRig");
+            rig.transform.SetParent(sandbox, false);
+
+            Transform freePivot = new GameObject("FreeCameraPivot").transform;
+            freePivot.SetParent(rig.transform, false);
+            freePivot.position = player.transform.position;
+            freePivot.rotation = Quaternion.Euler(13f, player.transform.eulerAngles.y, 0f);
+
+            Transform lockPivot = new GameObject("LockCameraPivot").transform;
+            lockPivot.SetParent(rig.transform, false);
+            lockPivot.position = player.transform.position;
+            lockPivot.rotation = Quaternion.Euler(11f, player.transform.eulerAngles.y, 0f);
+
+            outputCamera.transform.SetParent(rig.transform, true);
+            CinemachineBrain brain = outputCamera.GetComponent<CinemachineBrain>();
+            if (brain == null) brain = outputCamera.gameObject.AddComponent<CinemachineBrain>();
+            brain.UpdateMethod = CinemachineBrain.UpdateMethods.SmartUpdate;
+            brain.BlendUpdateMethod = CinemachineBrain.BrainUpdateMethods.LateUpdate;
+
+            GameObject freeObject = new GameObject("CM_Free");
+            freeObject.transform.SetParent(rig.transform, false);
+            CinemachineCamera freeCamera = freeObject.AddComponent<CinemachineCamera>();
+            freeCamera.Follow = freePivot;
+            freeCamera.LookAt = player.transform;
+            LensSettings freeLens = freeCamera.Lens;
+            freeLens.FieldOfView = 58f;
+            freeCamera.Lens = freeLens;
+
+            CinemachineThirdPersonFollow freeBody =
+                freeObject.AddComponent<CinemachineThirdPersonFollow>();
+            freeBody.ShoulderOffset = new Vector3(0.48f, 1.18f, 0f);
+            freeBody.VerticalArmLength = 0.26f;
+            freeBody.CameraSide = 0.58f;
+            freeBody.CameraDistance = 4.35f;
+            freeBody.Damping = new Vector3(0.10f, 0.16f, 0.10f);
+
+            CinemachineRotationComposer freeAim =
+                freeObject.AddComponent<CinemachineRotationComposer>();
+            freeAim.TargetOffset = new Vector3(0f, 1.28f, 0f);
+            freeAim.Damping = new Vector2(0.08f, 0.10f);
+            freeAim.CenterOnActivate = false;
+            ScreenComposerSettings freeComposition = freeAim.Composition;
+            freeComposition.ScreenPosition = new Vector2(0.08f, 0.04f);
+            freeComposition.DeadZone = new ScreenComposerSettings.DeadZoneSettings
+            {
+                Enabled = true,
+                Size = new Vector2(0.08f, 0.06f)
+            };
+            freeComposition.HardLimits = new ScreenComposerSettings.HardLimitSettings
+            {
+                Enabled = true,
+                Size = new Vector2(0.92f, 0.86f),
+                Offset = Vector2.zero
+            };
+            freeAim.Composition = freeComposition;
+
+            GameObject lockObject = new GameObject("CM_Lock");
+            lockObject.transform.SetParent(rig.transform, false);
+            CinemachineCamera lockCamera = lockObject.AddComponent<CinemachineCamera>();
+            lockCamera.Follow = lockPivot;
+            lockCamera.LookAt = sentinel.transform;
+            LensSettings lockLens = lockCamera.Lens;
+            lockLens.FieldOfView = 55f;
+            lockCamera.Lens = lockLens;
+
+            CinemachineThirdPersonFollow lockBody =
+                lockObject.AddComponent<CinemachineThirdPersonFollow>();
+            lockBody.ShoulderOffset = new Vector3(0.32f, 1.30f, 0f);
+            lockBody.VerticalArmLength = 0.22f;
+            lockBody.CameraSide = 0.54f;
+            lockBody.CameraDistance = 5.15f;
+            lockBody.Damping = new Vector3(0.12f, 0.16f, 0.10f);
+
+            CinemachineRotationComposer lockAim =
+                lockObject.AddComponent<CinemachineRotationComposer>();
+            lockAim.TargetOffset = new Vector3(0f, 1.72f, 0f);
+            lockAim.Damping = new Vector2(0.10f, 0.13f);
+            lockAim.CenterOnActivate = false;
+            ScreenComposerSettings lockComposition = lockAim.Composition;
+            lockComposition.ScreenPosition = new Vector2(0f, 0.07f);
+            lockComposition.DeadZone = new ScreenComposerSettings.DeadZoneSettings
+            {
+                Enabled = true,
+                Size = new Vector2(0.06f, 0.045f)
+            };
+            lockComposition.HardLimits = new ScreenComposerSettings.HardLimitSettings
+            {
+                Enabled = true,
+                Size = new Vector2(0.78f, 0.72f),
+                Offset = Vector2.zero
+            };
+            lockAim.Composition = lockComposition;
+
+#if CINEMACHINE_PHYSICS
+            freeBody.AvoidObstacles.Enabled = true;
+            freeBody.AvoidObstacles.CollisionFilter = ~0;
+            freeBody.AvoidObstacles.CameraRadius = 0.22f;
+            freeBody.AvoidObstacles.DampingIntoCollision = 0.05f;
+            freeBody.AvoidObstacles.DampingFromCollision = 0.22f;
+
+            lockBody.AvoidObstacles.Enabled = true;
+            lockBody.AvoidObstacles.CollisionFilter = ~0;
+            lockBody.AvoidObstacles.CameraRadius = 0.22f;
+            lockBody.AvoidObstacles.DampingIntoCollision = 0.04f;
+            lockBody.AvoidObstacles.DampingFromCollision = 0.24f;
+#endif
+
+            freeCamera.enabled = true;
+            lockCamera.enabled = false;
+
+            MuscaCinemachineController controller =
+                player.GetComponent<MuscaCinemachineController>();
+            if (controller == null)
+                controller = player.AddComponent<MuscaCinemachineController>();
+            controller.Configure(
+                outputCamera,
+                brain,
+                freeCamera,
+                lockCamera,
+                freePivot,
+                lockPivot,
+                movement,
+                lockOn);
         }
 
         private static void ApplyCombatInputBindings(
@@ -675,6 +829,42 @@ namespace MUSCA.Gate3D.Editor
                 arena.transform, "DistantMonolith_R",
                 new Vector3(11.2f, 6.5f, 58f),
                 new Vector3(2.4f, 13f, 2.4f), dark, false);
+
+            // v0.6 encounter silhouette: keep gameplay space clean while giving
+            // the First Threshold layered depth beyond the central causeway.
+            for (int i = 0; i < 3; i++)
+            {
+                float z = 27f + i * 8.2f;
+                float height = 0.65f + i * 0.42f;
+                CreateArenaCube(
+                    arena.transform, $"Terrace_L_{i}",
+                    new Vector3(-9.25f, height * 0.5f, z),
+                    new Vector3(3.1f, height, 5.4f), dark, false);
+                CreateArenaCube(
+                    arena.transform, $"Terrace_R_{i}",
+                    new Vector3(9.25f, height * 0.5f, z + 1.4f),
+                    new Vector3(3.1f, height, 5.4f), dark, false);
+            }
+
+            GameObject shardLeft = CreateArenaCube(
+                arena.transform, "ThresholdShard_L",
+                new Vector3(-4.7f, 2.45f, 49.2f),
+                new Vector3(0.38f, 5.8f, 1.15f), ceramic, false);
+            shardLeft.transform.rotation = Quaternion.Euler(0f, -11f, -19f);
+            GameObject shardRight = CreateArenaCube(
+                arena.transform, "ThresholdShard_R",
+                new Vector3(4.9f, 2.10f, 48.7f),
+                new Vector3(0.42f, 5.1f, 1.05f), ceramic, false);
+            shardRight.transform.rotation = Quaternion.Euler(0f, 14f, 23f);
+
+            CreateArenaCube(
+                arena.transform, "RearWall_L",
+                new Vector3(-8.6f, 4.2f, 54f),
+                new Vector3(6.2f, 8.4f, 0.8f), dark, false);
+            CreateArenaCube(
+                arena.transform, "RearWall_R",
+                new Vector3(8.6f, 4.8f, 55.5f),
+                new Vector3(6.2f, 9.6f, 0.8f), dark, false);
 
             CreateArenaCube(
                 arena.transform, "ThresholdFrame_L",

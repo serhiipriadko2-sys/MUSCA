@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.IO;
 using UnityEngine;
+using Unity.Cinemachine;
 
 namespace MUSCA.Gate3D
 {
@@ -41,6 +42,9 @@ namespace MUSCA.Gate3D
             public bool jumpLanded;
             public bool lockOnAcquired;
             public string lockOnTarget;
+            public bool cinemachineBrainPresent;
+            public bool cinemachineLockActive;
+            public string cinemachineActiveCamera;
             public bool telegraphObserved;
             public string sentinelState;
             public int sentinelTelegraphs;
@@ -92,6 +96,8 @@ namespace MUSCA.Gate3D
             bool jumpLanded = false;
             bool lockOnAcquired = false;
             string lockOnTarget = string.Empty;
+            bool cinemachineLockActive = false;
+            string cinemachineActiveCamera = string.Empty;
             bool telegraphObserved = false;
             bool skipStandardWait = false;
             bool groundingWasGrounded = false;
@@ -103,6 +109,11 @@ namespace MUSCA.Gate3D
             PlayerCombatVitals vitals = player.GetComponent<PlayerCombatVitals>();
             PlayerDodgeController dodge = player.GetComponent<PlayerDodgeController>();
             PlayerLockOn lockOn = player.GetComponent<PlayerLockOn>();
+            MuscaCinemachineController cinemachineController =
+                player.GetComponent<MuscaCinemachineController>();
+            CinemachineBrain cameraBrain = player.PlayerCamera != null
+                ? player.PlayerCamera.GetComponent<CinemachineBrain>()
+                : null;
             CharacterController character = player.GetComponent<CharacterController>();
 
             Vector3 authoredPlayerSpawn = FindMarkerPosition(
@@ -259,10 +270,19 @@ namespace MUSCA.Gate3D
 
             if (view == "lockon")
             {
-                yield return null;
+                // Let CinemachineBrain settle the detached output camera before
+                // evaluating screen-facing target acquisition.
+                yield return new WaitForSeconds(0.15f);
                 lockOnAcquired = lockOn != null && lockOn.TryLockNearest();
                 lockOnTarget = lockOn != null ? lockOn.TargetName : string.Empty;
-                yield return new WaitForSeconds(0.15f);
+                yield return new WaitForSeconds(0.20f);
+                cinemachineLockActive =
+                    cinemachineController != null &&
+                    cinemachineController.IsUsingLockCamera;
+                cinemachineActiveCamera =
+                    cameraBrain != null && cameraBrain.ActiveVirtualCamera != null
+                        ? cameraBrain.ActiveVirtualCamera.Name
+                        : string.Empty;
                 skipStandardWait = true;
             }
 
@@ -374,6 +394,7 @@ namespace MUSCA.Gate3D
                 jumpLanded,
                 lockOnAcquired,
                 lockOnTarget,
+                cinemachineLockActive,
                 telegraphObserved,
                 brain,
                 vitals,
@@ -409,6 +430,9 @@ namespace MUSCA.Gate3D
                 jumpLanded = jumpLanded,
                 lockOnAcquired = lockOnAcquired,
                 lockOnTarget = lockOnTarget,
+                cinemachineBrainPresent = cameraBrain != null,
+                cinemachineLockActive = cinemachineLockActive,
+                cinemachineActiveCamera = cinemachineActiveCamera,
                 telegraphObserved = telegraphObserved,
                 sentinelState = brain != null ? brain.State.ToString() : string.Empty,
                 sentinelTelegraphs = brain != null ? brain.TelegraphCount : 0,
@@ -471,6 +495,7 @@ namespace MUSCA.Gate3D
             bool jumpLanded,
             bool lockOnAcquired,
             string lockOnTarget,
+            bool cinemachineLockActive,
             bool telegraphObserved,
             SentinelCombatBrain brain,
             PlayerCombatVitals vitals,
@@ -491,7 +516,9 @@ namespace MUSCA.Gate3D
                            jumpHeight >= 0.65f && jumpHeight <= 1.55f &&
                            jumpLanded;
                 case "lockon":
-                    return lockOnAcquired && lockOnTarget == "Sentinel_v01";
+                    return lockOnAcquired &&
+                           lockOnTarget == "Sentinel_v01" &&
+                           cinemachineLockActive;
                 case "telegraph":
                     return telegraphObserved && brain != null && brain.TelegraphCount >= 1;
                 case "enemyai":
