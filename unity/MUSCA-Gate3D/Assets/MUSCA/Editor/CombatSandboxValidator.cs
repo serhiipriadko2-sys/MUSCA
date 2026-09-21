@@ -23,6 +23,9 @@ namespace MUSCA.Gate3D.Editor
             public bool playerCombat;
             public bool sentinelHealth;
             public bool sentinelCollider;
+            public bool sentinelColliderWorldSizeValid;
+            public bool sentinelOverlapsPlayer;
+            public Vector3 sentinelColliderWorldSize;
             public bool companionPresent;
             public bool formEnvironmentPresent;
             public bool collisionFloorEnabled;
@@ -43,7 +46,9 @@ namespace MUSCA.Gate3D.Editor
             GameObject functionEnvironment = FindRoot(scene, "Function_Environment", findings);
 
             PlayerMeleeCombat combat = player != null ? player.GetComponent<PlayerMeleeCombat>() : null;
+            CharacterController playerCharacter = player != null ? player.GetComponent<CharacterController>() : null;
             if (combat == null) findings.Add("player melee combat missing");
+            if (playerCharacter == null) findings.Add("player CharacterController missing");
 
             Transform sentinelTransform = sandbox != null ? sandbox.transform.Find("Sentinel_v01") : null;
             CombatDamageReceiver health = sentinelTransform != null ? sentinelTransform.GetComponent<CombatDamageReceiver>() : null;
@@ -53,6 +58,18 @@ namespace MUSCA.Gate3D.Editor
             if (health == null) findings.Add("sentinel health missing");
             if (collider == null) findings.Add("sentinel collider missing");
             if (rendererCount == 0) findings.Add("sentinel renderers missing");
+
+            Vector3 sentinelColliderWorldSize = collider != null ? collider.bounds.size : Vector3.zero;
+            bool sentinelColliderWorldSizeValid = collider != null &&
+                sentinelColliderWorldSize.x >= 0.65f && sentinelColliderWorldSize.x <= 1.05f &&
+                sentinelColliderWorldSize.y >= 1.55f && sentinelColliderWorldSize.y <= 1.95f &&
+                sentinelColliderWorldSize.z >= 0.65f && sentinelColliderWorldSize.z <= 1.05f;
+            if (!sentinelColliderWorldSizeValid)
+                findings.Add($"sentinel collider world size invalid: {sentinelColliderWorldSize}");
+
+            bool sentinelOverlapsPlayer = collider != null && playerCharacter != null &&
+                collider.bounds.Intersects(playerCharacter.bounds);
+            if (sentinelOverlapsPlayer) findings.Add("sentinel collider overlaps player at authored spawn");
 
             if (companion == null || companion.GetComponent<MuscaCompanion>() == null)
                 findings.Add("MUSCA companion missing");
@@ -92,6 +109,9 @@ namespace MUSCA.Gate3D.Editor
                 playerCombat = combat != null,
                 sentinelHealth = health != null,
                 sentinelCollider = collider != null,
+                sentinelColliderWorldSizeValid = sentinelColliderWorldSizeValid,
+                sentinelOverlapsPlayer = sentinelOverlapsPlayer,
+                sentinelColliderWorldSize = sentinelColliderWorldSize,
                 companionPresent = companion != null && companion.GetComponent<MuscaCompanion>() != null,
                 formEnvironmentPresent = formEnvironment != null,
                 collisionFloorEnabled = collisionFloorEnabled,

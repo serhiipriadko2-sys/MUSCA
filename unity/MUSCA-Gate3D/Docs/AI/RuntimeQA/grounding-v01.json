@@ -1,0 +1,19 @@
+{
+    "view": "grounding",
+    "outcome": "Pending",
+    "cells": 2,
+    "signal": 3,
+    "x": 0.0,
+    "y": 0.07999974489212036,
+    "z": 8.199999809265137,
+    "combatHits": 0,
+    "sentinelHealth": 100.0,
+    "sentinelAlive": true,
+    "grounded": true,
+    "collisionSafe": true,
+    "groundProbeHit": true,
+    "groundProbeCollider": "Function_Environment/Floor",
+    "groundProbePointY": 0.0,
+    "groundProbeDistance": 3.0,
+    "screenshot": "C:\\github\\MUSCA-combat-v01\\unity\\runtime-qa-current\\grounding.png"
+}

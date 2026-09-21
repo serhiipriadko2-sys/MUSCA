@@ -1,14 +1,23 @@
 {
-  "status": "PENDING_REVALIDATION",
-  "reason": "Player-fall regression exposed a disabled authoritative floor collider. Source and scene were corrected, but Unity scene validation has not been rerun yet.",
-  "previousEvidenceCommit": "5e92a1b982584133a28fc758ca2cb2168b0cd4c7",
-  "requiredChecks": [
-    "authoritative Function floor collider enabled",
-    "zero missing scripts",
-    "combat components present",
-    "Build Settings preserved"
-  ],
-  "findings": [
-    "previous validator did not assert floor collision"
-  ]
+    "status": "PASS",
+    "unityVersion": "6000.6.1f1",
+    "scene": "Assets/MUSCA/Scenes/CombatSandbox_v01.unity",
+    "missingScripts": 0,
+    "sentinelRenderers": 25,
+    "playerCombat": true,
+    "sentinelHealth": true,
+    "sentinelCollider": true,
+    "sentinelColliderWorldSizeValid": true,
+    "sentinelOverlapsPlayer": false,
+    "sentinelColliderWorldSize": {
+        "x": 0.8400000929832458,
+        "y": 1.7599999904632568,
+        "z": 0.8400001525878906
+    },
+    "companionPresent": true,
+    "formEnvironmentPresent": true,
+    "collisionFloorEnabled": true,
+    "gateHudDisabled": true,
+    "buildSettingsPreserved": true,
+    "findings": []
 }

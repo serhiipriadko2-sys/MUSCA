@@ -9,5 +9,11 @@
     "combatHits": 1,
     "sentinelHealth": 66.0,
     "sentinelAlive": true,
-    "screenshot": "C:\\github\\MUSCA-combat-v01\\unity\\runtime-qa\\combatstrike.png"
+    "grounded": false,
+    "collisionSafe": true,
+    "groundProbeHit": false,
+    "groundProbeCollider": "",
+    "groundProbePointY": 0.0,
+    "groundProbeDistance": 0.0,
+    "screenshot": "C:\\github\\MUSCA-combat-v01\\unity\\runtime-qa-current\\combatstrike.png"
 }

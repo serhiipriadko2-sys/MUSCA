@@ -21,19 +21,29 @@ The sandbox is not a claim that MUSCA already has souls-like combat. Its purpose
 - Scene: `Assets/MUSCA/Scenes/CombatSandbox_v01.unity`
 - Sentinel source: `blender/gate-lab-v0.2/Combat_Sentinel_v0.1.blend`
 - Sentinel Unity FBX: `Assets/MUSCA/Art/CombatV01/Sentinel_FormProxy_v0.1.fbx`
-- Runtime QA: `Docs/AI/RuntimeQA/combat-v01.*` and `combatstrike-v01.*`
+- Runtime QA: `Docs/AI/RuntimeQA/combat-v01.*`, `combatstrike-v01.*` and `grounding-v01.*`
 
 ## Automated evidence
 
-Pre-fix evidence at commit `5e92a1b982584133a28fc758ca2cb2168b0cd4c7` showed:
+Human playtesting falsified the original floor-collision assumption: the player could fall below the visible floor.
+
+The audit found two collision defects:
+
+- the hidden Function floor collider had been disabled under the Form v0.3 visual layer;
+- the decisive runtime fault was the Sentinel collider: the imported FBX root has `lossyScale = 100`, so a locally authored 0.42 m × 1.76 m capsule became an 84 m × 176 m × 84 m world collider and overlapped the player spawn.
+
+The corrected builder preserves the Function collision proxy and converts desired Sentinel world dimensions into local collider dimensions using the imported root scale. The validator now rejects an oversized Sentinel collider or a Sentinel/player spawn overlap.
+
+Current evidence:
 
 - Blender procedural Sentinel validation: PASS.
-- Unity scene validation: PASS, but the validator did not assert floor collision.
-- EditMode tests: 11/11 PASS, including four combat-foundation tests.
+- Unity scene validation: PASS; zero missing scripts; Function floor collider enabled.
+- Sentinel collider world bounds: approximately 0.84 m × 1.76 m × 0.84 m; player-spawn overlap: false.
+- EditMode tests: 11/11 PASS.
 - Windows Development build: PASS, 0 errors, 0 warnings.
-- Runtime QA confirmed the melee path, but it disabled player movement and therefore did not exercise gravity/collision.
-
-Human playtesting then falsified the implied floor-collision assumption: the player could fall through the visible floor. The collision proxy, validator and runtime grounding QA have been corrected on the feature branch. Current Unity validation, Windows rebuild and grounding runtime QA are **pending rerun**.
+- Runtime gameplay DLL fingerprint: `50effb82a14504b033556f3bd9355ef517cc5c8aecd89aeda096907485629c21`.
+- Grounding runtime QA: PASS; player settles at y ≈ 0.08 with `grounded=true`, `collisionSafe=true`, and a physics probe resolves `Function_Environment/Floor` at y = 0.
+- Melee runtime QA: PASS; exactly one strike registers and Sentinel health changes 100 → 66.
 
 See:
 
@@ -43,7 +53,7 @@ See:
 
 ## Claim boundary
 
-The pre-fix build proved the executable melee foundation but did not prove player grounding. The current collision fix must be rebuilt and revalidated before the updated branch can claim runtime PASS.
+The rebuilt development executable passes the automated grounding regression and the deterministic melee regression. This closes the specific reported fall-through defect at the tested combat probe; it does not replace human free-movement testing.
 
 It does **not** prove:
 

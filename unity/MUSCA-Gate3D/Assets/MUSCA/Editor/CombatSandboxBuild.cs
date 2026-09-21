@@ -21,6 +21,9 @@ namespace MUSCA.Gate3D.Editor
             public ulong bytes;
             public long exeBytes;
             public string exeSha256;
+            public string runtimeDll;
+            public long runtimeDllBytes;
+            public string runtimeDllSha256;
             public int errors;
             public int warnings;
         }
@@ -45,6 +48,10 @@ namespace MUSCA.Gate3D.Editor
             BuildReport report = BuildPipeline.BuildPlayer(options);
             BuildSummary summary = report.summary;
             bool passed = summary.result == BuildResult.Succeeded && summary.totalErrors == 0;
+            string outputDirectory = Path.GetDirectoryName(output) ?? projectRoot;
+            string dataDirectory = Path.Combine(outputDirectory,
+                Path.GetFileNameWithoutExtension(output) + "_Data");
+            string runtimeDll = Path.Combine(dataDirectory, "Managed", "MUSCA.Gate3D.Runtime.dll");
             var receipt = new Receipt
             {
                 status = passed ? "PASS" : "FAIL",
@@ -54,6 +61,9 @@ namespace MUSCA.Gate3D.Editor
                 bytes = summary.totalSize,
                 exeBytes = File.Exists(output) ? new FileInfo(output).Length : 0L,
                 exeSha256 = File.Exists(output) ? Sha256(output) : string.Empty,
+                runtimeDll = runtimeDll,
+                runtimeDllBytes = File.Exists(runtimeDll) ? new FileInfo(runtimeDll).Length : 0L,
+                runtimeDllSha256 = File.Exists(runtimeDll) ? Sha256(runtimeDll) : string.Empty,
                 errors = (int)summary.totalErrors,
                 warnings = (int)summary.totalWarnings
             };

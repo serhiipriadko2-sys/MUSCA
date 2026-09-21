@@ -25,6 +25,10 @@ namespace MUSCA.Gate3D
             public bool sentinelAlive;
             public bool grounded;
             public bool collisionSafe;
+            public bool groundProbeHit;
+            public string groundProbeCollider;
+            public float groundProbePointY;
+            public float groundProbeDistance;
             public string screenshot;
         }
 
@@ -52,6 +56,8 @@ namespace MUSCA.Gate3D
             int combatHits = 0;
             CombatDamageReceiver combatTarget = FindAnyObjectByType<CombatDamageReceiver>();
             CharacterController character = player.GetComponent<CharacterController>();
+            bool groundingWasGrounded = false;
+            float groundingSettledY = 0f;
             switch (view)
             {
                 case "spawn":
@@ -110,6 +116,9 @@ namespace MUSCA.Gate3D
             if (view == "grounding")
             {
                 yield return new WaitForSeconds(1.0f);
+                groundingWasGrounded = player.LastMoveGrounded ||
+                    (character != null && character.isGrounded);
+                groundingSettledY = player.transform.position.y;
                 player.InputEnabled = false;
                 FirstPersonController.UnlockCursor();
             }
@@ -128,8 +137,28 @@ namespace MUSCA.Gate3D
 
             GateSnapshot snapshot = runtime.Snapshot();
             Vector3 position = player.transform.position;
-            bool grounded = character != null && character.isGrounded;
-            bool collisionSafe = view != "grounding" || (grounded && position.y > -0.1f);
+            bool grounded = view == "grounding"
+                ? groundingWasGrounded
+                : character != null && character.isGrounded;
+            float collisionCheckY = view == "grounding" ? groundingSettledY : position.y;
+            bool groundProbeHit = false;
+            string groundProbeCollider = string.Empty;
+            float groundProbePointY = 0f;
+            float groundProbeDistance = 0f;
+            if (view == "grounding")
+            {
+                RaycastHit groundHit;
+                groundProbeHit = TryGroundProbe(player.transform, out groundHit);
+                if (groundProbeHit)
+                {
+                    groundProbeCollider = TransformPath(groundHit.collider.transform);
+                    groundProbePointY = groundHit.point.y;
+                    groundProbeDistance = groundHit.distance;
+                }
+            }
+            bool collisionSafe = view != "grounding" ||
+                (collisionCheckY > -0.1f && groundProbeHit &&
+                 groundProbePointY > -0.5f && groundProbePointY < 0.5f);
             var receipt = new QaReceipt
             {
                 view = view,
@@ -144,6 +173,10 @@ namespace MUSCA.Gate3D
                 sentinelAlive = combatTarget != null && combatTarget.IsAlive,
                 grounded = grounded,
                 collisionSafe = collisionSafe,
+                groundProbeHit = groundProbeHit,
+                groundProbeCollider = groundProbeCollider,
+                groundProbePointY = groundProbePointY,
+                groundProbeDistance = groundProbeDistance,
                 screenshot = fullOutput
             };
             string jsonPath = Path.ChangeExtension(fullOutput, ".json");
@@ -151,6 +184,41 @@ namespace MUSCA.Gate3D
             Debug.Log($"MUSCA_QA_CAPTURE view={view} screenshot={fullOutput} receipt={jsonPath}");
             yield return null;
             Application.Quit(0);
+        }
+
+        private static bool TryGroundProbe(Transform owner, out RaycastHit nearest)
+        {
+            RaycastHit[] hits = Physics.RaycastAll(
+                new Vector3(owner.position.x, 3f, owner.position.z),
+                Vector3.down, 10f, ~0, QueryTriggerInteraction.Ignore);
+            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+            foreach (RaycastHit hit in hits)
+            {
+                if (hit.collider == null ||
+                    hit.collider.transform == owner ||
+                    hit.collider.transform.IsChildOf(owner))
+                {
+                    continue;
+                }
+
+                nearest = hit;
+                return true;
+            }
+
+            nearest = default;
+            return false;
+        }
+
+        private static string TransformPath(Transform value)
+        {
+            string path = value.name;
+            Transform current = value.parent;
+            while (current != null)
+            {
+                path = current.name + "/" + path;
+                current = current.parent;
+            }
+            return path;
         }
 
         private static string ArgValue(string prefix)

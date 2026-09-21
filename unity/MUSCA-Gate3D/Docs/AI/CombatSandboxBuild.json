@@ -1,7 +1,14 @@
 {
-  "status": "STALE_REQUIRES_REBUILD",
-  "reason": "The combat floor collision fix changed scene/source after the last Windows build.",
-  "previousEvidenceCommit": "5e92a1b982584133a28fc758ca2cb2168b0cd4c7",
-  "previousExeSha256": "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
-  "claimBoundary": "Do not treat the previous Windows build as evidence for the current collision-fix HEAD. Rebuild and revalidate in Unity."
+    "status": "PASS",
+    "unityVersion": "6000.6.1f1",
+    "scene": "Assets/MUSCA/Scenes/CombatSandbox_v01.unity",
+    "output": "C:\\github\\MUSCA-combat-v01\\unity\\MUSCA-Gate3D\\Builds\\CombatSandbox-v01\\MUSCA-CombatSandbox-v01.exe",
+    "bytes": 173103801,
+    "exeBytes": 667136,
+    "exeSha256": "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
+    "runtimeDll": "C:\\github\\MUSCA-combat-v01\\unity\\MUSCA-Gate3D\\Builds\\CombatSandbox-v01\\MUSCA-CombatSandbox-v01_Data\\Managed\\MUSCA.Gate3D.Runtime.dll",
+    "runtimeDllBytes": 43520,
+    "runtimeDllSha256": "50effb82a14504b033556f3bd9355ef517cc5c8aecd89aeda096907485629c21",
+    "errors": 0,
+    "warnings": 0
 }

@@ -42,6 +42,8 @@ unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/*
 !unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/combat-v01.json
 !unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/combatstrike-v01.png
 !unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/combatstrike-v01.json
+!unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/grounding-v01.png
+!unity/MUSCA-Gate3D/Docs/AI/RuntimeQA/grounding-v01.json
 
 # Blender Form authoring backups/cache; authoritative .blend/.fbx outputs are explicit.
 *.blend1

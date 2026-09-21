@@ -53,9 +53,7 @@ namespace MUSCA.Gate3D.Editor
 
             CapsuleCollider capsule = sentinel.GetComponent<CapsuleCollider>();
             if (capsule == null) capsule = sentinel.AddComponent<CapsuleCollider>();
-            capsule.center = new Vector3(0f, 0.88f, 0f);
-            capsule.height = 1.76f;
-            capsule.radius = 0.42f;
+            ConfigureWorldCapsule(capsule, 1.76f, 0.42f, 0.88f);
 
             CombatDamageReceiver receiver = sentinel.GetComponent<CombatDamageReceiver>();
             if (receiver == null) receiver = sentinel.AddComponent<CombatDamageReceiver>();
@@ -76,6 +74,19 @@ namespace MUSCA.Gate3D.Editor
             AssetDatabase.Refresh();
             Selection.activeGameObject = sentinel;
             Debug.Log($"MUSCA_COMBAT_SANDBOX_BUILT scene={TargetScene}");
+        }
+
+        private static void ConfigureWorldCapsule(
+            CapsuleCollider capsule, float worldHeight, float worldRadius, float worldCenterY)
+        {
+            Vector3 scale = capsule.transform.lossyScale;
+            float scaleY = Mathf.Max(0.0001f, Mathf.Abs(scale.y));
+            float scaleRadius = Mathf.Max(0.0001f, Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z)));
+
+            capsule.direction = 1;
+            capsule.center = new Vector3(0f, worldCenterY / scaleY, 0f);
+            capsule.height = worldHeight / scaleY;
+            capsule.radius = worldRadius / scaleRadius;
         }
 
         private static void CreateArenaMarkers(Transform parent)
