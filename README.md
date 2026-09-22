@@ -154,20 +154,44 @@ MMO/multiplayer не входят в активный roadmap.
 Структурная проверка зарегистрированных manifests:
 
 ```powershell
-py -3.14 scripts/validate_manifests.py --level schema data/manifests/SCI-DATA-SHIU-FW630.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json experiments/manifests/gate-p01.json
+py -3.14 scripts/validate_manifests.py --level schema data/manifests/SCI-DATA-SHIU-FW630.candidate.json experiments/manifests/SCI-R00-SHIU-ENV-DATA.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json experiments/manifests/SCI-R01-SHIU-SUGAR.run.json experiments/manifests/SCI-R02-SHIU-MN9-LATERALITY-200HZ.candidate.json experiments/manifests/SCI-R02-SHIU-MN9-LATERALITY-200HZ.run.json experiments/manifests/gate-p01.json
 ```
 
-Перед реальным запуском используется более строгий gate:
+Перед R01 execution использовался более строгий local gate:
 
 ```powershell
-py -3.14 scripts/validate_manifests.py --level runnable --repo-root . experiments/manifests/SCI-R01-SHIU-SUGAR.candidate.json
+py -3.14 scripts/validate_manifests.py --level runnable --repo-root . experiments/manifests/SCI-R01-SHIU-SUGAR.run.json
 ```
 
-Сейчас R01 runnable-check обязан завершаться `FAIL`: scientific manifest имеет статус
-`draft_not_run`. Dataset уже локально получен и проверен, но strict environment/R00 ещё не завершены. Это защитный gate, а не ошибка проекта.
-`schema PASS` подтверждает форму документа, но не разрешает эксперимент.
+Исторический `SCI-R01-SHIU-SUGAR.candidate.json` остаётся замороженным preregistration
+candidate со статусом `draft_not_run`. После operational SCI-R00 PASS был создан отдельный
+frozen `SCI-R01-SHIU-SUGAR.run.json`; его `ready_to_run` фиксирует pre-execution envelope
+и не переписывается после просмотра результата. `schema PASS` подтверждает форму документа,
+а `runnable PASS` на конкретном research-host подтверждает лишь готовность входов/метаданных.
 
 Runnable дополнительно требует существующий local_storage; not_applicable допускается только с явной причиной.
+
+[FACT local] SCI-R01 strict tutorial sugar execution завершён как engineering **PASS**:
+30/30 trials, `406978` spike rows, `430` active neurons. Output SHA-256:
+`657f4ae3d54f90bb0c2a5f13db4156449fec0b24cff74efb84afe03035e6c9e2`.
+Execution receipt SHA-256:
+`38d7ed8bf191fce5f0495b8e3561483f5fcbe2da4a3140bcad069e7cdb8eec5d`.
+Independent artifact verification also PASS; details are in
+`docs/status/2026-09-19-r01-execution.md`.
+
+This R01 result is **not** a Nature-figure reproduction, biological validation,
+topology-superiority result, commercial clearance or game-value result.
+
+[FACT local] SCI-R02 subsequently **PASSED** its separately preregistered bilateral
+200 Hz MN9-laterality reproduction gate: both 30-trial hemisphere conditions met all
+frozen primary criteria. Execution receipt SHA-256:
+`91016e6339a17ad658f48ba814d47d7e51f9866f7e010537bc0a57b86399668d`.
+Independent verification SHA-256:
+`1437673a23eb0650a39f100108953a79e64cf0e6b418060ac3c57d6180a086fe`.
+See `docs/status/2026-09-19-r02-execution.md`.
+
+R02 PASS is still **not** biological validation or topology-superiority evidence;
+matched-control topology testing remains a separate preregistered gate.
 
 ## SCI-R00 read-only preflight
 
@@ -179,9 +203,10 @@ py -3.14 scripts/research_r00_preflight.py --repo-root .
 
 The preflight is intentionally non-mutating. It reports governance, manifest,
 host-tooling and storage blockers and performs zero installs/downloads/simulations.
-ADR-0005 принят. На авторизованном research-host project-local micromamba может
-дать `READY_FOR_OPERATIONAL_APPROVAL`; GitHub-hosted CI без этого локального tool
-по-прежнему ожидаемо видит `host_solver`. Ни одно состояние не является R00 PASS.
+ADR-0005 принят. SCI-R00 operational strict environment/data smoke теперь имеет
+локальный PASS с датированным receipt в `docs/status/2026-09-18-r00-execution.md`.
+GitHub-hosted CI без project-local solver по-прежнему ожидаемо видит `host_solver`;
+это CI-проверка fail-closed preflight semantics, а не опровержение локального R00 PASS.
 
 The strict Shiu reproduction lineage requires a conda-compatible solver for the
 pinned `environment_full.yml`. `uv` may coexist on the host but is not treated as
