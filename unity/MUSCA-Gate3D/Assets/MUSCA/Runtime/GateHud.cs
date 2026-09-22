@@ -189,7 +189,7 @@ namespace MUSCA.Gate3D
             GUI.Label(new Rect(rect.x + 18f, rect.y + 68f, rect.width - 36f, 20f), "ISKRA отделяет факт от гипотезы.", _body);
             GUI.Label(new Rect(rect.x + 18f, rect.y + 92f, rect.width - 36f, 20f), "MUSCA замечает среду и сопровождает.", _body);
             GUI.Label(new Rect(rect.x + 18f, rect.y + 118f, rect.width - 36f, 20f), "WASD — движение · мышь — обзор · Q/E — действие", _small);
-            GUI.Label(new Rect(rect.x + 18f, rect.y + 143f, rect.width - 36f, 20f), "TAB — журнал · R — заново · ESC — курсор", _small);
+            GUI.Label(new Rect(rect.x + 18f, rect.y + 143f, rect.width - 36f, 20f), "TAB — журнал · F5 — заново · ESC — курсор", _small);
         }
 
         private void DrawPrompt(float width, float height)
@@ -278,7 +278,7 @@ namespace MUSCA.Gate3D
                 ? $"Решение подтверждено миром. Остаток ресурса: {_snapshot.Cells}/2."
                 : "Реактивный реагент заблокировал проход. Гипотеза не подтвердилась.";
             GUI.Label(new Rect(rect.x + 35f, rect.y + 120f, rect.width - 70f, 70f), text, _resultBody);
-            GUI.Label(new Rect(rect.x + 35f, rect.y + 210f, rect.width - 70f, 42f), "R — пройти снова", _center);
+            GUI.Label(new Rect(rect.x + 35f, rect.y + 210f, rect.width - 70f, 42f), "F5 — пройти снова", _center);
         }
 
         private void Refresh()

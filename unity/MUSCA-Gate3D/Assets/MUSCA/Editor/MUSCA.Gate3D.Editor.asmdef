@@ -1,7 +1,7 @@
 {
   "name": "MUSCA.Gate3D.Editor",
   "rootNamespace": "MUSCA.Gate3D.Editor",
-  "references": ["MUSCA.Gate3D.Runtime"],
+  "references": ["MUSCA.Gate3D.Runtime", "Unity.Cinemachine"],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

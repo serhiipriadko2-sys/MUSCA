@@ -1,0 +1,105 @@
+{
+    "schema":  "musca.combat-embodiment-v061.runtime-qa.v1",
+    "status":  "PASS",
+    "unityVersion":  "6000.6.1f1",
+    "editModeTests":  {
+                          "total":  32,
+                          "passed":  32,
+                          "failed":  0
+                      },
+    "sceneValidation":  "PASS",
+    "cameraHotfix":  {
+                         "packageVersion":  "6.6.0",
+                         "idleStable":  true,
+                         "idleYawDriftDegrees":  0.0,
+                         "freeActiveCamera":  "CM_Free",
+                         "lockAcquired":  true,
+                         "lockTarget":  "Sentinel_v01",
+                         "lockCameraActive":  true,
+                         "lockActiveCamera":  "CM_Lock",
+                         "cause":  "free-orbit yaw was fed from Cinemachine output yaw every frame, creating positive feedback",
+                         "fix":  "free pivot yaw is authoritative; lock/free yaw synchronizes only on mode transition; body faces desired travel direction when unlocked"
+                     },
+    "movementHotfix":  {
+                           "forwardBasis":  "Cinemachine pivot yaw, not output camera yaw",
+                           "freeBodyFacing":  "desired movement direction",
+                           "lockedBodyFacing":  "lock target",
+                           "editModeCoverage":  [
+                                                    "ExternalForwardInputUsesPivotYaw",
+                                                    "BodyFacingYawMatchesDesiredTravelDirection"
+                                                ]
+                       },
+    "repositoryRegression":  {
+                                 "python":  "128/128 PASS",
+                                 "node":  "8/8 PASS",
+                                 "browserCheck":  "PASS",
+                                 "roomValidation":  "PASS"
+                             },
+    "runtimeViews":  [
+                         {
+                             "view":  "cameraidle",
+                             "status":  "PASS",
+                             "jsonSha256":  "0ed021c2c264e23b988125a6c678f2628f66087697a4b6252baf8921fe2f7495",
+                             "pngSha256":  "54eae8f086eecb7b89c9c1c22a6da0c2e97ea6515bdc9b73f8022cb44bd24a46"
+                         },
+                         {
+                             "view":  "grounding",
+                             "status":  "PASS",
+                             "jsonSha256":  "b15a73d9f410f2eac831fa90cd338136fd7813b3087030f93acff8b999d0353d",
+                             "pngSha256":  "d14a719780b29f72c25659f3c0f42e0ef725f5ee8585d93e1002a3defcc989dc"
+                         },
+                         {
+                             "view":  "jump",
+                             "status":  "PASS",
+                             "jsonSha256":  "1266b0ef76a44269ff1cfa8fd7ecc33ff73b9b8bdeb157aed6c67214f15e2522",
+                             "pngSha256":  "a1eea7ca28992c035a22a8ddc33f1814c6e315bfbb4f8d292b079f53a93586a8"
+                         },
+                         {
+                             "view":  "dodge",
+                             "status":  "PASS",
+                             "jsonSha256":  "03480e81d42173efcb597001cd17e78abb9eb8891a56eb114276b55002f9c4d8",
+                             "pngSha256":  "f1cdabb2e1dbe61d1735800601c518ff7dc8e806e84b98ccbc7bbe6972353dec"
+                         },
+                         {
+                             "view":  "lockon",
+                             "status":  "PASS",
+                             "jsonSha256":  "54fc6c087a96dffbaa490f544982668bd09024ce772539c7d3488b654bbd4710",
+                             "pngSha256":  "388d8ed1bc515319d2fb000824081f42d090018bedf7e70eb16e2675b10e8310"
+                         },
+                         {
+                             "view":  "telegraph",
+                             "status":  "PASS",
+                             "jsonSha256":  "d04ec6e4fb5436e27bf33769500bf0a8baa44193300126a70477aff53ede7df1",
+                             "pngSha256":  "0e6c43079f6000ecf6f245c43627f6db679e2b55e245b19651428715059fbe3d"
+                         },
+                         {
+                             "view":  "enemyai",
+                             "status":  "PASS",
+                             "jsonSha256":  "887a8ddf6e5593da7c48e7bb69312b722653e2b053492eaa9fed5e173b8255f6",
+                             "pngSha256":  "a015ffadc0294536327d8676898d763b54f0c8c1ebdba1a65021e339666dc84f"
+                         },
+                         {
+                             "view":  "combatstrike",
+                             "status":  "PASS",
+                             "jsonSha256":  "def0f210e52d68a98d59e21127df6e69d3e319fe55ad71ff3ee972c666f5cb98",
+                             "pngSha256":  "456e6e6618896d794dce49107dd817fef6a16e6f79bf5b03e5ece8d1d091f96f"
+                         },
+                         {
+                             "view":  "kaelprediction",
+                             "status":  "PASS",
+                             "jsonSha256":  "6189b3f3b06169a29ee7c6ae5d1785b21fd0ddcde3a991d67f1dcec754ed66f3",
+                             "pngSha256":  "bd9aa5e3b29232e1e87476f002a14a830f382ea47985c06e561227aab4bd9a56"
+                         }
+                     ],
+    "build":  {
+                  "status":  "PASS",
+                  "exeBytes":  667136,
+                  "exeSha256":  "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
+                  "runtimeDllBytes":  86016,
+                  "runtimeDllSha256":  "a70c14683110ba7093c9b9057e9297486e93737ffa468cdb8421c6f0d3844dfc",
+                  "errors":  0,
+                  "warnings":  0
+              },
+    "humanRetest":  "PENDING",
+    "claimBoundary":  "Automated evidence proves the free Cinemachine camera no longer self-rotates while idle, forward input resolves from the stable pivot yaw, body facing follows travel direction when unlocked, CM_Lock still activates, and previous combat regressions remain green. Human feel under active mouse movement and rapid strafe still requires playtest."
+}

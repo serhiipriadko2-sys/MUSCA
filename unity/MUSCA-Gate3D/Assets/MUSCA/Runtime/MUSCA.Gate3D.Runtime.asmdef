@@ -1,7 +1,7 @@
 {
   "name": "MUSCA.Gate3D.Runtime",
   "rootNamespace": "MUSCA.Gate3D",
-  "references": [],
+  "references": ["Unity.Cinemachine"],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

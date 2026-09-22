@@ -1,0 +1,94 @@
+{
+    "schema":  "musca.combat-embodiment-v04.runtime-qa.v1",
+    "status":  "PASS",
+    "unityVersion":  "6000.6.1f1",
+    "editModeTests":  {
+                          "total":  26,
+                          "passed":  26,
+                          "failed":  0
+                      },
+    "sceneValidation":  "PASS",
+    "pivotRig":  {
+                     "player":  true,
+                     "sentinel":  true
+                 },
+    "boss":  {
+                 "colliderHeight":  2.6600003242492676,
+                 "visualHeight":  2.659998893737793,
+                 "upright":  true
+             },
+    "prediction":  {
+                       "baseStrikeX":  0.0,
+                       "baseStrikeZ":  32.45000076293945,
+                       "predictedStrikeX":  2.380000114440918,
+                       "predictedStrikeZ":  32.45000076293945,
+                       "fresh":  true,
+                       "applied":  true
+                   },
+    "repositoryRegression":  {
+                                 "python":  "128/128 PASS",
+                                 "node":  "8/8 PASS",
+                                 "roomValidation":  "PASS"
+                             },
+    "runtimeViews":  [
+                         {
+                             "view":  "grounding",
+                             "status":  "PASS",
+                             "jsonSha256":  "f7f0c69e5388c6fa6c7c3781cce54a34482306a3d87bbf0580497364fcb36795",
+                             "pngSha256":  "590be138e2a5f9411d0bedec33f84cfcd36a493a85104f644c80c132dd54b98e"
+                         },
+                         {
+                             "view":  "jump",
+                             "status":  "PASS",
+                             "jsonSha256":  "4f0bad5d7abd56b4be789e938926763caba09ee25c9a8ca00afb2c4e353ad6e7",
+                             "pngSha256":  "864dbf265f54774c7e0efe8eebf333d1bdea52f699d77189e2b6eee9a7dec95d"
+                         },
+                         {
+                             "view":  "dodge",
+                             "status":  "PASS",
+                             "jsonSha256":  "a7d893acdf2881e4b2a9a99eecc757df9f2a4d8c6a31bbde71352492db0fd2fc",
+                             "pngSha256":  "2727b2010aab3f92d8da4ec14a52b55f9130a0f37584b9cbff33c30c6a25055d"
+                         },
+                         {
+                             "view":  "lockon",
+                             "status":  "PASS",
+                             "jsonSha256":  "efb22548b7351cc61c68f18c3fc4dd9954684868d04b29d0b7889af77fcdb81d",
+                             "pngSha256":  "3b0a45bdfae5b6fd98082709e77b15404c8e498c78bafc3ac4cad5f4a540b132"
+                         },
+                         {
+                             "view":  "telegraph",
+                             "status":  "PASS",
+                             "jsonSha256":  "bb533d61a02cda09a364680a92adb246c3d004176b5374eadd368dabce4f503d",
+                             "pngSha256":  "2414819707611601bdd7009906f0035b73241ed12ecbaa93fb7b71c2f2cbfdfb"
+                         },
+                         {
+                             "view":  "enemyai",
+                             "status":  "PASS",
+                             "jsonSha256":  "94481714af55c197f5d6c77b4d6a61b214e7c5d48df2370c923dac7e464a2ae4",
+                             "pngSha256":  "afa35b380d1d9581b7a7e2c79abf1b016c9afe63e84f0aad793d86087dbc0133"
+                         },
+                         {
+                             "view":  "combatstrike",
+                             "status":  "PASS",
+                             "jsonSha256":  "547d921f60768bc127505b9ae65d2ea570ba413343e47e96770808a66b318b8a",
+                             "pngSha256":  "35df9f62f2b9c1fa62d3f0f4b498b707374e7fc844ef7e7e92c8b1e48d7d68f6"
+                         },
+                         {
+                             "view":  "kaelprediction",
+                             "status":  "PASS",
+                             "jsonSha256":  "8ef66e9124e2e6b0b9fdbe96ebb29100fbdc6a57892da736a82849fa14c0b396",
+                             "pngSha256":  "f70a7be4dbb9be6f39f03ad371b896992c2641f3177b489e4f8b9bd0f30a600c"
+                         }
+                     ],
+    "build":  {
+                  "status":  "PASS",
+                  "exeBytes":  667136,
+                  "exeSha256":  "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
+                  "runtimeDllBytes":  76800,
+                  "runtimeDllSha256":  "fc135ef8778bf50bc90c582b6ffd03cb5a9068a3b8cabbfab3a72b58c374c3cd",
+                  "errors":  0,
+                  "warnings":  0
+              },
+    "humanRetest":  "PENDING",
+    "claimBoundary":  "Automated evidence covers pivot-rig presence, boss scale/upright state, dual-zone prediction semantics, collision/build integrity and combat execution. It does not prove that procedural motion feels natural, that dodge reads as a roll/lunge to a human, that camera feel is solved, or that the arena is production-quality art."
+}

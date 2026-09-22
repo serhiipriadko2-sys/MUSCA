@@ -1,0 +1,83 @@
+{
+    "schema":  "musca.combat-embodiment-v03.runtime-qa.v1",
+    "status":  "PASS",
+    "unityVersion":  "6000.6.1f1",
+    "editModeTests":  {
+                          "total":  25,
+                          "passed":  25,
+                          "failed":  0
+                      },
+    "sceneValidation":  "PASS",
+    "serializedBindings":  {
+                                "status":  "PASS",
+                                "jump":  "Space",
+                                "dodge":  "LeftShift",
+                                "lockOn":  "Q + MMB"
+                            },
+    "repositoryRegression":  {
+                                  "python":  "128/128 PASS",
+                                  "node":  "8/8 PASS",
+                                  "roomValidation":  "PASS"
+                              },
+    "runtimeViews":  [
+                         {
+                             "view":  "grounding",
+                             "status":  "PASS",
+                             "jsonSha256":  "4f24a4443f28c66da457043f610b7d663eebf371b57b9b7572d0a773d89e00ae",
+                             "pngSha256":  "763add7129ad866655b408dd6de68182e49a600f74e419e800fdb40d81ac96db"
+                         },
+                         {
+                             "view":  "jump",
+                             "status":  "PASS",
+                             "jsonSha256":  "122cb47ea445df1586791ce29c2db25d1ff6c829d2769d8ca8841cb00331032e",
+                             "pngSha256":  "fdcf3bedbeff35c480839d236cf547f2bf9c7f576438eb2a06382bcd0406d7a6"
+                         },
+                         {
+                             "view":  "dodge",
+                             "status":  "PASS",
+                             "jsonSha256":  "3608cfd14383a46f45355f63949f0167afb19a987701c58acdb54256c8f4f443",
+                             "pngSha256":  "50aaac82f4d3fe83c50140a40cd788805e8f810cfcc46c9a5d1f17883c52ffda"
+                         },
+                         {
+                             "view":  "lockon",
+                             "status":  "PASS",
+                             "jsonSha256":  "30079b347353f99f2f9cf768767fbc5dab3de86326438aea29c33116500fceca",
+                             "pngSha256":  "f0a3b99d60aa7a41ba0338f408ea3a64b5ce008ce2672718e4c8cee0db21076f"
+                         },
+                         {
+                             "view":  "telegraph",
+                             "status":  "PASS",
+                             "jsonSha256":  "a112253cc755875890e0f69db18df355b3c768e2cfa5e16fd4cb69673eab0728",
+                             "pngSha256":  "f29bd417308bedb56443139d946fab5babc7862d045ea31aeab44b3d45163b20"
+                         },
+                         {
+                             "view":  "enemyai",
+                             "status":  "PASS",
+                             "jsonSha256":  "3d6b67e61ec6041a6e99db19a9861948589ec0182b1ffa170ee32e552075a910",
+                             "pngSha256":  "17524db5beb44a738f95403e041318a7b417ad4296ebc6bfcdba073ae3f38729"
+                         },
+                         {
+                             "view":  "combatstrike",
+                             "status":  "PASS",
+                             "jsonSha256":  "05963dc725886e2b49db95d6878465165845d52e15fe109545474605d0135494",
+                             "pngSha256":  "aaa4a6177f3d65859fee5873bf5c790fa38371b17f79bc90c58c3328ba53e561"
+                         },
+                         {
+                             "view":  "kaelprediction",
+                             "status":  "PASS",
+                             "jsonSha256":  "3ddba938fccbc7384d80301d93b0abc9803744c28c2edc3c0d584bdfe6105c31",
+                             "pngSha256":  "f63f5300ec22edcb900d04e5d2e91f7d06471a31cf44d4873812b33c7bfd9605"
+                         }
+                     ],
+    "build":  {
+                  "status":  "PASS",
+                  "exeBytes":  667136,
+                  "exeSha256":  "61695ba6e3d61056db5f10a955b41f680e78f85626ffc909d4e7a93ecb20df9e",
+                  "runtimeDllBytes":  70656,
+                  "runtimeDllSha256":  "476041e59ac5fc7de77c00d31179d0a407b3332e5ad3cdc0e6bb1309509b9266",
+                  "errors":  0,
+                  "warnings":  0
+              },
+    "humanRetest":  "PENDING",
+    "claimBoundary":  "Automated evidence covers scene integrity, upright boss proxy, arena floor, jump/dodge/lock-on/telegraph/AI/melee/prediction execution. It does not approve final animation quality, boss art, arena art direction, camera feel, combat feel, or Kael prediction design."
+}
