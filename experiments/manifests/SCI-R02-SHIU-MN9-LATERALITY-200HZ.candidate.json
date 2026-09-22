@@ -1,0 +1,92 @@
+{
+  "experiment": {
+    "id": "SCI-R02-SHIU-MN9-LATERALITY-200HZ",
+    "question": "Does the strict pinned Shiu/FlyWire-v630 model reproduce the archived bilateral prediction that unilateral 200 Hz sugar-GRN activation drives contralateral MN9 more strongly than ipsilateral MN9?",
+    "hypothesis": "For both the archived right-hemisphere and left-hemisphere sugar-GRN sets at 200 Hz, the contralateral MN9 firing-rate distribution exceeds the ipsilateral MN9 distribution and the whole-neuron mean-rate vector remains highly concordant with the archived Edmond V3 reference.",
+    "falsifier": "Either hemisphere fails structural 30-trial execution, fails contralateral > ipsilateral MN9 with one-sided Mann-Whitney p < 0.05, retains less than 50% of the archived MN9 mean-difference effect, or has archived-vs-rerun whole-rate-vector Spearman rho below 0.98.",
+    "code_commit": "philshiu/Drosophila_brain_model@91bdd1e7dcf193f3e7ca5a8933497fcef63b7960",
+    "dataset_manifest": "SCI-DATA-SHIU-FW630.candidate.json",
+    "model": "Upstream Brian2 leaky-integrate-and-fire model in pinned model.py under the strict SCI-R00 environment; default_params unchanged except explicit r_poi=200 Hz for this figure-specific condition.",
+    "task": "Run two independent 30-trial 1000 ms conditions: archived 21-neuron right sugar-GRN set at 200 Hz and archived 10-neuron left sugar-GRN set at 200 Hz; compare homologous MN9 responses and whole-neuron mean-rate vectors to archived Edmond V3 raw outputs.",
+    "controls": [
+      "Ipsilateral homologous MN9 is the within-condition comparator for each unilateral sugar-GRN stimulation.",
+      "Edmond V3 raw 200 Hz outputs are an external frozen reference, not a source of random seeds for the rerun."
+    ],
+    "fixed_conditions": [
+      "FlyWire v630 bundled inputs and their R00-verified hashes",
+      "pinned source commit 91bdd1e7dcf193f3e7ca5a8933497fcef63b7960",
+      "strict R00 environment with Python 3.10.11 and Brian2 2.5.1",
+      "t_run=1000 ms; n_run=30",
+      "r_poi=200 Hz explicitly; no dependence on tutorial default frequency",
+      "right condition uses the archived 21 right-hemisphere sugar-GRN FlyWire IDs",
+      "left condition uses the archived 10 left-hemisphere sugar-GRN FlyWire IDs",
+      "MN9 left=720575940660219265; MN9 right=720575940645521262",
+      "no silenced neurons; no second excitation class",
+      "all default model parameters other than r_poi remain unchanged",
+      "record n_proc, platform, wall time and peak process-tree RAM as execution parameters",
+      "reference raw right SHA256=cae3cd2823dfbd88a8d957724d63aba2b288b40e6b453bfe13a75f77a8bb6357",
+      "reference raw left SHA256=3fc01a93e1318479acd7584595f58345227283e238aabf8c7b314afe5a6e60e8",
+      "reference metrics SHA256=f8a61aa90783aa4f9fe137111935b1abee670640aaae332dfa1291cba004556d"
+    ],
+    "train_worlds": [],
+    "validation_worlds": [],
+    "test_worlds": [],
+    "random_seeds": [],
+    "repetitions": 30,
+    "metrics": [
+      "process exit/exception status and 30 trial identifiers per hemisphere",
+      "MN9 left/right per-trial spike counts and mean firing rates",
+      "contralateral minus ipsilateral MN9 mean-rate difference for each hemisphere",
+      "one-sided Mann-Whitney U test for contralateral > ipsilateral MN9 for each hemisphere",
+      "effect-retention ratio: rerun MN9 mean difference divided by archived mean difference",
+      "Spearman rho between archived and rerun whole-neuron mean-rate vectors over the union of nonzero FlyWire IDs with missing rates filled as zero",
+      "top-200 mean-rate Jaccard as a secondary non-gating diagnostic",
+      "output bytes/SHA-256, wall time and peak process-tree RAM"
+    ],
+    "compute_budget": "Two 30-trial whole-brain runs. Use a resource-safe recorded n_proc; stop on resource exhaustion. No frequency sweep, silencing experiment, or topology-null comparison is authorized by this manifest.",
+    "analysis_plan": "For each condition compute 30 per-trial spike counts for contralateral and ipsilateral MN9, one-sided Mann-Whitney U (alternative=greater), archived effect retention, and whole-neuron mean-rate Spearman correlation against the frozen 200 Hz Edmond reference. Success is conjunctive across both hemispheres. The project-defined replication tolerance is >=50% archived MN9 effect retention and rho>=0.98; these thresholds are frozen before rerun execution. Absolute mean rates, top-200 Jaccard and performance are secondary diagnostics and cannot rescue a failed primary gate.",
+    "success_criterion": "PASS only if both hemisphere conditions complete all 30 trials with structurally valid output; each has contralateral MN9 mean > ipsilateral mean with one-sided Mann-Whitney p<0.05; each retains at least 50% of its archived MN9 mean-difference effect (right reference 30.3333333333 Hz; left reference 12.6666666667 Hz); and each archived-vs-rerun whole-rate-vector Spearman rho is >=0.98. Source/data/reference hashes must remain unchanged and repository/source cleanliness postconditions must pass.",
+    "result_path": "PLANNED: E:\\MUSCA_RESEARCH\\results\\SCI-R02-SHIU-MN9-LATERALITY-200HZ",
+    "study_type": "strict_published_prediction_reproduction",
+    "trainable_parameters": [],
+    "confounds": [
+      "Final Nature panel assignment says main Figure 1c used left sugar GRNs and Extended Data Figure 1d used right; the preprint/archive notebook names Figure 1 as right and Figure S1 as left. This R02 freezes the bilateral 200 Hz laterality prediction rather than panel identity.",
+      "Archived and pinned model.py bytes differ, but numeric defaults and core simulation functions create_model/poi/run_trial/silence are AST-identical; remaining observed differences are comments/docstrings/print wording.",
+      "PoissonInput is stochastic and no explicit upstream seed is frozen; exact spike hashes are not expected.",
+      "Brian2 may use NumPy code generation on this host because MSVC Cython compilation is unavailable; this is a performance confound.",
+      "This experiment does not compare biological topology against artificial/randomized controls.",
+      "FlyWire-v630 commercial-use/redistribution clearance is not established by this experiment."
+    ],
+    "status": "draft_not_run"
+  },
+  "reference_evidence": {
+    "source_dataset": "doi:10.17617/3.CZODIW, Edmond Drosophila Brain Model V3",
+    "results_zip_file_id": 223847,
+    "results_zip_bytes": 4499610373,
+    "results_zip_md5": "f6f2e314821fa6a4196214e3b2b14bc4",
+    "right_200hz": {
+      "sha256": "cae3cd2823dfbd88a8d957724d63aba2b288b40e6b453bfe13a75f77a8bb6357",
+      "contra_mean_hz": 93.23333333333333,
+      "ipsi_mean_hz": 62.9,
+      "mean_difference_hz": 30.333333333333336,
+      "mw_p_greater": 1.4404413965147154e-11,
+      "split_half_spearman_rho": 0.9981084000807218
+    },
+    "left_200hz": {
+      "sha256": "3fc01a93e1318479acd7584595f58345227283e238aabf8c7b314afe5a6e60e8",
+      "contra_mean_hz": 50.766666666666666,
+      "ipsi_mean_hz": 38.1,
+      "mean_difference_hz": 12.666666666666664,
+      "mw_p_greater": 2.9984785474049246e-11,
+      "split_half_spearman_rho": 0.9963649413541762
+    },
+    "reference_metrics_path": "E:\\MUSCA_RESEARCH\\results\\SCI-R02-SHIU-MN9-LATERALITY-200HZ\\REFERENCE_200HZ_METRICS.json",
+    "reference_metrics_sha256": "f8a61aa90783aa4f9fe137111935b1abee670640aaae332dfa1291cba004556d",
+    "reference_raw_manifest_sha256": "b9d608556c424fdb7c313b1d1cc80bd5a721970cfe3fe2f4f40d4dc8fc00b73e"
+  },
+  "non_claims": [
+    "This preregistration does not assert that R02 has run.",
+    "A future R02 PASS would reproduce only the frozen bilateral 200 Hz MN9 laterality prediction in this model/data lineage.",
+    "It would not establish biological validity, connectome-topology superiority, embodied-controller usefulness, commercial clearance, or game value."
+  ]
+}
