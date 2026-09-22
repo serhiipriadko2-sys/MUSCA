@@ -1,24 +1,30 @@
 # MUSCA — текущий статус
 
-Дата проверки: 2026-09-19. Это оперативная сводка; исторические receipts не переписываются.
+Дата проверки: 2026-09-22. Это оперативная сводка; исторические receipts не переписываются.
 Перед новым решением по HEAD, CI, PR или локальному workspace делать fresh read-back.
 
 ## Репозиторий и интеграция
 
-[FACT @ GitHub] Проверенный integration baseline перед этой status-only правкой:
-`main@988088c20442a1db97fbc4a93c2d5e0c317f96dc`.
+[FACT @ GitHub, 2026-09-22] Текущий `main` =
+`b3de4438a4b5400a1e639ca0fd6c4f41ca13eb46` — merge PR #12
+`Unity: First Threshold v0.6.1 Cinemachine camera hotfix`.
 
-[FACT @ GitHub] PR #7 (Form v0.3/v0.31 + Unity gameplay candidate) и PR #8
-(visible Unity/Blender MCP tooling) merged. Открытых PR после merge #7 нет.
+[FACT @ GitHub] PR #12 merged 2026-09-22. Его head =
+`38e45af5ba3bb9136fea3d2a720888077f6cfa0a`. GitHub Actions run #94 на head завершён
+`SUCCESS` для Windows/Python 3.14.6 и Browser 3D Function/Node 24.18.1.
+На merge commit `b3de443...` отдельный workflow run при fresh read-back не найден,
+поэтому post-merge CI именно merge commit не заявляется.
 
-[FACT @ GitHub] Remote feature-ветка PR #7 удалена после проверки, что её head является
-предком `main`. На remote остаётся только `main`.
+[FACT @ GitHub] Remote branch `feature/combat-controls-ai-v02` после merge всё ещё существует.
+Открытых PR при read-back нет.
 
-[FACT @ GitHub] Merge commit `988088c...` прошёл свежий CI:
-Windows/Python 3.14.6 SUCCESS и Browser 3D Function/Node 24.18.1 SUCCESS.
+[BOUNDARY] В body PR #12 human gate включал четыре ручные проверки: отсутствие self-spin,
+визуально корректное движение вперёд по `W`, стабильный lock-on `A-D-A-D` и отсутствие
+скачка `lock -> unlock`. Merge сам по себе не доказывает, что эти четыре пункта были
+отдельно зафиксированы человеком; GitHub review/comment read-back такого подтверждения не содержит.
 
-[BOUNDARY] Merge означает интеграцию проверенного прототипа. Он не означает release,
-deployment, scientific validation или финальное художественное качество.
+[BOUNDARY] Merge означает интеграцию проверенного инженерного кандидата. Он не означает release,
+deployment, scientific validation, production-art approval или автоматически подтверждённый gameplay feel.
 
 ## Игровое направление
 
@@ -82,18 +88,20 @@ permit remote exposure, or make tooling part of shipped gameplay runtime.
 
 ## Workspace hygiene
 
-[FACT local] Основной каталог `C:\github\MUSCA` синхронизирован с merged main
-перед этой status-only правкой.
+[FACT local, 2026-09-22] Основной `C:\github\MUSCA` сохранён на
+`science/r02-mn9-laterality@a43a5d4`; его research history не переписывалась.
 
-[FACT] Отдельный `MUSCA-form-v031` worktree удалён после merge. Локальная divergent
-ветка была удалена только после проверки: против merged remote candidate отличался
-один файл лишь EOL-представлением; `git diff --ignore-space-at-eol` = PASS.
+[FACT local] Две локальные generated-настройки (`.vscode/mcp.json` и
+`unity/MUSCA-Gate3D/ProjectSettings/PackageManagerSettings.asset`) оставлены на диске,
+но скрыты только через локальный `.git/info/exclude`. `ProjectAuditorSettings.asset`
+восстановлен; его working blob совпадает с index blob.
 
-[FACT] Прежние 158 dirty entries сохранены в safety snapshot:
-`E:\MUSCA_RESEARCH\worktree-snapshots\2026-09-18-feature-blender-form-dirty-158`.
+[FACT local] Безопасный integration candidate подготовлен в отдельном worktree
+`C:\github\MUSCA-r02-main-probe` на ветке `science/r02-main-sync-candidate`.
+Он сохраняет исходные R00-R02 commit hashes через merge, а не cherry-pick.
 
-[FACT] Snapshot manifest SHA-256:
-`8ba8c693f4db6ccc6e174455179c5d098dbfc25ffaaf4722322073a884a9d993`.
+[FACT local] Отдельный combat worktree содержит незакоммиченные post-v0.6.1 изменения;
+они не входят в `main` и не входят в science integration candidate.
 
 ## Local Codex Runtime
 
@@ -144,13 +152,13 @@ validity or connectome-topology superiority. Topology advantage remains UNKNOWN.
 
 | Surface | State |
 | --- | --- |
-| `main` | INTEGRATED: Form/Unity PR #7 + tooling PR #8 |
+| `main` | INTEGRATED through PR #12 / First Threshold v0.6.1 (`b3de443...`) |
 | Remote PRs | 0 open |
-| Remote feature branches | 0; `main` only |
+| Remote feature branches | `feature/combat-controls-ai-v02` still present; science R02 branch is local-only |
 | Gate3D Function human approval | APPROVED |
 | Form v0.31 human approval | APPROVED — PROTOTYPE ONLY |
 | Unity Form integration | PROTOTYPE VERIFIED |
-| Runtime/gameplay human approval | PENDING / null |
+| Runtime/gameplay human approval | PR #12 human-feel gate not independently recorded in GitHub read-back |
 | Final production art | NOT APPROVED |
 | Local Codex Runtime | SEPARATE / NOT ACTIVE |
 | GATE-P01 v0.1 | 1/12, no aggregate verdict |
